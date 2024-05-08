@@ -2,7 +2,6 @@
 async function hallarPuntosIntermedios(la1,lo1,la2,lo2) {
     const distanciaARecorrer = distanciaPuntos(la1,lo1,la2,lo2)
     const numPuntos = Math.ceil(distanciaARecorrer);
-    console.log(la1 + lo1 + la2 + lo2)
 
     const puntos = [];
     for (let i = 0; i <= numPuntos; i++) {
