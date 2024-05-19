@@ -5,17 +5,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "Aeropuerto")
-public class AeropuertoModel {
-
+@Table(name = "Continente")
+public class ContinenteModel {
     @Id
     private int id;
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getId() {
-        return id;
-    }
 }
