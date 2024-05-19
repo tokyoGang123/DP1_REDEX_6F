@@ -1,21 +1,21 @@
 package com.redex.logisticaReparto.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Aeropuerto")
 public class AeropuertoModel {
 
     @Id
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(unique = true, nullable = false)
+    private int idAeropuerto;
 
-    public void setId(int id) {
-        this.id = id;
+    public void setId(int idAeropuerto) {
+        this.idAeropuerto = idAeropuerto;
     }
 
     public int getId() {
-        return id;
+        return idAeropuerto;
     }
 }

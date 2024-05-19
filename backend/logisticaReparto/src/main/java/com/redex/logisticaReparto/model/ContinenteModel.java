@@ -1,12 +1,19 @@
 package com.redex.logisticaReparto.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "Continente")
 public class ContinenteModel {
+
     @Id
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(unique = true, nullable = false)
+    private int idContinente;
+
+    @OneToMany(mappedBy = "continente", cascade = CascadeType.ALL)
+    private List<PaisModel> paises =new ArrayList<>();
 }
