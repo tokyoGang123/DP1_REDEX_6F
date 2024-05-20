@@ -6,7 +6,6 @@ import jakarta.persistence.*;
 @Table(name="Paquete")
 public class Paquete {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
     private String id_paquete;
     @Transient
