@@ -17,6 +17,13 @@ public class Paquete {
     @JoinColumn(name = "id_envio")
     private Envio envio;
 
+    //Un paquete estará asociado a un aeropuerto
+    @ManyToOne
+    @JoinColumn(name = "id_aeropuerto")
+    private Aeropuerto aeropuerto;
+
+
+
     public Paquete() {
     }
 
@@ -56,5 +63,14 @@ public class Paquete {
 
     public void setEnvio(Envio envio) {
         this.envio = envio;
+    }
+
+
+    public Aeropuerto getAeropuerto() {
+        return aeropuerto;
+    }
+
+    public void setAeropuerto(Aeropuerto aeropuerto) {
+        this.aeropuerto = aeropuerto;
     }
 }
