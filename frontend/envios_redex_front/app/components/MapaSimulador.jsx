@@ -5,6 +5,7 @@ import { EditControl } from "react-leaflet-draw"
 import { useState, useEffect } from "react";
 import Aeropuerto from "./Aeropuerto";
 import PlanDeVuelo from "./PlanDeVuelo";
+import { Cronometro } from "./Elementos/SelectorFecha";
 
 
 //Temporal, reemplazada por la API de aeropuertos
