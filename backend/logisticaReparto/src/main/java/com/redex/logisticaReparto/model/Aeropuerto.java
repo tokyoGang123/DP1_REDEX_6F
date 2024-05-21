@@ -1,6 +1,5 @@
 package com.redex.logisticaReparto.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,7 +21,6 @@ public class Aeropuerto {
     //Un Pais puede tener varios Aeropuertos
     @ManyToOne
     @JoinColumn(name = "id_pais")
-    @JsonBackReference
     private Pais pais;
 
 

@@ -1,6 +1,5 @@
 package com.redex.logisticaReparto.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,7 +18,6 @@ public class Continente {
     private int id_continente;
 
     @OneToMany(mappedBy = "continente", cascade = CascadeType.ALL)
-    @JsonIgnore
     private List<Pais> paises =new ArrayList<>();
 
     private String nombre_continente;
