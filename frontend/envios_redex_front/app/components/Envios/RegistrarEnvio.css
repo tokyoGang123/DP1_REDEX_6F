@@ -1,0 +1,90 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background-color: #fff; /* Fondo blanco */
+}
+
+.header-proyecto {
+    background-color: #0098D5; /* Cabecera azul */
+    color: white;
+    padding: 10px 20px; /* Reduce el padding */
+    height: 60px; /* Nueva altura */
+    display: flex;
+    justify-content: space-between;
+    align-items: center; /* Centra verticalmente el contenido */
+}
+
+.main-proyecto {
+    padding: 20px;
+}
+
+form {
+    display: grid;
+    gap: 50px;
+    justify-content: center;
+}
+
+label {
+    font-weight: bold;
+    color: #0098D5; /* Texto de los labels */
+}
+
+input[type="text"],
+input[type="datetime-local"],
+input[type="number"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #0098D5; /* Bordes de los inputs */
+    border-radius: 4px;
+    background-color: transparent;
+    color: #0098D5; /* Color del texto de los inputs */
+}
+
+.boton-confirmar {
+    padding: 12px 24px; /* Aumenta el padding de los botones */
+    margin: 5px; /* Agrega margen entre los botones */
+    background-color: #0098D5;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.boton-regresar {
+    padding: 12px 24px; /* Aumenta el padding de los botones */
+    margin: 5px; /* Agrega margen entre los botones */
+    background-color: #697377;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.boton-regresar:hover,
+.boton-confirmar:hover {
+    background-color: #0077a3;
+}
+
+.botones {
+    display: flex;
+    justify-content: center;
+}
+
+.fila {
+    display: flex;
+    justify-content: left;
+    gap: 130px; /* Ajusta la distancia entre los campos */
+    margin-bottom: 10px; /* Añade espacio entre las filas */
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    align-items: left; /* Centra horizontalmente los campos */
+    gap: 10px;
+}
+
+h2 {
+    color: #0077a3;
+}
