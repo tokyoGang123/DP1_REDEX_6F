@@ -1,11 +1,9 @@
-import Image from "next/image";
-import MapaSimulador from "./components/MapaSimulador";
-import "leaflet/dist/leaflet.css";
+import PantallaPrincipal from "./components/PantallaPrincipal";
+
 
 export default function Home() {
+  
   return (
-    <>
-    <MapaSimulador></MapaSimulador>
-    </>
+    <PantallaPrincipal></PantallaPrincipal>
   );
 }
