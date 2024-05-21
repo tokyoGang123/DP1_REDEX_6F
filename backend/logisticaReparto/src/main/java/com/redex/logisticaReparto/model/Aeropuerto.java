@@ -37,6 +37,7 @@ public class Aeropuerto {
     private int capacidad_maxima;
     private int capacidad_ocupada;
     private String ciudad;
+    private String diminutivo;
 
     public Aeropuerto() {
 
