@@ -9,8 +9,6 @@ import SimSemanal from "./Simulaciones/SimSemanal";
 
 export default function PantallaPrincipal() {
 
-
-
     //Simulación seleccionada
     const [simulacionActiva, setSimulacionActiva] = useState('SEMANAL'); //SEMANAL, DIARIA, COLAPSO, NINGUNA
     const [textoSim, setTextoSim] = useState('Simulación Semanal'); //Simulacion Semanal, Operaciones Diarias, Simulacion al Colapso, No Activa
