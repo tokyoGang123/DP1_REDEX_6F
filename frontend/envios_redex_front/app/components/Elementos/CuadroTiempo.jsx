@@ -5,11 +5,6 @@ import { useEffect } from 'react';
 
 export function CuadroTiempo({horas, minutos, segundos}) {
 
-    //Temporal
-    let horasT = 0;
-    let minutosT = 0;
-    let segundosT = 0;
-
     return (
         <Box
           component="form"
@@ -22,7 +17,7 @@ export function CuadroTiempo({horas, minutos, segundos}) {
         >
           <TextField id="outlined-basic" label="Tiempo Transcurrido" variant="outlined" disabled 
         value={
-          horasT.toString().padStart(2, '0') + ":" + minutosT.toString().padStart(2, '0') + ":" + segundosT.toString().padStart(2, '0')}
+          horas.toString().padStart(2, '0') + ":" + minutos.toString().padStart(2, '0') + ":" + segundos.toString().padStart(2, '0')}
           />
         </Box>
       );
