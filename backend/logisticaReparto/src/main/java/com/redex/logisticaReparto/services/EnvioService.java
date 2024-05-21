@@ -21,5 +21,5 @@ public class EnvioService {
 
     public Optional<Envio> obtenerEnvioPorId(long id) { return envioRepository.findById(id); }
 
-    public ArrayList<Envio> insertarEnvios(List<Envio> envios) { return (ArrayList<Envio>)envioRepository.saveAll(envios); }
+    public ArrayList<Envio> insertarListaEnvios(List<Envio> envios) { return (ArrayList<Envio>)envioRepository.saveAll(envios); }
 }

@@ -24,5 +24,5 @@ public class EnvioController {
     Optional<Envio> obtenerPorId(long idEnvio) { return envioService.obtenerEnvioPorId(idEnvio);}
 
     @PostMapping("envios/insertarTodos")
-    ArrayList<Envio> insertarTodosEnvios(ArrayList<Envio> envios) {return envioService.insertarEnvios(envios);}
+    ArrayList<Envio> insertarTodosEnvios(ArrayList<Envio> envios) {return envioService.insertarListaEnvios(envios);}
 }
