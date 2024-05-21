@@ -1,0 +1,30 @@
+01,01,SKBO,Bogota,Colombia,bogo,-05:00,430,4.70139,-74.14694
+02,01,SEQM,Quito,Ecuador,quit,-05:00,410,0.11333,-78.35861
+03,01,SVMI,Caracas,Venezuela,cara,-04:00,400,10.60306,-66.99056
+04,01,SBBR,Brasilia,Brasil,bras,-03:00,480,-15.86472,-47.91806 
+05,01,SPIM,Lima,Perú,lima,-05:00,440,-12.02194,-77.11444
+06,01,SLLP,La Paz,Bolivia,lapa,-04:00,420,-16.51306,-68.19222
+07,01,SCEL,Santiago de Chile,Chile,sant,-03:00,460,-33.39639,-70.79472
+08,01,SABE,Buenos Aires,Argentina,buen,-03:00,460,-34.55917,-58.41556
+09,01,SGAS,Asunción,Paraguay,asun,-04:00,400,-25.24000,-57.52000
+10,01,SUAA,Motenvideo,Uruguay,mont,-03:00,400,-34.78917,-56.26472
+11,02,LATI,Tirana,Albania,tira,+02:00,410,41.41472,19.72056
+12,02,EDDI,Berlin,Alemania,berl,+02:00,480,52.47361,13.40167
+13,02,LOWW,Viena,Austria,vien,+02:00,430,48.11083,16.57083
+14,02,EBCI,Bruselas,Belgica,brus,+02:00,440,50.45917,4.45361
+15,02,UMMS,Minsk,Bielorrusia,mins,+03:00,400,53.88250,28.03250
+16,02,LBSF,Sofia,Bulgaria,sofi,+03:00,400,42.69028,23.40472
+17,02,LKPR,Praga,Checa,prag,+02:00,400,50.10139,14.26556
+18,02,LDZA,Zagreb,Croacia,zagr,+02:00,420,45.74278,16.06861
+19,02,EKCH,Copenhague,Dinamarca,cope,+02:00,480,55.61806,12.65611
+20,02,EHAM,Amsterdam,Holanda,amst,+02:00,480,52.30000,4.76500
+21,03,VIDP,Delhi,India,delh,+05:00,480,28.56639,77.10306
+22,03,RKSI,Seul,Corea del Sur,seul,+09:00,400,37.46333,126.44000
+23,03,VTBS,Bangkok,Tailandia,bang,+07:00,420,13.68083,100.74722
+24,03,OMDB,Dubai,Emiratos A.U,emir,+04:00,420,25.25278,55.36444
+25,03,ZBAA,Beijing,China,beij,+08:00,480,40.07250,116.59750
+26,03,RJTT,Tokyio,Japon,toky,+09:00,460,35.55222,139.78000
+27,03,WMKK,Kuala,Malasia,kual,+08:00,420,2.74333,101.69806
+28,03,WSSS,Singapure,Singapure,sing,+08:00,400,1.35694,103.98861
+29,03,WIII,Jakarta,Indonesia,jaka,+07:00,400,-6.12556,106.65583
+30,03,RPLL,Manila,Filipinas,mani,+08:00,400,14.50861,121.01944

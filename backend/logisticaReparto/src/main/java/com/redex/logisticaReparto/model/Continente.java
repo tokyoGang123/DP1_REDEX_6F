@@ -14,7 +14,6 @@ import java.util.List;
 public class Continente {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
     private int id_continente;
 
@@ -33,4 +32,5 @@ public class Continente {
         this.id_continente = id_continente;
         this.nombre_continente = nombre_continente;
     }
+
 }
