@@ -42,7 +42,7 @@ export default function PlanDeVuelo({ planDeVuelo }) {
             )
                 .then((puntos) => {
                     setListaPuntosViaje(puntos);
-                    console.log("Estado actualizado:", puntos);
+                    //console.log("Estado actualizado:", puntos);
                 })
                 .catch((error) => {
                     console.error("Error al obtener puntos intermedios:", error);
@@ -52,8 +52,8 @@ export default function PlanDeVuelo({ planDeVuelo }) {
 
     //Cuando se actualiza el arreglo
     useEffect(() => {
-        console.log("Lita")
-        console.log(listaPuntosViaje)
+        //console.log("Lita")
+        //console.log(listaPuntosViaje)
         
         if (listaPuntosViaje.length != 0) {
             cambiaPos();
