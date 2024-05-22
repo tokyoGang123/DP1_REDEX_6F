@@ -26,6 +26,16 @@ public class PlanDeVuelo {
     public PlanDeVuelo() {
     }
 
+    public PlanDeVuelo(int ciudad_origen, ZonedDateTime hora_origen, int ciudad_destino, ZonedDateTime hora_destino, int capacidad_maxima, int estado) {
+        this.ciudad_origen = ciudad_origen;
+        this.hora_origen = hora_origen;
+        this.ciudad_destino = ciudad_destino;
+        this.hora_destino = hora_destino;
+        this.capacidad_maxima = capacidad_maxima;
+        this.capacidad_ocupada = 0;
+        this.estado = estado;
+    }
+
     public PlanDeVuelo(long id_tramo, int ciudad_origen, ZonedDateTime hora_origen, int ciudad_destino, ZonedDateTime hora_destino, int capacidad_maxima, int estado) {
         this.id_tramo = id_tramo;
         this.ciudad_origen = ciudad_origen;

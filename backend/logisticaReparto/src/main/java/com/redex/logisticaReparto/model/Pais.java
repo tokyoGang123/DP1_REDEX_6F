@@ -1,5 +1,7 @@
 package com.redex.logisticaReparto.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,9 +23,11 @@ public class Pais {
 
     @ManyToOne
     @JoinColumn(name = "id_continente")
+    @JsonBackReference
     private Continente continente;
 
     @OneToMany(mappedBy = "pais", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Aeropuerto> aeropuertos= new ArrayList<>();;
 
     public Pais(int id_pais) {

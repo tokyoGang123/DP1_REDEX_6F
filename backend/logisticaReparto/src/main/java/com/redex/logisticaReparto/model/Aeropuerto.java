@@ -1,5 +1,7 @@
 package com.redex.logisticaReparto.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,12 +23,14 @@ public class Aeropuerto {
     //Un Pais puede tener varios Aeropuertos
     @ManyToOne
     @JoinColumn(name = "id_pais")
+    @JsonBackReference
     private Pais pais;
 
 
     //Un aeropuerto puede tener paquetes
     //private ArrayList<Integer> paquetesAlmacenados;
     @OneToMany(mappedBy = "aeropuerto", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<Paquete> paquetesAlmacenados= new ArrayList<>();;
 
     private double longitud;

@@ -1,5 +1,6 @@
 package com.redex.logisticaReparto.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -14,14 +15,14 @@ public class Paquete {
 
     @ManyToOne
     @JoinColumn(name = "id_envio")
+    @JsonBackReference
     private Envio envio;
 
     //Un paquete estará asociado a un aeropuerto
     @ManyToOne
     @JoinColumn(name = "id_aeropuerto")
+    @JsonBackReference
     private Aeropuerto aeropuerto;
-
-
 
     public Paquete() {
     }
