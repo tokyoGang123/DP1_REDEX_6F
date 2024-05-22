@@ -1,5 +1,5 @@
 'use client'
-import * as React from 'react';
+import { useEffect, useState } from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es'
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
@@ -9,12 +9,17 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { Box } from '@mui/material';
 
 
-export default function SelectorFecha() {
+export default function SelectorFecha({fechaSim, estadoSim}) {
 
 
 
   //Valor del selector de fecha, otorga la fecha actual inicialmente y cambia de acuerdo a cambios en la fecha
-  const [fecha, setFecha] = React.useState(dayjs());
+  const [fecha, setFecha] = useState(fechaSim);
+
+
+   useEffect(() => {
+    setFecha(fechaSim)
+  },[fechaSim])
 
 
   return (
@@ -32,6 +37,7 @@ export default function SelectorFecha() {
             label="Fecha de Simulación"
             value={fecha}
             onChange={(newFecha) => setFecha(newFecha)}
+            disabled={estadoSim == 'PL'}
           />
         </DemoContainer>
       </LocalizationProvider>

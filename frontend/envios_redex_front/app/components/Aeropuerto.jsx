@@ -14,8 +14,8 @@ export default function Aeropuerto({ aeropuerto }) {
     //Texto a mostrar en el popup de resumen rápido
     const textoAeropuerto = (
         <div>
-            <h1>Aeropuerto de: {aeropuerto.nombre}</h1>
-            <h1>Capacidad: {aeropuerto.capacidadActual} de {aeropuerto.capacidadMax}</h1>
+            <h1>Aeropuerto de: {aeropuerto.ciudad}</h1>
+            <h1>Ocupación: {aeropuerto.capacidad_ocupada} de {aeropuerto.capacidad_maxima}</h1>
         </div>
     )
 
@@ -55,7 +55,7 @@ export default function Aeropuerto({ aeropuerto }) {
 
     //Cambiar el color del aeropuerto cada vez que se actualiza la capacidad
     useEffect( () => {
-        let porcentajeOcupacion = (aeropuerto.capacidadActual/aeropuerto.capacidadMax)*100;
+        let porcentajeOcupacion = (aeropuerto.capacidad_ocupada/aeropuerto.capacidad_maxima)*100;
         if (porcentajeOcupacion < 33.33) setColorMarcador("Verde")
         else if (porcentajeOcupacion < 66.66) setColorMarcador("Amarillo")
         else setColorMarcador("Rojo")
@@ -63,7 +63,7 @@ export default function Aeropuerto({ aeropuerto }) {
 
     return <>
         
-        <Marker position={[aeropuerto.latitude, aeropuerto.longitude]} icon={
+        <Marker position={[aeropuerto.latitud, aeropuerto.longitud]} icon={
             colorMarcador == 'Verde' ? iconoVerde : (colorMarcador == 'Amarillo' ? iconoAmarillo : iconoRojo)
         }eventHandlers={{click:eventHandler}} >
             <Popup>{textoAeropuerto}</Popup>

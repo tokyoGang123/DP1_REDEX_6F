@@ -6,7 +6,7 @@ import hallarPuntosIntermedios from "./funcionesRuta";
 
 const markerSize = 20
 
-export default function PlanDeVuelo({ planDeVuelo }) {
+export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim }) {
 
     //Rojo, Amarillo, Verde
     const [colorMarcador, setColorMarcador] = useState('Verde')
@@ -51,6 +51,7 @@ export default function PlanDeVuelo({ planDeVuelo }) {
     }, [planDeVuelo]);
 
     //Cuando se actualiza el arreglo
+    /*
     useEffect(() => {
         //console.log("Lita")
         //console.log(listaPuntosViaje)
@@ -59,6 +60,15 @@ export default function PlanDeVuelo({ planDeVuelo }) {
             cambiaPos();
         }
     },[listaPuntosViaje])
+    */
+
+    useEffect(() => {
+        console.log(estadoSim)
+        if (estadoSim === 'PL') {
+            cambiaPos()
+        }
+    },[estadoSim])
+
 
     //Cambia posicion en intervalos de tiempo. CAMBIAR PARA QUE FUNCIONE A TIEMPO COMO CRONOMETRO
     async function cambiaPos() {
