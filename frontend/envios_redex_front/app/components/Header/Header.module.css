@@ -1,0 +1,9 @@
+.header-proyecto {
+    background-color: #0098D5;
+    color: white;
+    padding: 10px 20px;
+    height: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }

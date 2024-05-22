@@ -9,7 +9,7 @@ export default function Menu() {
 		<div>
 			<header className="header-proyecto">
 				<h1>RedEx</h1>
-				<img src="../images/usuario1.png" />
+				<img src="/icons/usuario1.png" width="30" height="30" />
 			</header>
 
 			<div className="principal">

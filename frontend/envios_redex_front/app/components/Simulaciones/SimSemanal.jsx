@@ -6,6 +6,7 @@ import BotonIniciar from "../Botones/BotonIniciar"
 import { useEffect, useState } from "react"
 import dayjs from "dayjs"
 import { getAeropuertosTodos } from "@/app/api/aeropuetos.api"
+import Header from '../Header/Header'
 
 export default function SimSemanal() {
 
@@ -106,6 +107,7 @@ export default function SimSemanal() {
 
     return (
         <>
+            <Header title="Simulación" />
             <Stack direction="row" spacing={2}>
 
                 <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron}></CuadroTiempo>
