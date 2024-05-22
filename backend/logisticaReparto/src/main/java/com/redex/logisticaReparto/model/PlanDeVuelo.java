@@ -14,13 +14,16 @@ public class PlanDeVuelo {
 
     private int ciudad_origen;
     private ZonedDateTime hora_origen;
+    //@OneToOne(cascade = CascadeType.ALL)
+    //private Coordenada coordenada_origen;
     private int ciudad_destino;
     private ZonedDateTime hora_destino;
+    //@OneToOne(cascade = CascadeType.ALL)
+    //private Coordenada coordenada_destino;
     private int capacidad_maxima;
     private int capacidad_ocupada;
     private int estado;
 
-    @Transient
     public boolean isFull() {return capacidad_maxima == capacidad_ocupada;}
 
     public PlanDeVuelo() {
@@ -117,4 +120,20 @@ public class PlanDeVuelo {
     public void setEstado(int estado) {
         this.estado = estado;
     }
+
+    /*public Coordenada getCoordenada_origen() {
+        return coordenada_origen;
+    }
+
+    public void setCoordenada_origen(Coordenada coordenada_origen) {
+        this.coordenada_origen = coordenada_origen;
+    }
+
+    public Coordenada getCoordenada_destino() {
+        return coordenada_destino;
+    }
+
+    public void setCoordenada_destino(Coordenada coordenada_destino) {
+        this.coordenada_destino = coordenada_destino;
+    }*/
 }

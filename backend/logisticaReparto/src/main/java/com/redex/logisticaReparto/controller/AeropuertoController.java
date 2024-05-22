@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Scanner;
 
@@ -47,7 +48,7 @@ public class AeropuertoController {
     Optional<Aeropuerto> obtenerAeropuertoPorCodigo(String codigo) { return aeropuertoService.obtenerAeropuertoPorCodigo(codigo);}
 
     @PostMapping("/aeropuertos/lecturaArchivo")
-    ArrayList<Aeropuerto> cargarDatos(){
+    ArrayList<Aeropuerto> cargarDatos(@RequestBody Map<String, String> datos){
         ArrayList<Aeropuerto> aeropuertos = new ArrayList<>();
         //Llamar ContinenteService
         Continente continente1 = new Continente();
@@ -67,57 +68,100 @@ public class AeropuertoController {
         continenteService.insertarContinente(continente2);
         continenteService.insertarContinente(continente3);
 
-        try {
-            File planesFile = new File("src/main/resources/Aeropuerto/aeropuertos.txt");
-            Scanner scanner = new Scanner(planesFile);
+        String aeropuertosDatos = datos.get("data");
+        String[] lineas = aeropuertosDatos.split("\n");
 
-            while(scanner.hasNextLine()) { //Leer todas la lineas
-                String row = scanner.nextLine();
-                String data[] = row.split(",");
+        for (String linea : lineas) {
+            String data[] = linea.split(",");
+            Aeropuerto aeropuerto = new Aeropuerto();
+            Pais pais=new Pais();
+            Continente continente=new Continente();
 
-                Aeropuerto aeropuerto = new Aeropuerto();
-                Pais pais=new Pais();
-                Continente continente=new Continente();
-
-                int continenteID = Integer.parseInt(data[1]);
-                String codigoAeropuerto = data[2];
-                String ciudad = data[3];
-                String paisNombre = data[4];
-                String diminutivoPais= data[5];
-                String zonaHoraria= data[6];
-                int capacidad= Integer.parseInt(data[7]);
-                double latitud= Double.parseDouble(data[8]);
-                double longitud= Double.parseDouble(data[9]);
+            int continenteID = Integer.parseInt(data[1]);
+            String codigoAeropuerto = data[2];
+            String ciudad = data[3];
+            String paisNombre = data[4];
+            String diminutivoPais= data[5];
+            String zonaHoraria= data[6];
+            int capacidad= Integer.parseInt(data[7]);
+            double latitud= Double.parseDouble(data[8]);
+            double longitud= Double.parseDouble(data[9]);
 
 
-                //Llamar PaisService
-                pais.setNombre_pais(paisNombre);
-                pais.setId_continente(continenteID);
-                pais.setAeropuertos(new ArrayList<>());
-                paisService.insertarPais(pais);
+            //Llamar PaisService
+            pais.setNombre_pais(paisNombre);
+            pais.setId_continente(continenteID);
+            pais.setAeropuertos(new ArrayList<>());
+            paisService.insertarPais(pais);
 
-                //aeropuerto.setIdPais(1);
-                int idPais = pais.getId_pais();
+            //aeropuerto.setIdPais(1);
+            int idPais = pais.getId_pais();
 
-                aeropuerto.setIdPais(idPais);
-                aeropuerto.setPaquetesAlmacenados(new ArrayList<>());
-                aeropuerto.setLatitud(latitud);
-                aeropuerto.setLongitud(longitud);
-                aeropuerto.setEstado(1);
-                aeropuerto.setCodigo(codigoAeropuerto);
-                aeropuerto.setHuso_horario(zonaHoraria);
-                aeropuerto.setCapacidad_maxima(capacidad);
-                aeropuerto.setCapacidad_ocupada(0);
-                aeropuerto.setCiudad(ciudad);
-                aeropuerto.setDiminutivo(diminutivoPais);
-
-                //Aeropuerto insertado
-                insertarAeropuerto(aeropuerto);
-            }
-
-        } catch (FileNotFoundException e) {
-            throw new RuntimeException(e);
+            aeropuerto.setIdPais(idPais);
+            aeropuerto.setPaquetesAlmacenados(new ArrayList<>());
+            aeropuerto.setLatitud(latitud);
+            aeropuerto.setLongitud(longitud);aeropuerto.setEstado(1);
+            aeropuerto.setCodigo(codigoAeropuerto);
+            aeropuerto.setHuso_horario(zonaHoraria);
+            aeropuerto.setCapacidad_maxima(capacidad);
+            aeropuerto.setCapacidad_ocupada(0);
+            aeropuerto.setCiudad(ciudad);
+            aeropuerto.setDiminutivo(diminutivoPais);
+            aeropuertos.add(aeropuerto);
+            //Aeropuerto insertado
+            insertarAeropuerto(aeropuerto);
         }
+
+//        try {
+//            File planesFile = new File("src/main/resources/Aeropuerto/aeropuertos.txt");
+//            Scanner scanner = new Scanner(planesFile);
+//
+//            while(scanner.hasNextLine()) { //Leer todas la lineas
+//                String row = scanner.nextLine();
+//                String data[] = row.split(",");
+//
+//                Aeropuerto aeropuerto = new Aeropuerto();
+//                Pais pais=new Pais();
+//                Continente continente=new Continente();
+//
+//                int continenteID = Integer.parseInt(data[1]);
+//                String codigoAeropuerto = data[2];
+//                String ciudad = data[3];
+//                String paisNombre = data[4];
+//                String diminutivoPais= data[5];
+//                String zonaHoraria= data[6];
+//                int capacidad= Integer.parseInt(data[7]);
+//                double latitud= Double.parseDouble(data[8]);
+//                double longitud= Double.parseDouble(data[9]);
+//
+//
+//                //Llamar PaisService
+//                pais.setNombre_pais(paisNombre);
+//                pais.setId_continente(continenteID);
+//                pais.setAeropuertos(new ArrayList<>());
+//                paisService.insertarPais(pais);
+//
+//                //aeropuerto.setIdPais(1);
+//                int idPais = pais.getId_pais();
+//
+//                aeropuerto.setIdPais(idPais);
+//                aeropuerto.setPaquetesAlmacenados(new ArrayList<>());
+//                aeropuerto.setLatitud(latitud);
+//                aeropuerto.setLongitud(longitud);aeropuerto.setEstado(1);
+//                aeropuerto.setCodigo(codigoAeropuerto);
+//                aeropuerto.setHuso_horario(zonaHoraria);
+//                aeropuerto.setCapacidad_maxima(capacidad);
+//                aeropuerto.setCapacidad_ocupada(0);
+//                aeropuerto.setCiudad(ciudad);
+//                aeropuerto.setDiminutivo(diminutivoPais);
+//
+//                //Aeropuerto insertado
+//                insertarAeropuerto(aeropuerto);
+//            }
+//
+//        } catch (FileNotFoundException e) {
+//            throw new RuntimeException(e);
+//        }
 
         return aeropuertos;
     }

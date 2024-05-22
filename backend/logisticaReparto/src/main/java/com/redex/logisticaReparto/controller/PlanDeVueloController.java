@@ -1,8 +1,9 @@
 package com.redex.logisticaReparto.controller;
 
+import com.redex.logisticaReparto.dto.PlanVueloResponse;
 import com.redex.logisticaReparto.model.Aeropuerto;
 import com.redex.logisticaReparto.model.PlanDeVuelo;
-import com.redex.logisticaReparto.repository.AeropuertoRepository;
+import com.redex.logisticaReparto.model.Coordenada;
 import com.redex.logisticaReparto.services.AeropuertoService;
 import com.redex.logisticaReparto.services.PlanDeVueloService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +15,11 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Scanner;
 
+@CrossOrigin(origins = "*")
 @RequestMapping("api")
 @RestController
 public class PlanDeVueloController {
@@ -25,8 +28,14 @@ public class PlanDeVueloController {
     @Autowired
     private AeropuertoService aeropuertoService;
 
+    //@GetMapping("/planesVuelo/obtenerTodos")
+    //ArrayList<PlanDeVuelo> obtenerTodosPlanesVuelos() { return planDeVueloService.obtenerPlanesVuelos();}
+
     @GetMapping("/planesVuelo/obtenerTodos")
-    ArrayList<PlanDeVuelo> obtenerTodosPlanesVuelos() { return planDeVueloService.obtenerPlanesVuelos();}
+    ArrayList<PlanVueloResponse> obtenerTodosPlanesVuelos() { return planDeVueloService.obtenerPlanesVuelos();}
+
+    //@GetMapping("planesVuelo/listarConLatitudLongitud")
+    //ArrayList<PlanDeVuelo> obtenerPlanesConLatitudLongitud() { return planDeVueloService.obtenerPlanesLatitudLongitud();}
 
     @PostMapping("/planesVuelo/insertar")
     PlanDeVuelo insertarPlanDeVuelo(PlanDeVuelo plan) { return planDeVueloService.insertarPlanVuelo(plan); }
@@ -40,11 +49,13 @@ public class PlanDeVueloController {
     @PostMapping("planesVuelo/cargarArchivoPlanes/{fecha}")
     ArrayList<PlanDeVuelo> cargarPlanesVuelo(@PathVariable String fecha){
         ArrayList<PlanDeVuelo> planes = new ArrayList<>();
-        String[] partesFecha = fecha.split("/");
-        int aa = Integer.parseInt(partesFecha[0]);
-        int mm = Integer.parseInt(partesFecha[1]);
-        int dd = Integer.parseInt(partesFecha[2]);
-
+        String anio = fecha.substring(0, 4);
+        String mes = fecha.substring(4, 6);
+        String dia = fecha.substring(6, 8);
+        int aa = Integer.parseInt(anio);
+        int mm = Integer.parseInt(mes);
+        int dd = Integer.parseInt(dia);
+        int i =1;
         try {
             File planesFile = new File("src/main/resources/PlanesVuelo/planes_vuelo.v3.txt");
             Scanner scanner = new Scanner(planesFile);
@@ -72,7 +83,7 @@ public class PlanDeVueloController {
                         ZonedDateTime fechaFin;
 
                         //Segun la hora de inicio y final, podemos determinar si el vuelo acaba
-                        //en el mismo o diferente día
+                        //en el mismo o diferente dia
                         if (planDeVueloService.planAcabaElSiguienteDia(data[2],data[3])) {
                             //fechaFin = ZonedDateTime.now(ZoneId.of(husoDestino)).plusDays(1);
                             fechaFin = ZonedDateTime.of(aa,mm,dd,12,0,0,0,ZoneId.of(husoDestino)).plusDays(1);
@@ -90,11 +101,16 @@ public class PlanDeVueloController {
                         ZonedDateTime hora_fin = fechaFin.withHour(hF.getHour()).withMinute(hF.getMinute()).withSecond(0);
 
                         int capacidad = Integer.parseInt(data[4]);
-
                         //System.out.println(ciudad_origen + " " + ciudad_destino + " " + hora_inicio + " " + hora_fin + " " + capacidad);
 
                         PlanDeVuelo plan = new PlanDeVuelo(ciudad_origen,hora_inicio,ciudad_destino,hora_fin,capacidad,1);
+
+                        //plan.setCoordenada_origen(new Coordenada("Origen",aeropuertoOrigen.getLatitud(), aeropuertoOrigen.getLongitud()));
+                        //plan.setCoordenada_destino(new Coordenada("Destino",aeropuertoDest.getLatitud(), aeropuertoDest.getLongitud()));
                         planes.add(plan);
+                        planDeVueloService.insertarPlanVuelo(plan);
+                        System.out.println(i);
+                        i++;
                     }
                 }
 
@@ -102,7 +118,7 @@ public class PlanDeVueloController {
         } catch (FileNotFoundException e) {
             System.out.println("Archivo de pedidos no encontrado, error: " + e.getMessage());
         }
-        planDeVueloService.insertarListaPlanesVuelos(planes);
+        //planDeVueloService.insertarListaPlanesVuelos(planes);
         return planes;
     }
 }
