@@ -1,0 +1,128 @@
+.customers-container {
+    margin: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .customers-table {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    overflow: hidden;
+  }
+  
+  .table-header {
+    background-color: #f2f2f2;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    font-weight: bold;
+  }
+  
+  .table-header span {
+    flex: 1;
+    text-align: left;
+  }
+  
+  .table-row {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .table-row:last-child {
+    border-bottom: none;
+  }
+  
+  .table-row span {
+    flex: 1;
+    text-align: left;
+  }
+  
+  .status {
+    padding: 5px 10px;
+    border-radius: 5px;
+    font-weight: bold;
+  }
+  
+  .active {
+    background-color: #d4edda;
+    color: #155724;
+  }
+  
+  .inactive {
+    background-color: #f8d7da;
+    color: #721c24;
+  }
+  
+  .pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: right;
+  }
+  
+  .pagination span {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    cursor: pointer;
+  }
+  
+  .pagination span.active {
+    background-color: #007bff;
+    color: #fff;
+  }
+
+  .button-container {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+  }
+  
+  .button-left,
+  .button-right {
+    padding: 10px 20px;
+    background-color: #0098D5;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+  }
+  
+  .button-left:hover,
+  .button-right:hover {
+    background-color: #0077a3;
+  }
+  
+  .status {
+    display: inline-block; /* Para ajustar automáticamente al tamaño del texto */
+    padding: 5px 5px; /* Ajusta el padding según sea necesario */
+    margin: 0;
+    border-radius: 5px;
+    font-weight: bold;
+    white-space: nowrap;
+    max-width: 100px;
+  }
+  
+  .entregado {
+    background-color: #4CAF50; /* Verde suave */
+    color: white;
+  }
+  
+  .esperando {
+    background-color: #E57373; /* Rojo suave */
+    color: white;
+  }
+  
+  
+  .ulti-header {
+    max-width: 110px;
+  }
+
+  .habilitado {
+    background-color: #4CAF50; /* Verde suave */
+    color: white;
+  }
+  
+  .no_habilitado {
+    background-color: #E57373; /* Rojo suave */
+    color: white;
+  }

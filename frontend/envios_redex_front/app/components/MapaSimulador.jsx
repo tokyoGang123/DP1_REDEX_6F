@@ -15,20 +15,21 @@ let aeropuertosTemp = [
 ]
 
 let planesTemp = [
-  {id_tramo: 1, ciudadOrigen: {latitude: 48.86,longitude: 2.3522}, ciudadDestino: {latitude: -12.0431800, longitude:  -77.0282400}, horaOrigen: "", hora_destino: "", capacidadMaxima: 100, capacidadOcupada: 0, estado: 1 },
-  {id_tramo: 2, ciudadOrigen: {latitude: 40.71427, longitude: -74.00597}, ciudadDestino: {latitude: -30.559482,longitude:  22.937506 }, horaOrigen: "", hora_destino: "", capacidadMaxima: 100, capacidadOcupada: 45, estado: 1 },
+  {id_tramo: 1, ciudadOrigen: {latitude: 4.70139,longitude:-74.14694}, ciudadDestino: {latitude: -12.0431800, longitude:  -77.0282400}, horaOrigen: "", hora_destino: "", capacidadMaxima: 100, capacidadOcupada: 0, estado: 1 },
+  {id_tramo: 2, ciudadOrigen: {latitude: -34.78917, longitude: -56.26472}, ciudadDestino: {latitude: 55.61806,longitude:  12.65611 }, horaOrigen: "", hora_destino: "", capacidadMaxima: 100, capacidadOcupada: 45, estado: 1 },
   {id_tramo: 3, ciudadOrigen: {latitude:39.9075, longitude: 116.39723}, ciudadDestino: {latitude: 39.074208, longitude:  21.824312}, horaOrigen: "", hora_destino: "", capacidadMaxima: 100, capacidadOcupada: 98, estado: 1},
 ]
 
-export default function MapaSimulador({ }) {
+export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim}) {
 
   //Variable para manejar los aeropuertos
-  const [aeropuertos, setAeropuertos] = useState(aeropuertosTemp);
+  const [aeropuertos, setAeropuertos] = useState({});
   const [planesDeVuelo, setPlanesDeVuelo] = useState(planesTemp)
 
   useEffect(() => {
-    
-  },[])
+      setAeropuertos(aeropuertosBD)
+      console.log("aer",aeropuertos)
+  },[aeropuertosBD])
 
   return (
     <>
@@ -39,11 +40,11 @@ export default function MapaSimulador({ }) {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           ></TileLayer>
-          {aeropuertos.map((pos, index) => (
+          {aeropuertos && aeropuertos.length > 0 ? aeropuertos.map((pos, index) => (
             <Aeropuerto key={index} aeropuerto={pos}></Aeropuerto>
-          ))}
+          )) : <></>}
           {planesDeVuelo.map((pos,index) => (
-            <PlanDeVuelo key={index} planDeVuelo={pos}></PlanDeVuelo>
+            <PlanDeVuelo key={index} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim}></PlanDeVuelo>
           )) }
         </MapContainer>
       </div>
