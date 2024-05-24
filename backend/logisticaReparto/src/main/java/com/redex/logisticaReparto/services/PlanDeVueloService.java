@@ -1,6 +1,9 @@
 package com.redex.logisticaReparto.services;
 
+import com.redex.logisticaReparto.model.Aeropuerto;
+import com.redex.logisticaReparto.model.Coordenada;
 import com.redex.logisticaReparto.model.PlanDeVuelo;
+import com.redex.logisticaReparto.dto.PlanVueloResponse;
 import com.redex.logisticaReparto.repository.PlanDeVueloRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,8 +16,10 @@ import java.util.Optional;
 public class PlanDeVueloService {
     @Autowired
     private PlanDeVueloRepository planDeVueloRepository;
+    @Autowired
+    private AeropuertoService aeropuertoService;
 
-    public ArrayList<PlanDeVuelo> obtenerPlanesVuelos() { return (ArrayList<PlanDeVuelo>)planDeVueloRepository.findAll(); }
+    public ArrayList<PlanVueloResponse> obtenerPlanesVuelos() { return planDeVueloRepository.queryPlanDeVueloWithAeropuerto(); }
 
     public PlanDeVuelo insertarPlanVuelo(PlanDeVuelo plan) { return planDeVueloRepository.save(plan); }
 
