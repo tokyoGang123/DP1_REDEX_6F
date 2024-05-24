@@ -1,7 +1,6 @@
 package com.redex.logisticaReparto.services;
 
 import com.redex.logisticaReparto.model.Aeropuerto;
-import com.redex.logisticaReparto.model.Coordenada;
 import com.redex.logisticaReparto.model.PlanDeVuelo;
 import com.redex.logisticaReparto.dto.PlanVueloResponse;
 import com.redex.logisticaReparto.repository.PlanDeVueloRepository;

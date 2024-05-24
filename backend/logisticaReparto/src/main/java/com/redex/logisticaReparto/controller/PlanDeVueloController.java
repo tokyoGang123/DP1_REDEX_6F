@@ -3,7 +3,6 @@ package com.redex.logisticaReparto.controller;
 import com.redex.logisticaReparto.dto.PlanVueloResponse;
 import com.redex.logisticaReparto.model.Aeropuerto;
 import com.redex.logisticaReparto.model.PlanDeVuelo;
-import com.redex.logisticaReparto.model.Coordenada;
 import com.redex.logisticaReparto.services.AeropuertoService;
 import com.redex.logisticaReparto.services.PlanDeVueloService;
 import org.springframework.beans.factory.annotation.Autowired;
