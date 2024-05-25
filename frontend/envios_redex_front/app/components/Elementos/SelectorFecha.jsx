@@ -9,18 +9,18 @@ import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { Box } from '@mui/material';
 
 
-export default function SelectorFecha({fechaSim, estadoSim}) {
+export default function SelectorFecha({fechaSim,setFechaSim, estadoSim}) {
 
 
 
   //Valor del selector de fecha, otorga la fecha actual inicialmente y cambia de acuerdo a cambios en la fecha
-  const [fecha, setFecha] = useState(fechaSim);
+  //const [fecha, setFecha] = useState(fechaSim);
 
-
+  /*
    useEffect(() => {
-    setFecha(fechaSim)
-  },[fechaSim])
-
+    setFechaSim(fecha)
+  },[fecha])
+  */
 
   return (
     <Box
@@ -35,8 +35,8 @@ export default function SelectorFecha({fechaSim, estadoSim}) {
         <DemoContainer components={['DateTimePicker']}>
           <DateTimePicker
             label="Fecha de Simulación"
-            value={fecha}
-            onChange={(newFecha) => setFecha(newFecha)}
+            value={fechaSim}
+            onChange={(newFechaSim) => setFechaSim(newFechaSim)}
             disabled={estadoSim == 'PL'}
           />
         </DemoContainer>

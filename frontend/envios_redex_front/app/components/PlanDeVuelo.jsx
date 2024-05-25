@@ -1,12 +1,17 @@
 'use client'
-import { Icon } from "leaflet";
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
 import { useEffect, useState, useRef } from "react";
 import { Marker, Popup } from "react-leaflet";
 import hallarPuntosIntermedios from "./funcionesRuta";
+import { Icon } from 'leaflet';
+
 
 const markerSize = 20
 
 export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim }) {
+
+    dayjs.extend(duration);
 
     //Rojo, Amarillo, Verde
     const [colorMarcador, setColorMarcador] = useState('Verde')
@@ -18,6 +23,8 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim }) {
     const [posicionActual, setPosicionActual] = useState({})
     //Indicador de si el viaje ha finalizado
     const [viajeFin, setViajeFin] = useState(false)
+    //Tiempo total que le toma al vuelo
+    const [tiempoVueloTotal,setTiempoVueloTotal] = useState(0); //en seg
 
     //UseRef necesario
     const markerRef = useRef(null);
@@ -31,9 +38,9 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim }) {
 
     //Colocar puntos en arreglo
     useEffect(() => {
-        if (planDeVuelo != null) {
-            const ciudadOrigen = planDeVuelo.ciudadOrigen;
-            const ciudadDestino = planDeVuelo.ciudadDestino;
+        if (planDeVuelo != null && listaPuntosViaje.length == 0) {
+            const ciudadOrigen = { latitude: planDeVuelo.latitud_origen, longitude: planDeVuelo.longitud_origen };
+            const ciudadDestino = { latitude: planDeVuelo.latitud_destino, longitude: planDeVuelo.longitud_destino };
             hallarPuntosIntermedios(
                 ciudadOrigen.latitude,
                 ciudadOrigen.longitude,
@@ -47,6 +54,12 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim }) {
                 .catch((error) => {
                     console.error("Error al obtener puntos intermedios:", error);
                 });
+            let fI = dayjs(planDeVuelo.hora_origen);
+            let fF = dayjs(planDeVuelo.hora_destino);
+            let difMl = fF.diff(fI)
+            let dif = dayjs.duration(difMl).asSeconds();
+            setTiempoVueloTotal(dif);
+            console.log(dif)
         }
     }, [planDeVuelo]);
 
@@ -63,11 +76,15 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim }) {
     */
 
     useEffect(() => {
-        console.log(estadoSim)
-        if (estadoSim === 'PL') {
+        //console.log(estadoSim)
+        let fechaActual = fechaSim.format('YYYY-MM-DDTHH:mm');//DAYJS
+        let fechaProg = dayjs(planDeVuelo.hora_origen).format('YYYY-MM-DDTHH:mm'); //ISO 8601
+        if (estadoSim === 'PL' && fechaActual === fechaProg) {
             cambiaPos()
+            //console.log("si")
         }
-    },[estadoSim])
+        //console.log("No")
+    }, [estadoSim, fechaSim])
 
 
     //Cambia posicion en intervalos de tiempo. CAMBIAR PARA QUE FUNCIONE A TIEMPO COMO CRONOMETRO
@@ -115,7 +132,7 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim }) {
     });
 
     useEffect(() => {
-        let porcentajeOcupacion = (planDeVuelo.capacidadOcupada / planDeVuelo.capacidadMaxima) * 100;
+        let porcentajeOcupacion = (planDeVuelo.capacidad_ocupada / planDeVuelo.capacidad_maxima) * 100;
         if (porcentajeOcupacion < 33.33) setColorMarcador("Verde")
         else if (porcentajeOcupacion < 66.66) setColorMarcador("Amarillo")
         else setColorMarcador("Rojo")
