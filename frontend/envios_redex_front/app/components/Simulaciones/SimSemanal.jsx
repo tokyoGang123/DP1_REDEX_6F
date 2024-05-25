@@ -3,11 +3,12 @@ import SelectorFecha from "../Elementos/SelectorFecha"
 import { CuadroTiempo } from "../Elementos/CuadroTiempo"
 import { Stack } from "@mui/material"
 import BotonIniciar from "../Botones/BotonIniciar"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import dayjs from "dayjs"
 import { getAeropuertosTodos } from "@/app/api/aeropuetos.api"
 import Header from '../Header/Header'
 import { getPlanesTodos } from "@/app/api/planesDeVuelo.api"
+import { TryOutlined } from "@mui/icons-material"
 
 export default function SimSemanal() {
 
@@ -17,6 +18,13 @@ export default function SimSemanal() {
 
     //TIEMPO SELECCIONADO PARA EJECUTAR LA SIMULACION
     const [fechaSim, setFechaSim] = useState(dayjs());
+    //useRef de fechaSim
+    const fechaSimRef = useRef(fechaSim)
+
+    //useEffect de fechaSimRef
+    useEffect(() => {
+        fechaSimRef.current = fechaSim;
+    },[fechaSimRef])
 
     //Variable para incrementar segundos totales
     const [segundosReales, setSegundosReales] = useState(0);
@@ -37,7 +45,8 @@ export default function SimSemanal() {
     //TIEMPO EN EL QUE PASA 1 MINUTO REAL
     const [intervaloMS, setIntervaloMS] = useState(200)
 
-
+    //Ref para montura inicial
+    const isInitialMount = useRef(TryOutlined)
 
     //---------------------------------------------------------
     //                      USE EFFECTS E INTERVALS
@@ -45,20 +54,15 @@ export default function SimSemanal() {
     useEffect(() => {
         //Obtener datos iniciales
         async function obtenerDatos() {
+            isInitialMount.current = false;
             let a = await getAeropuertosTodos()
             await setAeropuertos(a);
             let b = await getPlanesTodos()
             await setPlanesDeVuelo(b);
             console.log("DATOS LEIDOS")
         }
-        obtenerDatos()
+        if (isInitialMount.current) obtenerDatos()
     }, [])
-
-    //TEMP -> Ver actualizaciones
-    useEffect(() => {
-        //console.log(fechaSim)
-    }, [fechaSim])
-
 
     //Cambio del cronómetro real (mediante variable segundosReales)
     useEffect(() => {
@@ -104,10 +108,11 @@ export default function SimSemanal() {
         while (i < llamadas_totales) {
             
             nF = await nF.add(1, 'm');
-            console.log(nF);
+            //console.log(nF);
             await setFechaSim(nF);
+            fechaSimRef.current = nF
             
-            await new Promise(r => setTimeout(r, 1000)); //originalmente 200
+            await new Promise(r => setTimeout(r, intervaloMS)); //originalmente 200
             i++;
         }
     }
@@ -128,7 +133,7 @@ export default function SimSemanal() {
 
             </Stack>
             <div style={{ height: 'calc(100vh - 50px)', width: '100%' }}>
-                <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={planesDeVuelo} fechaSim={fechaSim} estadoSim={estadoSim}/>
+                <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={planesDeVuelo} fechaSim={fechaSim} estadoSim={estadoSim} intervaloMS={intervaloMS}/>
             </div>
 
         </>

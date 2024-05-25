@@ -20,7 +20,7 @@ let planesTemp = [
   {id_tramo: 3, ciudadOrigen: {latitude:39.9075, longitude: 116.39723}, ciudadDestino: {latitude: 39.074208, longitude:  21.824312}, horaOrigen: "", hora_destino: "", capacidadMaxima: 100, capacidadOcupada: 98, estado: 1},
 ]
 
-export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDeVueloBD}) {
+export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDeVueloBD,intervaloMS}) {
 
   //Variable para manejar los aeropuertos
   const [aeropuertos, setAeropuertos] = useState({});
@@ -36,7 +36,7 @@ export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDe
   },[planesDeVueloBD])
 
   useEffect(() => {
-    console.log(planesDeVuelo)
+    //console.log(planesDeVuelo)
   },[planesDeVuelo])
 
 
@@ -52,8 +52,11 @@ export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDe
           {aeropuertos && aeropuertos.length > 0 ? aeropuertos.map((pos, index) => (
             <Aeropuerto key={index} aeropuerto={pos}></Aeropuerto>
           )) : <></>}
-          {planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.map((pos,index) => (
-            <PlanDeVuelo key={index} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim}></PlanDeVuelo>
+          {/*planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.map((pos,index) => (
+            <PlanDeVuelo key={index} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} intervaloMS={intervaloMS}></PlanDeVuelo>
+          )) : <></>*/}
+          {planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.filter(pos => pos.id_tramo == 1).map((pos,index) => (
+            <PlanDeVuelo key={index} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} intervaloMS={intervaloMS}></PlanDeVuelo>
           )) : <></>}
         </MapContainer>
       </div>
