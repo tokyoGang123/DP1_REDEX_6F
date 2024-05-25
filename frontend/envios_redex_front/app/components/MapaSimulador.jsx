@@ -2,7 +2,7 @@
 import { MapContainer, Marker, TileLayer, Popup, FeatureGroup } from "react-leaflet";
 import { Icon, divIcon, point } from "leaflet";
 import { EditControl } from "react-leaflet-draw"
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import Aeropuerto from "./Aeropuerto";
 import PlanDeVuelo from "./PlanDeVuelo";
 import { Cronometro } from "./Elementos/SelectorFecha";
@@ -20,16 +20,25 @@ let planesTemp = [
   {id_tramo: 3, ciudadOrigen: {latitude:39.9075, longitude: 116.39723}, ciudadDestino: {latitude: 39.074208, longitude:  21.824312}, horaOrigen: "", hora_destino: "", capacidadMaxima: 100, capacidadOcupada: 98, estado: 1},
 ]
 
-export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim}) {
+export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDeVueloBD}) {
 
   //Variable para manejar los aeropuertos
   const [aeropuertos, setAeropuertos] = useState({});
-  const [planesDeVuelo, setPlanesDeVuelo] = useState(planesTemp)
+  const [planesDeVuelo, setPlanesDeVuelo] = useState({})
 
   useEffect(() => {
       setAeropuertos(aeropuertosBD)
-      console.log("aer",aeropuertos)
+      
   },[aeropuertosBD])
+
+  useEffect(() => {
+    setPlanesDeVuelo(planesDeVueloBD)
+  },[planesDeVueloBD])
+
+  useEffect(() => {
+    console.log(planesDeVuelo)
+  },[planesDeVuelo])
+
 
   return (
     <>
@@ -43,9 +52,9 @@ export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim}) {
           {aeropuertos && aeropuertos.length > 0 ? aeropuertos.map((pos, index) => (
             <Aeropuerto key={index} aeropuerto={pos}></Aeropuerto>
           )) : <></>}
-          {planesDeVuelo.map((pos,index) => (
+          {planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.map((pos,index) => (
             <PlanDeVuelo key={index} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim}></PlanDeVuelo>
-          )) }
+          )) : <></>}
         </MapContainer>
       </div>
 

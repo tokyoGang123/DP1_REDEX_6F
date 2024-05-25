@@ -7,6 +7,7 @@ import { useEffect, useState } from "react"
 import dayjs from "dayjs"
 import { getAeropuertosTodos } from "@/app/api/aeropuetos.api"
 import Header from '../Header/Header'
+import { getPlanesTodos } from "@/app/api/planesDeVuelo.api"
 
 export default function SimSemanal() {
 
@@ -27,8 +28,14 @@ export default function SimSemanal() {
     //Estado de la simulación
     const [estadoSim, setEstadoSim] = useState('NI'); //NI (No Iniciado), PL (En ejecucion), PS (en pausa)
 
-    //Aeropuertos - Estático
+    //Aeropuertos
     const [aeropuertos, setAeropuertos] = useState({});
+
+    //Planes de Vuelo
+    const [planesDeVuelo, setPlanesDeVuelo] = useState({})
+
+    //TIEMPO EN EL QUE PASA 1 MINUTO REAL
+    const [intervaloMS, setIntervaloMS] = useState(200)
 
 
 
@@ -39,7 +46,10 @@ export default function SimSemanal() {
         //Obtener datos iniciales
         async function obtenerDatos() {
             let a = await getAeropuertosTodos()
-            setAeropuertos(a);
+            await setAeropuertos(a);
+            let b = await getPlanesTodos()
+            await setPlanesDeVuelo(b);
+            console.log("DATOS LEIDOS")
         }
         obtenerDatos()
     }, [])
@@ -97,7 +107,7 @@ export default function SimSemanal() {
             console.log(nF);
             await setFechaSim(nF);
             
-            await new Promise(r => setTimeout(r, 200));
+            await new Promise(r => setTimeout(r, 1000)); //originalmente 200
             i++;
         }
     }
@@ -112,13 +122,13 @@ export default function SimSemanal() {
 
                 <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron}></CuadroTiempo>
                 <Stack>
-                    <SelectorFecha fechaSim={fechaSim} estadoSim={estadoSim}></SelectorFecha>
+                    <SelectorFecha fechaSim={fechaSim} setFechaSim={setFechaSim} estadoSim={estadoSim}></SelectorFecha>
                     <BotonIniciar onClick={clickBotonIniciar}></BotonIniciar>
                 </Stack>
 
             </Stack>
             <div style={{ height: 'calc(100vh - 50px)', width: '100%' }}>
-                <MapaSimulador aeropuertosBD={aeropuertos} planesDeVuelo={[]} fechaSim={fechaSim} estadoSim={estadoSim}/>
+                <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={planesDeVuelo} fechaSim={fechaSim} estadoSim={estadoSim}/>
             </div>
 
         </>
