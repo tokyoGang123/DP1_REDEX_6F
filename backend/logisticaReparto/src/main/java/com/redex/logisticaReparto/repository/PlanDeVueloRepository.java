@@ -11,11 +11,20 @@ import java.util.List;
 
 @Repository
 public interface PlanDeVueloRepository extends CrudRepository<PlanDeVuelo, Long> {
-    @Query("SELECT new com.redex.logisticaReparto.dto.PlanVueloResponse(p.id_tramo, p.ciudad_origen, p.hora_origen, ao.longitud, ao.latitud, " +
-            "p.ciudad_destino, p.hora_destino, ad.longitud, ad.latitud, " +
-            "p.capacidad_maxima, p.capacidad_ocupada, p.estado) " +
+    @Query("SELECT new com.redex.logisticaReparto.dto.PlanVueloResponse(" +
+            "p.id_tramo, " +
+            "p.ciudad_origen, " +
+            "CONCAT(CAST(FUNCTION('DATE_FORMAT', p.hora_origen, '%Y-%m-%d %H:%i:%s') AS string),'Z',ao.huso_horario), " +
+            "ao.longitud, ao.latitud, " +
+            "p.ciudad_destino, " +
+            "CONCAT(CAST(FUNCTION('DATE_FORMAT', p.hora_destino, '%Y-%m-%d %H:%i:%s') AS string),'Z',ad.huso_horario), " +
+            "ad.longitud, ad.latitud, " +
+            "p.capacidad_maxima, " +
+            "p.capacidad_ocupada, " +
+            "p.estado) " +
             "FROM PlanDeVuelo p " +
             "JOIN Aeropuerto ao ON p.ciudad_origen = ao.id_aeropuerto " +
             "JOIN Aeropuerto ad ON p.ciudad_destino = ad.id_aeropuerto")
-    public ArrayList<PlanVueloResponse> queryPlanDeVueloWithAeropuerto();
+    ArrayList<PlanVueloResponse> queryPlanDeVueloWithAeropuerto();
 }
+

@@ -11,19 +11,24 @@ import java.time.ZonedDateTime;
 public class PlanVueloResponse {
     private long id_tramo;
     private int ciudad_origen;
-    private ZonedDateTime hora_origen;
+    private String hora_origen;
     private double longitud_origen;
     private double latitud_origen;
     private int ciudad_destino;
-    private ZonedDateTime hora_destino;
+    private String hora_destino;
     private double longitud_destino;
     private double latitud_destino;
     private int capacidad_maxima;
     private int capacidad_ocupada;
     private int estado;
+
+
     public boolean isFull() {return capacidad_maxima == capacidad_ocupada;}
 
-    public PlanVueloResponse(long id_tramo, int ciudad_origen, ZonedDateTime hora_origen, double longitud_origen, double latitud_origen, int ciudad_destino, ZonedDateTime hora_destino, double longitud_destino, double latitud_destino, int capacidad_maxima, int capacidad_ocupada, int estado) {
+    public PlanVueloResponse(long id_tramo, int ciudad_origen, String hora_origen, double longitud_origen, double latitud_origen,
+                             int ciudad_destino, String hora_destino, double longitud_destino, double latitud_destino, int capacidad_maxima,
+                             int capacidad_ocupada, int estado) {
+
         this.id_tramo = id_tramo;
         this.ciudad_origen = ciudad_origen;
         this.hora_origen = hora_origen;

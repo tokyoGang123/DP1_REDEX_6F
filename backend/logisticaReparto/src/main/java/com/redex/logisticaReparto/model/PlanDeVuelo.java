@@ -24,6 +24,7 @@ public class PlanDeVuelo {
     private int capacidad_ocupada;
     private int estado;
 
+
     public boolean isFull() {return capacidad_maxima == capacidad_ocupada;}
 
     public PlanDeVuelo() {
