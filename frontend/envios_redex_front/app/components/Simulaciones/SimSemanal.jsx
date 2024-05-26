@@ -111,7 +111,7 @@ export default function SimSemanal() {
     //                      CUERPO SIMULACION
     const ejecucionSimulacion = async () => {
         let i = 0;
-        let llamadas_totales = 10800;
+        let llamadas_totales = 10080;
         let tiempoMax = 1;
         let nF = fechaSim;
 
@@ -139,6 +139,7 @@ export default function SimSemanal() {
                 <Stack>
                     <SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>
                     <BotonIniciar onClick={clickBotonIniciar}></BotonIniciar>
+                    <h2>ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</h2>
                 </Stack>
 
             </Stack>

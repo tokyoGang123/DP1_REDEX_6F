@@ -145,8 +145,8 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
 
         let intervalo = tiempoVueloReal * 1000 / (numPuntos - 1)
         setIntervaloCambio(intervalo)
-        console.log("Le toma: " + tiempoVueloReal + " para volar " + tiempoVueloSimulado + " minutos")
-        console.log(intervalo)
+        //console.log("Le toma: " + tiempoVueloReal + " para volar " + tiempoVueloSimulado + " minutos")
+        //console.log(intervalo)
         /*
 
         //console.log(tiempoVueloReal + " - " + numPuntos + " - " + intervaloMS)
