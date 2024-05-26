@@ -52,7 +52,7 @@ export default function SimSemanal() {
     const [planesDeVuelo, setPlanesDeVuelo] = useState({})
 
     //TIEMPO EN EL QUE PASA 1 MINUTO REAL
-    const [intervaloMS, setIntervaloMS] = useState(500) 
+    const [intervaloMS, setIntervaloMS] = useState(200) 
 
     //Ref para montura inicial
     const isInitialMount = useRef(TryOutlined)

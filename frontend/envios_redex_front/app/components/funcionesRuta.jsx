@@ -1,7 +1,7 @@
 
 async function hallarPuntosIntermedios(la1,lo1,la2,lo2) {
     const distanciaARecorrer = distanciaPuntos(la1,lo1,la2,lo2)
-    let densidad = 2
+    let densidad = 1 * 60
     const numPuntos = Math.ceil(distanciaARecorrer/densidad);
 
     const puntos = [];
