@@ -2,18 +2,17 @@ package com.redex.logisticaReparto.controller;
 
 import com.redex.logisticaReparto.model.Aeropuerto;
 import com.redex.logisticaReparto.model.Envio;
+import com.redex.logisticaReparto.model.Paquete;
 import com.redex.logisticaReparto.model.PlanDeVuelo;
 import com.redex.logisticaReparto.services.AeropuertoService;
 import com.redex.logisticaReparto.services.EnvioService;
+import com.redex.logisticaReparto.services.PaqueteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Scanner;
@@ -26,6 +25,8 @@ public class EnvioController {
     private EnvioService envioService;
     @Autowired
     private AeropuertoService aeropuertoService;
+    @Autowired
+    private PaqueteService paqueteService;
 
     @GetMapping("/envios/obtenerTodos")
     ArrayList<Envio> obtenerTodosEnvios() { return envioService.obtenerEnvios();}
@@ -41,10 +42,12 @@ public class EnvioController {
 
     @PostMapping("envios/cargarArchivoEnvios")
     ArrayList<Envio> cargarEnvios(){
+        long startTime = System.currentTimeMillis();
         ArrayList<Envio> envios = new ArrayList<>();
         try {
-            File enviosFile = new File("src/main/resources/Envios/pack_enviado_EBCI.txt");
+            File enviosFile = new File("src/main/resources/EnviosVictor/pack_enviado_EBCI.txt");
             Scanner scanner = new Scanner(enviosFile);
+            int i= 0;
             while (scanner.hasNextLine()) {
                 String row = scanner.nextLine();
                 String data[] = row.split("-");
@@ -60,7 +63,6 @@ public class EnvioController {
 
                         int ciudadOrigen = aeropuertoOrigen.getId_aeropuerto();
                         long numero_envio_Aeropuerto = Long.parseLong(data[1]); // cambiar a numero_envio_Aeropuerto
-
                         int ciudadDestino = aeropuertoDest.getId_aeropuerto();
                         int numPaquetes = Integer.parseInt(dataCdes[1]);
 
@@ -76,22 +78,46 @@ public class EnvioController {
                         int hora = Integer.parseInt(tiempoHM[0]);
                         int minutos = Integer.parseInt(tiempoHM[1]);
 
-                        ZonedDateTime tiempoOrigen = ZonedDateTime.of(LocalDate.of(anho,mes,dia), LocalTime.of(hora,minutos,0), ZoneId.of(husoCiudadOrigen));
+                        LocalDateTime tiempoOrigen = LocalDateTime .of(LocalDate.of(anho,mes,dia), LocalTime.of(hora,minutos,0));
 
                         //AGREGAR CONDICION PARA VER SI ES VUELO NACIONAL O INTERNACIONAL
-                        ZonedDateTime tiempoMax = tiempoOrigen.withZoneSameLocal(ZoneId.of(husoCiudadDestino)).plusDays(2); //ya que en el juego de datos aun no hay del mismo pais xd ni habra :v
+                        LocalDateTime tiempoMax = tiempoOrigen.plusDays(2); //ya que en el juego de datos aun no hay del mismo pais xd ni habra :v
                         //
 
-                        Envio newEnvio = new Envio(0,numero_envio_Aeropuerto,tiempoOrigen,ciudadOrigen,ciudadDestino,tiempoMax,numPaquetes );
+                        Envio newEnvio = new Envio(0,numero_envio_Aeropuerto,tiempoOrigen,ciudadOrigen,
+                                ciudadDestino,tiempoMax,numPaquetes,husoCiudadOrigen,husoCiudadDestino);
                         envios.add(newEnvio);
                     }
 
                 }
+                System.out.println(i);
+                i++;
             }
         } catch (FileNotFoundException e) {
             System.out.println("Archivo de pedidos no encontrado, error: " + e.getMessage());
         }
         envioService.insertarListaEnvios(envios);
+        ArrayList<Paquete> paquetes = new ArrayList<>();
+
+        // Generar y agregar los paquetes para cada envío
+        for (Envio envio : envios) {
+            ArrayList<Paquete> paquetesEnvio = new ArrayList<>();
+            for (int j = 0; j < envio.getNumPaquetes(); j++) {
+                Paquete paquete = new Paquete(0);
+                paquete.setEnvio(envio);
+                paquetesEnvio.add(paquete);
+                paquetes.add(paquete);
+            }
+            // Agregar la lista de paquetes al envío
+            envio.setPaquetes(paquetesEnvio);
+        }
+        // Guardar todos los paquetes de una vez
+        paqueteService.insertarListaPaquetes(paquetes);
+
+        long endTime = System.currentTimeMillis();
+        long durationInMillis = endTime - startTime;
+        double durationInSeconds = durationInMillis / 1000.0;
+        System.out.println("Tiempo de ejecución: " + durationInSeconds + " segundos");
         return envios;
 
     }
