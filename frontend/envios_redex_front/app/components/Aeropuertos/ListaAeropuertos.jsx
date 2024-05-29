@@ -11,7 +11,8 @@ const ListaAeropuertos = () => {
   useEffect(() => {
     const fetchAeropuertos = async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/aeropuertos/obtenerTodos');
+        const res = await fetch('http://inf226-982-6f.inf.pucp.edu.pe/api/aeropuertos/obtenerTodos');
+        //const res = await fetch('http://localhost:8080/api/aeropuertos/obtenerTodos');
         if (res.ok) {
           const aeropuertos = await res.json();
           setAirports(aeropuertos);
@@ -39,7 +40,7 @@ const ListaAeropuertos = () => {
       console.log('JSON generado:', json);
 
       // Enviar el contenido del archivo en formato JSON al backend
-      const response = await fetch('http://localhost:8080/api/aeropuertos/lecturaArchivo', {
+      const response = await fetch('http://inf226-982-6f.inf.pucp.edu.pe/api/aeropuertos/lecturaArchivo', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

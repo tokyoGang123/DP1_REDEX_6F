@@ -66,8 +66,9 @@ export default function SimSemanal() {
             isInitialMount.current = false;
             let a = await getAeropuertosTodos()
             await setAeropuertos(a);
-            let b = await getPlanesTodos()
-            await setPlanesDeVuelo(b);
+            let b = await cargarPlanesFecha(fechaSimRef)
+            let c = await getPlanesTodos()
+            await setPlanesDeVuelo(c);
             console.log("DATOS LEIDOS")
         }
         if (isInitialMount.current) obtenerDatos()
