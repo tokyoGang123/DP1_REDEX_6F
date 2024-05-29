@@ -1,6 +1,7 @@
 'use client'
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
+import utc from 'dayjs/plugin/utc';
 import { useEffect, useState, useRef } from "react";
 import { Marker, Popup } from "react-leaflet";
 import hallarPuntosIntermedios from "./funcionesRuta";
@@ -9,9 +10,10 @@ import { Icon } from 'leaflet';
 
 const markerSize = 20
 
-export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim }) {
+export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, intervaloMS }) {
 
     dayjs.extend(duration);
+    dayjs.extend(utc);
 
     //Rojo, Amarillo, Verde
     const [colorMarcador, setColorMarcador] = useState('Verde')
@@ -24,10 +26,38 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim }) {
     //Indicador de si el viaje ha finalizado
     const [viajeFin, setViajeFin] = useState(false)
     //Tiempo total que le toma al vuelo
-    const [tiempoVueloTotal,setTiempoVueloTotal] = useState(0); //en seg
+    const [tiempoVueloTotal, setTiempoVueloTotal] = useState(0); //en seg
+    //Intervalo de cambio
+    const [intervaloCambio, setIntervaloCambio] = useState(0); //en seg
+    //Segundos transcurridos
+    const [segTransc, setSegTransc] = useState(0);
+    //Microsegundos de revision
+    const [microsegVuelo, setMicrosegVuelo] = useState(1)
+    const lastTimestampRef = useRef(null);
 
     //UseRef necesario
     const markerRef = useRef(null);
+    //UseRef para el tiempo
+    const segTranscRef = useRef(segTransc)
+    //UseRef para la posición
+    const posicionActualRef = useRef(posicionActual)
+    //UseRef para el index
+    const currentPositionIndexRef = useRef(currentPositionIndex)
+
+    //Actualizar segundos
+    useEffect(() => {
+        segTranscRef.current = segTransc;
+    }, [segTranscRef])
+
+    //Actualizar posicion
+    useEffect(() => {
+        posicionActualRef.current = posicionActual;
+    }, [posicionActualRef])
+
+    //Actualizar posicion
+    useEffect(() => {
+        currentPositionIndexRef.current = currentPositionIndex;
+    }, [currentPositionIndexRef])
 
     //Quitar el marcador
     const removeMarker = () => {
@@ -35,6 +65,11 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim }) {
             markerRef.current.remove();
         }
     }
+
+    //Calcular intervalo de cambio
+    useEffect(() => {
+        if (tiempoVueloTotal > 0) calculaTiempoCambio();
+    }, [tiempoVueloTotal])
 
     //Colocar puntos en arreglo
     useEffect(() => {
@@ -54,12 +89,19 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim }) {
                 .catch((error) => {
                     console.error("Error al obtener puntos intermedios:", error);
                 });
-            let fI = dayjs(planDeVuelo.hora_origen);
-            let fF = dayjs(planDeVuelo.hora_destino);
+            let fI = dayjs.utc(planDeVuelo.hora_origen);
+            let fF = dayjs.utc(planDeVuelo.hora_destino);
             let difMl = fF.diff(fI)
             let dif = dayjs.duration(difMl).asSeconds();
-            setTiempoVueloTotal(dif);
-            console.log(dif)
+            setTiempoVueloTotal(dif) //tiempo vuelo simulado
+            /*
+            console.log(planDeVuelo.id_tramo + ": " + dif)
+            if (planDeVuelo.id_tramo === 1369){
+                console.log(planDeVuelo.hora_origen + " - " + planDeVuelo.hora_destino);
+                console.log(fI + " - " + fF)
+            }
+            */
+
         }
     }, [planDeVuelo]);
 
@@ -75,18 +117,50 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim }) {
     },[listaPuntosViaje])
     */
 
+
+
+
     useEffect(() => {
         //console.log(estadoSim)
         let fechaActual = fechaSim.format('YYYY-MM-DDTHH:mm');//DAYJS
         let fechaProg = dayjs(planDeVuelo.hora_origen).format('YYYY-MM-DDTHH:mm'); //ISO 8601
-        if (estadoSim === 'PL' && fechaActual === fechaProg) {
-            cambiaPos()
+
+        //REMOVER TERCER ARGUMENTO CUANDO SE ARREGLEN LOS ERRORES
+        if (estadoSim === 'PL' && fechaActual === fechaProg && tiempoVueloTotal > 0) {
+            requestAnimationFrame(cambiaPos);
             //console.log("si")
         }
         //console.log("No")
     }, [estadoSim, fechaSim])
 
 
+    //Calcular cada cuantos segundos se cambia de punto
+    async function calculaTiempoCambio() {
+
+
+        let relacionSegReales = intervaloMS * 0.001; //1 minuto simulado -> 0.2 segundos reales
+        let tiempoVueloSimulado = tiempoVueloTotal / 60; //Tiempo que toma al vuelo viajar en la simulacion (en minutos)
+        let numPuntos = listaPuntosViaje.length; // # de puntos que debemos cubrir
+        let tiempoVueloReal = tiempoVueloSimulado * relacionSegReales; //Tiempo que le tomará para cubrir todos los puntos
+
+        let intervalo = tiempoVueloReal * 1000 / (numPuntos - 1)
+        setIntervaloCambio(intervalo)
+        //console.log("Le toma: " + tiempoVueloReal + " para volar " + tiempoVueloSimulado + " minutos")
+        //console.log(intervalo)
+        /*
+
+        //console.log(tiempoVueloReal + " - " + numPuntos + " - " + intervaloMS)
+        let segundosReales = tiempoVueloReal/60 * intervaloMS * 0.001; //Segundos totales que pasarán en la realidad en los que aparece el vuelo
+        //console.log(segundosReales)
+        let intervalo = segundosReales/(numPuntos-1); //Intervalo de cambio (X segundos hasta ir al siguiente punto)
+        //intervalo = Math.round(intervalo)
+        setIntervaloCambio(intervalo)
+        //console.log(intervalo)
+        */
+
+    }
+
+    /*
     //Cambia posicion en intervalos de tiempo. CAMBIAR PARA QUE FUNCIONE A TIEMPO COMO CRONOMETRO
     async function cambiaPos() {
         const interval = setInterval(() => {
@@ -98,11 +172,44 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim }) {
                 }
                 return newIndex;
             });
-        }, 0.005); // Ajusta el intervalo según sea necesario
+        }, intervaloMS); // Ajusta el intervalo según sea necesario
+    }*/
+
+    //Cambia posicion en intervalos de tiempo. CAMBIAR PARA QUE FUNCIONE A TIEMPO COMO CRONOMETRO
+    async function cambiaPos(timestamp) {
+        if (!lastTimestampRef.current) {
+            lastTimestampRef.current = timestamp
+        }
+
+        const deltaTime = timestamp - lastTimestampRef.current;
+        lastTimestampRef.current = timestamp
+
+        segTranscRef.current += deltaTime;
+
+        if (segTranscRef.current >= intervaloCambio) { // Si ya ha pasado tiempo suficiente, hacer el cambio
+            setCurrentPositionIndex(prevIndex => {
+                const newIndex = prevIndex === listaPuntosViaje.length - 1 ? 0 : prevIndex + 1;
+                if (newIndex === 0) {
+                    setViajeFin(true);
+                    return prevIndex; // Detener el avance cuando se alcance el último índice
+                }
+                currentPositionIndexRef.current = newIndex;
+                return newIndex;
+            });
+            segTranscRef.current = 0;
+        }
+
+        if (!viajeFin) {
+            requestAnimationFrame(cambiaPos);
+        }
+
+
     }
+
 
     useEffect(() => {
         setPosicionActual(listaPuntosViaje[currentPositionIndex])
+        posicionActualRef.current = listaPuntosViaje[currentPositionIndex]
     }, [currentPositionIndex])
 
     //Si el viaje culmina, desaparecer
@@ -141,10 +248,10 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim }) {
     return (
         <>
             {posicionActual && Object.keys(posicionActual).length !== 0 ?
-                <Marker position={posicionActual}
+                <Marker position={posicionActualRef.current}
                     icon={colorMarcador == 'Verde' ? iconoVerde : (colorMarcador == 'Amarillo' ? iconoAmarillo : iconoRojo)}
                     ref={markerRef}>
-                    <Popup>Info vuelo</Popup>
+                    <Popup>Info vuelo {planDeVuelo.id_tramo}</Popup>
                 </Marker> : <></>}
         </>
     )
