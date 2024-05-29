@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
@@ -31,6 +32,14 @@ public class EnvioController {
 
     @GetMapping("/envios/obtenerTodos")
     ArrayList<Envio> obtenerTodosEnvios() { return envioService.obtenerEnvios();}
+
+    @GetMapping("/envios/obtenerTodosFecha/{fecha}")
+    ArrayList<Envio> obtenerTodosEnviosFecha(@PathVariable String fecha) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        LocalDate localDate = LocalDate.parse(fecha, formatter);
+
+        return envioService.obtenerEnviosPorFecha(localDate);
+    }
 
     @PostMapping("/envios/insertar")
     Envio insertarEnvio(Envio envio) { return envioService.insertarEnvio(envio); }
@@ -122,7 +131,7 @@ public class EnvioController {
         long startTime = System.currentTimeMillis();
         ArrayList<Envio> envios = new ArrayList<>();
         try {
-            File enviosFile = new File("src/main/resources/EnviosVictor/pack_enviado_EBCI.txt");
+            File enviosFile = new File("src/main/resources/EnviosAngelo/pack_enviado_SCEL.txt");
             Scanner scanner = new Scanner(enviosFile);
             int i= 0;
             while (scanner.hasNextLine()) {
