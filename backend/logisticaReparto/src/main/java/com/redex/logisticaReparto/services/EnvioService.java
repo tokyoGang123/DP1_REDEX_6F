@@ -5,7 +5,9 @@ import com.redex.logisticaReparto.repository.EnvioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +18,8 @@ public class EnvioService {
     private EnvioRepository envioRepository;
 
     public ArrayList<Envio>obtenerEnvios() { return (ArrayList<Envio>)envioRepository.findAll(); }
+
+    public ArrayList<Envio>obtenerEnviosPorFecha(LocalDate fecha) { return envioRepository.findByFecha_ingreso(fecha);}
 
     public Envio insertarEnvio(Envio envio) { return envioRepository.save(envio); }
 
