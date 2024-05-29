@@ -6,7 +6,20 @@ import axios from 'axios';
 import './ListaEnvios.css';
 import './RegistrarEnvio.css';
 
+import dayjs from "dayjs"
+import utc from 'dayjs/plugin/utc'
+import timezone from 'dayjs/plugin/timezone'
+
 const ListaEnvios = () => {
+
+  dayjs.extend(utc);
+  dayjs.extend(timezone);
+
+  let zonaHorariaUsuario = dayjs.tz.guess();
+  let fechaActualDayJS = dayjs().tz(zonaHorariaUsuario);
+  let fechaActual = fechaActualDayJS.format('YYYYMMDD')
+  //let fechaActual = 20240103
+
   const [envios, setEnvios] = useState([]);
   const [file, setFile] = useState(null);
   const fileInputRef = useRef(null);
@@ -14,7 +27,8 @@ const ListaEnvios = () => {
   useEffect(() => {
     const fetchEnvios = async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/envios/obtenerTodos');
+        const res = await fetch('http://inf226-982-6f.inf.pucp.edu.pe/api/envios/obtenerTodosFecha/' + fechaActual);
+        //const res = await fetch('http://localhost:8080/api/envios/obtenerTodosFecha/' + fechaActual);
         if (res.ok) {
           const env = await res.json();
           setEnvios(env);
@@ -27,7 +41,12 @@ const ListaEnvios = () => {
     };
 
     fetchEnvios();
+    console.log(fechaActual)
   }, []);
+
+  useEffect(() => {
+    console.log(envios)
+  },[envios])
 
   
 
@@ -50,7 +69,12 @@ const ListaEnvios = () => {
 
       console.log('JSON a enviar:', jsonData);  // Agregar el console.log aquí
 
-      axios.post('http://localhost:8080/api/envios/cargarArchivoEnvios', jsonData, {
+      /*axios.post('http://localhost:8080/api/envios/cargarArchivoEnvios', jsonData, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })*/
+      axios.post('http://inf226-982-6f.inf.pucp.edu.pe/api/envios/cargarArchivoEnvios', jsonData, {
         headers: {
           'Content-Type': 'application/json'
         }

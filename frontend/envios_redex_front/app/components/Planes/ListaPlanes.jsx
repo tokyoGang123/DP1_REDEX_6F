@@ -10,7 +10,8 @@ const ListaPlanes = () => {
     useEffect(() => {
         const fetchPlanes = async () => {
           try {
-            const res = await fetch('http://localhost:8080/api/planesVuelo/obtenerTodos');
+            const res = await fetch('http://inf226-982-6f.inf.pucp.edu.pe/api/planesVuelo/obtenerTodos');
+            //const res = await fetch('http://localhost:8080/api/planesVuelo/obtenerTodos');
             if (res.ok) {
               const plans = await res.json();
               setPlanes(plans);
