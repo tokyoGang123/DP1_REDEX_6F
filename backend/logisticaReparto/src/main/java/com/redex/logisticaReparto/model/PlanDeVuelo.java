@@ -1,10 +1,16 @@
 package com.redex.logisticaReparto.model;
 
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 @Entity
+@Getter
+@Setter
 @Table(name="PlanVuelo")
 public class PlanDeVuelo {
     @Id
@@ -13,34 +19,39 @@ public class PlanDeVuelo {
     private long id_tramo;;
 
     private int ciudad_origen;
-    private ZonedDateTime hora_origen;
-    //@OneToOne(cascade = CascadeType.ALL)
-    //private Coordenada coordenada_origen;
+    private LocalDateTime hora_origen;
+    private String huso_horario_origen;
     private int ciudad_destino;
-    private ZonedDateTime hora_destino;
-    //@OneToOne(cascade = CascadeType.ALL)
-    //private Coordenada coordenada_destino;
+    private LocalDateTime hora_destino;
+    private String huso_horario_destino;
     private int capacidad_maxima;
     private int capacidad_ocupada;
     private int estado;
 
+    @Transient
+    private ZonedDateTime zonedHora_origen;
+    @Transient
+    private ZonedDateTime zonedHora_destino;
 
     public boolean isFull() {return capacidad_maxima == capacidad_ocupada;}
 
     public PlanDeVuelo() {
     }
 
-    public PlanDeVuelo(int ciudad_origen, ZonedDateTime hora_origen, int ciudad_destino, ZonedDateTime hora_destino, int capacidad_maxima, int estado) {
+    public PlanDeVuelo(int ciudad_origen, LocalDateTime hora_origen, String huso_horario_origen, int ciudad_destino,
+                       LocalDateTime hora_destino, String huso_horario_destino, int capacidad_maxima, int estado) {
         this.ciudad_origen = ciudad_origen;
         this.hora_origen = hora_origen;
+        this.huso_horario_origen = huso_horario_origen;
         this.ciudad_destino = ciudad_destino;
         this.hora_destino = hora_destino;
+        this.huso_horario_destino = huso_horario_destino;
         this.capacidad_maxima = capacidad_maxima;
         this.capacidad_ocupada = 0;
         this.estado = estado;
     }
 
-    public PlanDeVuelo(long id_tramo, int ciudad_origen, ZonedDateTime hora_origen, int ciudad_destino, ZonedDateTime hora_destino, int capacidad_maxima, int estado) {
+    /*public PlanDeVuelo(long id_tramo, int ciudad_origen, ZonedDateTime hora_origen, int ciudad_destino, ZonedDateTime hora_destino, int capacidad_maxima, int estado) {
         this.id_tramo = id_tramo;
         this.ciudad_origen = ciudad_origen;
         this.hora_origen = hora_origen;
@@ -49,6 +60,12 @@ public class PlanDeVuelo {
         this.capacidad_maxima = capacidad_maxima;
         this.capacidad_ocupada = 0;
         this.estado = estado;
+    }*/
+
+    @PostLoad
+    public void cargarZonedDateTime() {
+        this.zonedHora_origen = hora_origen.atZone(ZoneId.of(huso_horario_origen));
+        this.zonedHora_destino = hora_destino.atZone(ZoneId.of(huso_horario_destino));
     }
 
     public void imprimeDetallePlan() {
@@ -58,83 +75,4 @@ public class PlanDeVuelo {
         System.out.println("Actualmente almacenando " + capacidad_ocupada + " paquetes, maximo " + capacidad_maxima);
     }
 
-    public int getEstado() {
-        return estado;
-    }
-
-    public long getId_tramo() {
-        return id_tramo;
-    }
-
-    public int getCiudad_origen() {
-        return ciudad_origen;
-    }
-
-    public ZonedDateTime getHora_origen() {
-        return hora_origen;
-    }
-
-    public int getCiudad_destino() {
-        return ciudad_destino;
-    }
-
-    public ZonedDateTime getHora_destino() {
-        return hora_destino;
-    }
-
-    public int getCapacidad_maxima() {
-        return capacidad_maxima;
-    }
-
-    public int getCapacidad_ocupada() {
-        return capacidad_ocupada;
-    }
-
-    public void setCiudad_origen(int ciudad_origen) {
-        this.ciudad_origen = ciudad_origen;
-    }
-
-    public void setHora_origen(ZonedDateTime hora_origen) {
-        this.hora_origen = hora_origen;
-    }
-
-    public void setCiudad_destino(int ciudad_destino) {
-        this.ciudad_destino = ciudad_destino;
-    }
-
-    public void setHora_destino(ZonedDateTime hora_destino) {
-        this.hora_destino = hora_destino;
-    }
-
-    public void setCapacidad_maxima(int capacidad_maxima) {
-        this.capacidad_maxima = capacidad_maxima;
-    }
-
-    public void setCapacidad_ocupada(int capacidad_ocupada) {
-        this.capacidad_ocupada = capacidad_ocupada;
-    }
-
-    public void setId_tramo(long id_tramo) {
-        this.id_tramo = id_tramo;
-    }
-
-    public void setEstado(int estado) {
-        this.estado = estado;
-    }
-
-    /*public Coordenada getCoordenada_origen() {
-        return coordenada_origen;
-    }
-
-    public void setCoordenada_origen(Coordenada coordenada_origen) {
-        this.coordenada_origen = coordenada_origen;
-    }
-
-    public Coordenada getCoordenada_destino() {
-        return coordenada_destino;
-    }
-
-    public void setCoordenada_destino(Coordenada coordenada_destino) {
-        this.coordenada_destino = coordenada_destino;
-    }*/
 }
