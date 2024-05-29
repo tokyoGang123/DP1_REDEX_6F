@@ -1,14 +1,30 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import '../Envios/ListaEnvios.css';
+import '../Envios/RegistrarEnvio.css';
 
-const ListaAeropuertos = ({ aeropuertos }) => {
-  // Estado para almacenar los aeropuertos
-  const [airports, setAirports] = useState(aeropuertos);
+const ListaAeropuertos = () => {
+  const [airports, setAirports] = useState([]);
 
-  // Maneja la carga del archivo
+  useEffect(() => {
+    const fetchAeropuertos = async () => {
+      try {
+        const res = await fetch('http://localhost:8080/api/aeropuertos/obtenerTodos');
+        if (res.ok) {
+          const aeropuertos = await res.json();
+          setAirports(aeropuertos);
+        } else {
+          console.error('Error al obtener los aeropuertos');
+        }
+      } catch (error) {
+        console.error('Error al obtener los aeropuertos:', error);
+      }
+    };
+
+    fetchAeropuertos();
+  }, []);
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -17,14 +33,26 @@ const ListaAeropuertos = ({ aeropuertos }) => {
     reader.onload = async (e) => {
       const contents = e.target.result;
       const textoApropiado = await changeText(contents);
-      const json = parseFileContents(textoApropiado);
+      const json = await formatJSON(textoApropiado);
 
-      // Actualiza el estado con los nuevos aeropuertos
-      setAirports(prevAirports => {
-        const updatedAirports = [...prevAirports, ...json];
-        console.log("Updated Airports:", updatedAirports); // Añade el console.log aquí
-        return updatedAirports;
+      // Verificar el JSON generado
+      console.log('JSON generado:', json);
+
+      // Enviar el contenido del archivo en formato JSON al backend
+      const response = await fetch('http://localhost:8080/api/aeropuertos/lecturaArchivo', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(json),
       });
+
+      if (response.ok) {
+        const newAirports = await response.json();
+        setAirports(prevAirports => [...prevAirports, ...newAirports]);
+      } else {
+        console.error('Error al cargar los aeropuertos');
+      }
     };
     reader.readAsText(file);
   };
@@ -35,28 +63,12 @@ const ListaAeropuertos = ({ aeropuertos }) => {
     return textoApropiado;
   }
 
-  // Convierte el texto del archivo a JSON
-  const parseFileContents = (contents) => {
-    const lines = contents.split('\n');
-    const result = lines.map(line => {
-      const [id, id_pais, codigo, ciudad, pais, diminutivo, huso_horario, capacidad_maxima, latitud, longitud] = line.split(',');
-      return {
-        id_aeropuerto: id,
-        id_pais,
-        codigo,
-        ciudad,
-        pais,
-        diminutivo,
-        huso_horario,
-        capacidad_maxima: parseInt(capacidad_maxima),
-        latitud: parseFloat(latitud),
-        longitud: parseFloat(longitud),
-        capacidad_ocupada: 0, // Ajusta este valor según sea necesario
-        full: false, // Ajusta este valor según sea necesario
-        estado: 1 // Ajusta este valor según sea necesario
-      };
-    });
-    return result;
+  // Formatea el texto en un JSON con la clave "data"
+  const formatJSON = async (text) => {
+    const json = {
+      data: text
+    };
+    return json;
   };
 
   return (
@@ -87,7 +99,7 @@ const ListaAeropuertos = ({ aeropuertos }) => {
             <span>Latitud</span>
             <span className="ulti-header">Estado</span>
           </div>
-          {aeropuertos.map((aeropuerto, index) => (
+          {airports.map((aeropuerto, index) => (
             <div className="table-row" key={index}>
               <span>{aeropuerto.codigo}</span>
               <span>{aeropuerto.ciudad}</span>
@@ -115,5 +127,8 @@ const ListaAeropuertos = ({ aeropuertos }) => {
 };
 
 export default ListaAeropuertos;
+
+
+
 
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import './ListaEnvios.css';
+import './RegistrarEnvio.css';
 
 const ListaEnvios = () => {
   const customers = [
