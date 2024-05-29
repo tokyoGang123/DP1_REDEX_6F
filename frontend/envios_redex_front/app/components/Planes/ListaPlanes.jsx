@@ -1,5 +1,6 @@
 import React from 'react';
 import '../Envios/ListaEnvios.css';
+import '../Envios/RegistrarEnvio.css';
 
 const ListaPlanes = ({ planes }) => {
 
