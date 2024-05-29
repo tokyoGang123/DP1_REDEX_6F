@@ -1,8 +1,29 @@
-import React from 'react';
+"use client";
+
+import React, { useState, useEffect } from 'react';
 import '../Envios/ListaEnvios.css';
 import '../Envios/RegistrarEnvio.css';
 
-const ListaPlanes = ({ planes }) => {
+const ListaPlanes = () => {
+    const [planes, setPlanes] = useState([]);
+
+    useEffect(() => {
+        const fetchPlanes = async () => {
+          try {
+            const res = await fetch('http://localhost:8080/api/planesVuelo/obtenerTodos');
+            if (res.ok) {
+              const plans = await res.json();
+              setPlanes(plans);
+            } else {
+              console.error('Error al obtener los planes');
+            }
+          } catch (error) {
+            console.error('Error al obtener los planes:', error);
+          }
+        };
+    
+        fetchPlanes();
+    }, []);
 
     const formatFecha = (fechaString) => {
         const fecha = new Date(fechaString);
