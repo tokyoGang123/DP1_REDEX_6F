@@ -20,7 +20,7 @@ public class PlanDeVueloService {
 
     public ArrayList<PlanVueloResponse> obtenerPlanesVuelos() { return planDeVueloRepository.queryPlanDeVueloWithAeropuerto(); }
 
-    //public ArrayList<PlanDeVuelo> obtenerPlanesVuelos() { return (ArrayList<PlanDeVuelo>)planDeVueloRepository.findAll(); }
+    public ArrayList<PlanDeVuelo> obtenerListaPlanesVuelos() { return (ArrayList<PlanDeVuelo>)planDeVueloRepository.findAll(); }
 
     public PlanDeVuelo insertarPlanVuelo(PlanDeVuelo plan) { return planDeVueloRepository.save(plan); }
 
