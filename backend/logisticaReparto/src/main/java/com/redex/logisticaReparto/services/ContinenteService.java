@@ -5,6 +5,8 @@ import com.redex.logisticaReparto.repository.ContinenteRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+
 @Service
 public class ContinenteService {
     @Autowired
@@ -13,4 +15,6 @@ public class ContinenteService {
     public Continente insertarContinente(Continente continente) {
         return continenteRepository.save(continente);
     }
+
+    public ArrayList<Continente> obtenerTodosContinentes() {return (ArrayList<Continente>) continenteRepository.findAll();}
 }
