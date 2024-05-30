@@ -57,6 +57,9 @@ export default function SimSemanal() {
     //Ref para montura inicial
     const isInitialMount = useRef(TryOutlined)
 
+    //Tiempo hasta llamada de datos nueva
+    const tiempoLlamaGRASP = 120;
+
     //---------------------------------------------------------
     //                      USE EFFECTS E INTERVALS
 
