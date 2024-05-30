@@ -10,6 +10,24 @@ import { Icon } from 'leaflet';
 
 const markerSize = 20
 
+const iconoRojo = new Icon({
+    iconUrl: "/planes/plane_red.png",
+    //iconUrl: require(""),
+    iconSize: [markerSize, markerSize],
+});
+
+const iconoAmarillo = new Icon({
+    iconUrl: "/planes/plane_yellow.png",
+    //iconUrl: require(""),
+    iconSize: [markerSize, markerSize],
+});
+
+const iconoVerde = new Icon({
+    iconUrl: "/planes/plane_green.png",
+    //iconUrl: require(""),
+    iconSize: [markerSize, markerSize],
+});
+
 export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, intervaloMS }) {
 
     dayjs.extend(duration);
@@ -220,23 +238,7 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
     }, [viajeFin])
 
 
-    const iconoRojo = new Icon({
-        iconUrl: "/planes/plane_red.png",
-        //iconUrl: require(""),
-        iconSize: [markerSize, markerSize],
-    });
-
-    const iconoAmarillo = new Icon({
-        iconUrl: "/planes/plane_yellow.png",
-        //iconUrl: require(""),
-        iconSize: [markerSize, markerSize],
-    });
-
-    const iconoVerde = new Icon({
-        iconUrl: "/planes/plane_green.png",
-        //iconUrl: require(""),
-        iconSize: [markerSize, markerSize],
-    });
+ 
 
     useEffect(() => {
         let porcentajeOcupacion = (planDeVuelo.capacidad_ocupada / planDeVuelo.capacidad_maxima) * 100;

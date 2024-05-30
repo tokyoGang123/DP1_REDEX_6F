@@ -3,8 +3,11 @@ import { MapContainer, Marker, TileLayer, Popup, FeatureGroup } from "react-leaf
 import { Icon, divIcon, point } from "leaflet";
 import { EditControl } from "react-leaflet-draw"
 import { useState, useEffect, use } from "react";
-import Aeropuerto from "./Aeropuerto";
-import PlanDeVuelo from "./PlanDeVuelo";
+import dynamic from "next/dynamic";
+const Aeropuerto = dynamic(() => import('./Aeropuerto'), {ssr: false});
+const PlanDeVuelo = dynamic(() => import('./PlanDeVuelo'), {ssr: false});
+//import Aeropuerto from "";
+//import PlanDeVuelo from "./PlanDeVuelo";
 import { Cronometro } from "./Elementos/SelectorFecha";
 
 
@@ -36,7 +39,7 @@ export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDe
   },[planesDeVueloBD])
 
   useEffect(() => {
-    //console.log(planesDeVuelo)
+    console.log("PLANES",planesDeVuelo)
   },[planesDeVuelo])
 
 

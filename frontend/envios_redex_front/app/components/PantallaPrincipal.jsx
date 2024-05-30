@@ -5,7 +5,9 @@ import "leaflet/dist/leaflet.css";
 import SelectorFecha, { Cronometro } from "./Elementos/SelectorFecha";
 import { CuadroTiempo } from "./Elementos/CuadroTiempo";
 import { useState } from "react";
-import SimSemanal from "./Simulaciones/SimSemanal";
+import dynamic from "next/dynamic";
+const SimSemanal = dynamic(() => import('./Simulaciones/SimSemanal'), {ssr: false});
+//import SimSemanal from "./Simulaciones/SimSemanal";
 
 export default function PantallaPrincipal() {
 
@@ -18,7 +20,6 @@ export default function PantallaPrincipal() {
 
     return (
         <>
-
             {/* MOSTRAR DATA DE LA SIMULACIÓN DESEADA */}
             {simulacionActiva == 'SEMANAL' ? (
                 <SimSemanal></SimSemanal>

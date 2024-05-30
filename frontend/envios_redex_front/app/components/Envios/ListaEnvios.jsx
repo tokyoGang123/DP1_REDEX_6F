@@ -9,6 +9,7 @@ import './RegistrarEnvio.css';
 import dayjs from "dayjs"
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import { getEnviosTodos, postEnviosArchivo } from '@/app/api/envios.api';
 
 const ListaEnvios = () => {
 
@@ -25,6 +26,7 @@ const ListaEnvios = () => {
   const fileInputRef = useRef(null);
 
   useEffect(() => {
+    /*
     const fetchEnvios = async () => {
       try {
         const res = await fetch('http://inf226-982-6f.inf.pucp.edu.pe/api/envios/obtenerTodosFecha/' + fechaActual);
@@ -41,14 +43,20 @@ const ListaEnvios = () => {
     };
 
     fetchEnvios();
-    console.log(fechaActual)
+    */
+
+    async function carga() {
+      let e = await getEnviosTodos(fechaActual);
+      setEnvios(e);
+    }
+    carga()
   }, []);
 
   useEffect(() => {
     console.log(envios)
-  },[envios])
+  }, [envios])
 
-  
+
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -68,12 +76,13 @@ const ListaEnvios = () => {
       const jsonData = await formatJSON(cleanText);
 
       console.log('JSON a enviar:', jsonData);  // Agregar el console.log aquí
+      /*
 
       /*axios.post('http://localhost:8080/api/envios/cargarArchivoEnvios', jsonData, {
         headers: {
           'Content-Type': 'application/json'
         }
-      })*/
+      })
       axios.post('http://inf226-982-6f.inf.pucp.edu.pe/api/envios/cargarArchivoEnvios', jsonData, {
         headers: {
           'Content-Type': 'application/json'
@@ -85,8 +94,15 @@ const ListaEnvios = () => {
       })
       .catch(error => {
         console.error('Error al cargar el archivo:', error);
-      });
-    };
+      });*/
+      async function sube() {
+        let res = await postEnviosArchivo(jsonData);
+        console.log(res)
+      }
+      sube()
+    }
+
+
     reader.readAsText(file);
   };
 

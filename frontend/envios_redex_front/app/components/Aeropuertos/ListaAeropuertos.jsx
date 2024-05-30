@@ -4,11 +4,13 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import '../Envios/ListaEnvios.css';
 import '../Envios/RegistrarEnvio.css';
+import { getAeropuertosTodos } from '@/app/api/aeropuetos.api';
 
 const ListaAeropuertos = () => {
   const [airports, setAirports] = useState([]);
 
   useEffect(() => {
+    /*
     const fetchAeropuertos = async () => {
       try {
         const res = await fetch('http://inf226-982-6f.inf.pucp.edu.pe/api/aeropuertos/obtenerTodos');
@@ -23,8 +25,14 @@ const ListaAeropuertos = () => {
         console.error('Error al obtener los aeropuertos:', error);
       }
     };
-
     fetchAeropuertos();
+    */
+    async function carga() {
+      let a = await getAeropuertosTodos()
+      setAirports(a);
+    }
+    carga()
+
   }, []);
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
