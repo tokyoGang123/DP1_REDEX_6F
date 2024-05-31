@@ -8,6 +8,8 @@ const baseApi = axios.create({
     baseURL: `http://localhost:8080/api/`
     //URL PARA EL HOSTEADO EN EL V
     //baseURL: `http://inf226-982-6f.inf.pucp.edu.pe/api/`
+    //URL HTTPS
+    //baseURL: `https://inf226-982-6f.inf.pucp.edu.pe/api/`
 })
 
 export default baseApi;

@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import '../Envios/ListaEnvios.css';
 import '../Envios/RegistrarEnvio.css';
-import { getAeropuertosTodos } from '@/app/api/aeropuetos.api';
+import { getAeropuertosTodos, postAeropuertosArchivo } from '@/app/api/aeropuetos.api';
 
 const ListaAeropuertos = () => {
   const [airports, setAirports] = useState([]);
@@ -46,7 +46,7 @@ const ListaAeropuertos = () => {
 
       // Verificar el JSON generado
       console.log('JSON generado:', json);
-
+      /*
       // Enviar el contenido del archivo en formato JSON al backend
       const response = await fetch('http://inf226-982-6f.inf.pucp.edu.pe/api/aeropuertos/lecturaArchivo', {
         method: 'POST',
@@ -56,12 +56,19 @@ const ListaAeropuertos = () => {
         body: JSON.stringify(json),
       });
 
-      if (response.ok) {
-        const newAirports = await response.json();
+      */
+      const response = await postAeropuertosArchivo(json)
+      console.log(response)
+
+      if (response) {
+        const newAirports = await response.data;
         setAirports(prevAirports => [...prevAirports, ...newAirports]);
       } else {
         console.error('Error al cargar los aeropuertos');
       }
+
+
+
     };
     reader.readAsText(file);
   };

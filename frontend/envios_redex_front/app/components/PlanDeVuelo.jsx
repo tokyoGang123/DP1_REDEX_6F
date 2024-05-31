@@ -2,7 +2,7 @@
 import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import utc from 'dayjs/plugin/utc';
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Marker, Popup } from "react-leaflet";
 import hallarPuntosIntermedios from "./funcionesRuta";
 import { Icon } from 'leaflet';
@@ -153,9 +153,8 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
 
 
     //Calcular cada cuantos segundos se cambia de punto
-    async function calculaTiempoCambio() {
 
-
+    const calculaTiempoCambio = useCallback(() => {
         let relacionSegReales = intervaloMS * 0.001; //1 minuto simulado -> 0.2 segundos reales
         let tiempoVueloSimulado = tiempoVueloTotal / 60; //Tiempo que toma al vuelo viajar en la simulacion (en minutos)
         let numPuntos = listaPuntosViaje.length; // # de puntos que debemos cubrir
@@ -175,9 +174,8 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
         setIntervaloCambio(intervalo)
         //console.log(intervalo)
         */
-
-    }
-
+    })
+    
     /*
     //Cambia posicion en intervalos de tiempo. CAMBIAR PARA QUE FUNCIONE A TIEMPO COMO CRONOMETRO
     async function cambiaPos() {
@@ -194,7 +192,8 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
     }*/
 
     //Cambia posicion en intervalos de tiempo. CAMBIAR PARA QUE FUNCIONE A TIEMPO COMO CRONOMETRO
-    async function cambiaPos(timestamp) {
+
+    const cambiaPos = useCallback(async (timestamp) => {
         if (!lastTimestampRef.current) {
             lastTimestampRef.current = timestamp
         }
@@ -222,8 +221,7 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
         }
 
 
-    }
-
+    })
 
     useEffect(() => {
         setPosicionActual(listaPuntosViaje[currentPositionIndex])
@@ -238,7 +236,7 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
     }, [viajeFin])
 
 
- 
+
 
     useEffect(() => {
         let porcentajeOcupacion = (planDeVuelo.capacidad_ocupada / planDeVuelo.capacidad_maxima) * 100;

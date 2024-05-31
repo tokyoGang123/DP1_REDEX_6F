@@ -13,9 +13,9 @@ export const getEnviosTodos = async (fecha) => {
 
 export const postEnviosArchivo = async (data) =>{
     try {
-        console.log("DATA",data)
+        //console.log("DATA",data)
         let res = await baseApi.post('envios/cargarArchivoEnvios',data)
-        console.log(res)
+        //console.log(res)
         return res
     } catch(error) {
         console.log("Error al insertar data")

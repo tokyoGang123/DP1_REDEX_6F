@@ -11,6 +11,28 @@ import { getAeropuertosTodos } from "@/app/api/aeropuetos.api"
 import Header from '../Header/Header'
 import { getPlanesTodos } from "@/app/api/planesDeVuelo.api"
 import { TryOutlined } from "@mui/icons-material"
+import { useTimer } from "../usoTimer"
+
+//Para manejar intervalos
+function useCustomInterval(callback, delay) {
+    const savedCallback = useRef();
+
+    useEffect(() => {
+        savedCallback.current = callback;
+    }, [callback]);
+
+    useEffect(() => {
+        function tick() {
+            savedCallback.current();
+        }
+
+        if (delay !== null) {
+            let id = setInterval(tick, delay);
+            return () => clearInterval(id);
+        }
+    }, [delay]);
+}
+
 
 export default function SimSemanal() {
 
@@ -41,6 +63,7 @@ export default function SimSemanal() {
     const horaCron = Math.floor(segundosReales / 3600).toString().padStart(2, '0');
     const minutoCron = Math.floor((segundosReales % 3600) / 60).toString().padStart(2, '0');
     const segundoCron = (segundosReales % 60).toString().padStart(2, '0');
+    const {time, startTimer, stopTimer} = useTimer(1000);
 
     //Estado de la simulación
     const [estadoSim, setEstadoSim] = useState('NI'); //NI (No Iniciado), PL (En ejecucion), PS (en pausa)
@@ -51,8 +74,14 @@ export default function SimSemanal() {
     //Planes de Vuelo
     const [planesDeVuelo, setPlanesDeVuelo] = useState({})
 
+    //Envios
+    const [envios, setEnvios] = useState({})
+
+    //Paquetes
+    const [paquetes, setPaquetes] = useState({})
+
     //TIEMPO EN EL QUE PASA 1 MINUTO REAL
-    const [intervaloMS, setIntervaloMS] = useState(200) 
+    const [intervaloMS, setIntervaloMS] = useState(200)
 
     //Ref para montura inicial
     const isInitialMount = useRef(TryOutlined)
@@ -104,6 +133,7 @@ export default function SimSemanal() {
 
         //"Play"
         setEstadoSim('PL')
+        startTimer()
         ejecucionSimulacion()
 
     }
@@ -119,14 +149,43 @@ export default function SimSemanal() {
         let tiempoMax = 1;
         let nF = fechaSim;
 
-        while (i < llamadas_totales) {
+        while (i <= llamadas_totales) {
 
+            //-----------------------------------
+            //MANTENER TIEMPO
+            if (i >= llamadas_totales) {
+                break;
+            }
+            const inicio = performance.now()
+            //MANTENER TIEMPO
+            //-----------------------------------
+
+            //-----------------------------------
+            //OPERACIONES
+
+            //Revisar envios
+
+
+
+            //agregar un minuto simulado
             nF = await nF.add(1, 'm');
-            //console.log(nF);
             await setFechaSim(nF);
             fechaSimRef.current = nF
 
-            await new Promise(r => setTimeout(r, intervaloMS)); //originalmente 200
+            //OPERACIONES
+            //-----------------------------------
+
+
+            //-----------------------------------
+            //MANTENER TIEMPO
+            const fin = performance.now();
+            const tiempo = fin - inicio;
+            const delay = Math.max(intervaloMS-tiempo)
+            //MANTENER TIEMPO
+            //-----------------------------------
+
+
+            await new Promise(r => setTimeout(r, delay)); //originalmente 200
             i++;
         }
     }
@@ -139,7 +198,10 @@ export default function SimSemanal() {
             <Header title="Simulación" />
             <Stack direction="row" spacing={2}>
 
-                <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron}></CuadroTiempo>
+                
+
+                
+                <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
                 <Stack>
                     <SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>
                     <BotonIniciar onClick={clickBotonIniciar}></BotonIniciar>

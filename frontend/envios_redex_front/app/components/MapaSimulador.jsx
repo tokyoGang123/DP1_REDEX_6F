@@ -46,7 +46,7 @@ export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDe
   return (
     <>
       <div style={{ position: 'relative', zIndex: 0, height: '100%', width: '100%'  }}>
-        <MapContainer center={[48.8566, 2.3522]} zoom={3} style={{ height: '100%', width: '100%' }}>
+        <MapContainer center={[48.8566, 2.3522]} zoom={3} style={{ height: '100%', width: '100%' }} preferCanvas={true}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
