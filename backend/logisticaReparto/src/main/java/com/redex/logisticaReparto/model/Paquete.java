@@ -15,7 +15,7 @@ public class Paquete {
     @Column(unique = true, nullable = false)
     private long id_paquete;
     @Transient
-    private Ruta ruta;
+    private Ruta ruta = new Ruta();
     private int estado;
 
     @ManyToOne
