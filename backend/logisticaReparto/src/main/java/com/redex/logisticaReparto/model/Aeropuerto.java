@@ -80,6 +80,4 @@ public class Aeropuerto {
         }
         return pais.getId_pais();
     }
-
-
 }

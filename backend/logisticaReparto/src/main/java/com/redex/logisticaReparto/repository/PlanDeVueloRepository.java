@@ -1,11 +1,14 @@
 package com.redex.logisticaReparto.repository;
 
 import com.redex.logisticaReparto.dto.PlanVueloResponse;
+import com.redex.logisticaReparto.model.Envio;
 import com.redex.logisticaReparto.model.PlanDeVuelo;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,5 +29,15 @@ public interface PlanDeVueloRepository extends CrudRepository<PlanDeVuelo, Long>
             "JOIN Aeropuerto ao ON p.ciudad_origen = ao.id_aeropuerto " +
             "JOIN Aeropuerto ad ON p.ciudad_destino = ad.id_aeropuerto")
     ArrayList<PlanVueloResponse> queryPlanDeVueloWithAeropuerto();
+
+
+    @Query("SELECT p FROM PlanDeVuelo p " +
+            "WHERE p.hora_origen BETWEEN " +
+            "FUNCTION('CONVERT_TZ', :fechaInicio, :husoHorarioInicio, p.huso_horario_origen) " +
+            "AND " +
+            "FUNCTION('CONVERT_TZ', :fechaFin, :husoHorarioInicio, p.huso_horario_origen)")
+    ArrayList<PlanDeVuelo> findByFechaIngresoInRange(@Param("fechaInicio") LocalDateTime fechaInicio,
+                                               @Param("husoHorarioInicio") String husoHorarioInicio,
+                                               @Param("fechaFin") LocalDateTime fechaFin);
 }
 

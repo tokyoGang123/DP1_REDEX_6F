@@ -1,12 +1,14 @@
 package com.redex.logisticaReparto.services;
 
 import com.redex.logisticaReparto.model.Aeropuerto;
+import com.redex.logisticaReparto.model.Envio;
 import com.redex.logisticaReparto.model.PlanDeVuelo;
 import com.redex.logisticaReparto.dto.PlanVueloResponse;
 import com.redex.logisticaReparto.repository.PlanDeVueloRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +30,9 @@ public class PlanDeVueloService {
 
     public ArrayList<PlanDeVuelo> insertarListaPlanesVuelos(List<PlanDeVuelo> planes) { return (ArrayList<PlanDeVuelo>)planDeVueloRepository.saveAll(planes); }
 
+    public ArrayList<PlanDeVuelo> obtenerPlanesVuelosPorFecha(LocalDateTime fechaInicio, String husoHorario, LocalDateTime fechaFin){
+        return planDeVueloRepository.findByFechaIngresoInRange(fechaInicio, husoHorario, fechaFin);
+    }
     public boolean planAcabaElSiguienteDia(String tInicio, String tFin) {
 
         String dataInicio[] = tInicio.split(":");
