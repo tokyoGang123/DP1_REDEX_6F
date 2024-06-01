@@ -63,7 +63,7 @@ public class GraspController {
         ArrayList<Envio> enviosEnRango = envioService.obtenerEnviosPorFecha(fechaInicioLocal, husoHorarioStr, fechaFinLocal);
         //Busqueda de planes en el rango de 12 horas (por ahora)
         ArrayList<PlanDeVuelo> planesEnRango = planDeVueloService.obtenerPlanesVuelosPorFecha(fechaInicioLocal,
-                husoHorarioStr, fechaFin.plusHours(12).toLocalDateTime());
+                husoHorarioStr, fechaFin.plusHours(20).toLocalDateTime());
 
         //450
         grasp.getEnvios().addAll(enviosEnRango);
