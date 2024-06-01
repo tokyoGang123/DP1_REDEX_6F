@@ -134,7 +134,7 @@ public class EnvioController {
         long startTime = System.currentTimeMillis();
         ArrayList<Envio> envios = new ArrayList<>();
         try {
-            File enviosFile = new File("src/main/resources/EnviosAngelo/pack_enviado_SCEL.txt");
+            File enviosFile = new File("src/main/resources/EnviosAngelo/pack_all.txt");
             Scanner scanner = new Scanner(enviosFile);
             int i= 0;
             while (scanner.hasNextLine()) {

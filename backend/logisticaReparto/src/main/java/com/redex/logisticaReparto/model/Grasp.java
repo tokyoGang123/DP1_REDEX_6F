@@ -427,10 +427,8 @@ public class Grasp {
     public ArrayList<Envio> ejecutaGrasp(ArrayList<Aeropuerto> aeropuertos, ArrayList<Envio> envios,
                                          ArrayList<PlanDeVuelo> planes) {
         ArrayList<Envio> mejorSol = new ArrayList<>();
-        //ALGORITMO
         int n = 1;
         for (int i = 0; i < n; i++) {
-            //System.out.println(aeropuertos[i].getCiudad());
             //FASE CONSTRUCTIVA
 
             //IDEAS
@@ -442,19 +440,38 @@ public class Grasp {
             imprimeSolucionEncontrada(aeropuertos,planes,enviosCubiertos);
             //FASE DE MEJORA
             //realizamos la búsqueda local
-
             ArrayList<Envio> solucion = busquedaLocalGRASP(aeropuertos, planes, enviosCubiertos);
             imprimeSolucionEncontrada(aeropuertos,planes,solucion);
             mejorSol = solucion;
         }
-
         //imprimeSolucionEncontrada(aeropuertos,planes,enviosSolicitados);
-
         //imprimeSolucionEncontrada(aeropuertos,planes,solucion);
-
         System.out.println("IMPRIMIENDO");
         return mejorSol;
     }
+
+    public ArrayList<Envio> buscarSinRuta(ArrayList<Envio> envios){
+
+        ArrayList<Envio> enviosSinRuta = new ArrayList<>();
+        int i=0;
+        for(Envio envio: envios) {
+            for (Paquete paquete : envio.getPaquetes()) {
+                ArrayList<Long> listaRutas=paquete.getRuta().getListaRutas();
+                if (listaRutas.isEmpty()){
+                    System.out.println(envio.getId_envio());
+                    enviosSinRuta.add(envio);
+                    i++;
+                    break;
+                }
+            }
+        }
+        System.out.println("=============================");
+        System.out.println("Envios con paquetes sin ruta:");
+        System.out.println(i);
+
+        return enviosSinRuta;
+    }
 }
+
 
 
