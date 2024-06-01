@@ -67,11 +67,11 @@ public class GraspController {
 
         //450
         grasp.getEnvios().addAll(enviosEnRango);
-        ArrayList<Envio> solucion = grasp.ejecutaGrasp(grasp.getAeropuertos(),enviosEnRango,planesEnRango);
+        ArrayList<Envio> solucion = grasp.ejecutaGrasp(grasp.getAeropuertos(),grasp.getEnvios(),planesEnRango);
         //Implementar una funcion que busque, de solucion, aquellos envios que no tienen paquetes con rutas asignadas
         //20 no tienen ruta
-        //ArrayList<Envios> enviosSinRuta = grasp.buscarSinRuta(solucion);
-        //grasp.setEnvios(enviosSinRuta);
+        ArrayList<Envio> enviosSinRuta = grasp.buscarSinRuta(solucion);
+        grasp.setEnvios(enviosSinRuta);
 
         long endTime = System.currentTimeMillis();
         long durationInMillis = endTime - startTime;
