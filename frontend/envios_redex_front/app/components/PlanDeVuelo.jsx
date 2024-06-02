@@ -28,6 +28,12 @@ const iconoVerde = new Icon({
     iconSize: [markerSize, markerSize],
 });
 
+const iconoGris = new Icon({
+    iconUrl: "/planes/plane_grey.svg",
+    //iconUrl: require(""),
+    iconSize: [markerSize, markerSize],
+});
+
 export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, intervaloMS }) {
 
     dayjs.extend(duration);
@@ -240,7 +246,8 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
 
     useEffect(() => {
         let porcentajeOcupacion = (planDeVuelo.capacidad_ocupada / planDeVuelo.capacidad_maxima) * 100;
-        if (porcentajeOcupacion < 33.33) setColorMarcador("Verde")
+        if (planDeVuelo.capacidad_ocupada == 0) setColorMarcador("Gris")
+        else if(porcentajeOcupacion < 33.33) setColorMarcador("Verde")
         else if (porcentajeOcupacion < 66.66) setColorMarcador("Amarillo")
         else setColorMarcador("Rojo")
     }, [planDeVuelo])
@@ -249,9 +256,16 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
         <>
             {posicionActual && Object.keys(posicionActual).length !== 0 ?
                 <Marker position={posicionActualRef.current}
-                    icon={colorMarcador == 'Verde' ? iconoVerde : (colorMarcador == 'Amarillo' ? iconoAmarillo : iconoRojo)}
+                    icon={colorMarcador == 'Verde' ? iconoVerde : (colorMarcador == 'Amarillo' ? iconoAmarillo : (colorMarcador == 'Rojo' ?  iconoRojo : iconoGris))}
                     ref={markerRef}>
-                    <Popup>Info vuelo {planDeVuelo.id_tramo}</Popup>
+                    <Popup>
+                        <h1>Info vuelo {planDeVuelo.id_tramo}</h1>
+                        <p>Paquetes asignados: </p>
+                        <ul>
+                            ${planDeVuelo.listaPaquetes.map(paq => <li>{paq}</li>).join('')}
+                        </ul>    
+                
+                    </Popup>
                 </Marker> : <></>}
         </>
     )

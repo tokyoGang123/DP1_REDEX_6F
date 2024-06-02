@@ -66,8 +66,8 @@ export default function SimSemanal() {
     //useEffect de fechaSimRef
     useEffect(() => {
         fechaSimRef.current = fechaSim;
-        console.log(fechaSimRef)
-    }, [fechaSimRef])
+        //console.log(fechaSimRef.current)
+    }, [fechaSim])
 
     //Variable para incrementar segundos totales
     const [segundosReales, setSegundosReales] = useState(0);
@@ -90,6 +90,10 @@ export default function SimSemanal() {
 
     //Planes de Vuelo
     const [planesDeVuelo, setPlanesDeVuelo] = useState({})
+    const planesDeVueloRef = useRef(planesDeVuelo)
+    useEffect(() => {
+        planesDeVueloRef.current = planesDeVuelo
+    },[planesDeVuelo])
 
     //Envios
     const [envios, setEnvios] = useState({})
@@ -166,14 +170,21 @@ export default function SimSemanal() {
 
         //Leer planes de vuelo de la fecha inicial + X tiempo
         let c = await getPlanesTodos() //Solicitar luego que se pueda dar la fecha
+        
+        //TEMPORAL
+        c = c.map(pdv => {
+            return { ...pdv, listaPaquetes: [] };
+        });
+        //TEMPORAL
+        
         await setPlanesDeVuelo(c);
 
         //Comando para inicializar la simulación
-        let res = iniciaGRASP();
-        console.log(res)
+        let res = await iniciaGRASP();
+        //console.log(res)
 
         //Obtener envios asignados
-        let tiempoEnviado = transformaHora(fechaSim);
+        let tiempoEnviado = transformaHora(fechaSimRef.current);
         let p = await ejecutaGRASP(tiempoEnviado);
         await p.sort((a, b) => {
             let fechaA = new Date(a.zonedFechaIngreso);
@@ -181,7 +192,9 @@ export default function SimSemanal() {
             return fechaA - fechaB;
         })
         await setEnvios(p)
-        console.log(p)
+        enviosRef.current = p
+        //console.log("PEDIDOS")
+        //console.log(p)
 
     }
 
@@ -190,20 +203,54 @@ export default function SimSemanal() {
     //---------------------------------------------------------
     //                      EJECUTA BLOQUE
 
+    //---------------------------------------------------------
+    //                      ASIGNAR ENVIO A PLANES
+    const asignarAPlanes = async (env) => {
+
+        //Por cada paquete del envio, asignaremos a un plan de vuelo
+        console.log(env)
+        for (let i = 0; i < env.paquetes.length; i++) {
+            let paq = env.paquetes[i]
+            let listRut = paq.ruta.listaRutas
+            for (let j = 0; j < listRut.length; j++){
+                //Encontrar plan de vuelo asignado a parte de la ruta
+                let pdv = planesDeVueloRef.current.find(plan => plan.id_tramo == listRut[j])
+                //AQUI SE ASIGNA A SU LISTA
+                pdv.listaPaquetes.push(paq.id_paquete)
+                pdv.capacidad_ocupada = pdv.capacidad_ocupada + 1 
+                console.log("Paquete " + paq.id_paquete + " asignado a ruta " + pdv.id_tramo)
+                console.log(pdv)
+            }
+           
+
+        }
+
+
+    }
+
 
     //---------------------------------------------------------
     //                      REVISAR ENVIOS
-    const revisaEnvios = () => {
-        let i = 0
+    const revisaEnvios = async () => {
+  
         //FOR es "falso", solo revisamos hasta que no tenga sentido
-        console.log(enviosRef.current)
+        console.log(enviosRef.current,length)
         for (let i = 0; i < enviosRef.current.length; i++) {
+            console.log("a")
             const env = enviosRef.current[i];
+
             //Si encontramos algun envio que no se necesite revisar, ignorar
-            if (env.zonedFechaIngreso > fechaSim) break;
+            //console.log(dayjs(env.zonedFechaIngreso)  + " " + fechaSimRef.current)
+            //console.log(dayjs(env.zonedFechaIngreso) > fechaSimRef.current)
+            if (dayjs(env.zonedFechaIngreso) > fechaSimRef.current) break;
             //console.log(env.id_envio)
+
+            await asignarAPlanes(env)
+
+            //Quitar envio de la lista
             enviosRef.current.splice(i,1);
         }
+        console.log("end")
         setEnvios(enviosRef.current)
     }
 
@@ -215,7 +262,7 @@ export default function SimSemanal() {
         let ciclo = 120
         let llamarAGrasp = 50;
         let tiempoMax = 1;
-        let nF = fechaSim;
+        let nF = fechaSimRef.current;
 
         while (i <= llamadas_totales) {
 
@@ -240,14 +287,14 @@ export default function SimSemanal() {
             //Revisar envios
 
             //let enviosAsignados = await evaluarEnvios()
-
+            console.log(enviosRef.current)
             await revisaEnvios()
 
             //agregar un minuto simulado
             nF = await nF.add(1, 'm');
             await setFechaSim(nF);
             fechaSimRef.current = nF
-
+            //console.log(fechaSimRef.current)
             //OPERACIONES
             //-----------------------------------
 
@@ -263,7 +310,7 @@ export default function SimSemanal() {
 
             await new Promise(r => setTimeout(r, delay)); //originalmente 200
             //console.log(fechaSimRef.current.toDate() + " - " + tiempo)
-            console.log(timeRef)
+            //console.log(timeRef)
             i++;
         }
     }
@@ -288,7 +335,7 @@ export default function SimSemanal() {
 
             </Stack>
             <div style={{ height: 'calc(100vh - 50px)', width: '100%' }}>
-                <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={planesDeVuelo} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} />
+                <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={planesDeVueloRef.current} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} />
             </div>
 
         </>
