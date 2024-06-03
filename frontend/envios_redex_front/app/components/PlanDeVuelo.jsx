@@ -262,7 +262,7 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
                         <h1>Info vuelo {planDeVuelo.id_tramo}</h1>
                         <p>Paquetes asignados: </p>
                         <ul>
-                            ${planDeVuelo.listaPaquetes.map(paq => <li>{paq}</li>).join('')}
+                            {planDeVuelo.listaPaquetes.map(paq => <li>{paq}</li>).join('')}
                         </ul>    
                 
                     </Popup>
