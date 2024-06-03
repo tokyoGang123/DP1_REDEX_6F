@@ -56,20 +56,23 @@ public class GraspController {
         String husoHorarioStr = fechaHora.substring(15);
 
         ZonedDateTime fechaInicio = ZonedDateTime.of(anio, mes, dia, hora, minutos, 0, 0, ZoneId.of(husoHorarioStr));
-        ZonedDateTime fechaFin = fechaInicio.plusHours(3);
+        ZonedDateTime fechaFin = fechaInicio.plusHours(2);
         LocalDateTime fechaInicioLocal = fechaInicio.toLocalDateTime();
         LocalDateTime fechaFinLocal = fechaFin.toLocalDateTime();
         //Busqueda de envios en el rango de 2 horas
         ArrayList<Envio> enviosEnRango = envioService.obtenerEnviosPorFecha(fechaInicioLocal, husoHorarioStr, fechaFinLocal);
         //Busqueda de planes en el rango de 12 horas (por ahora)
         ArrayList<PlanDeVuelo> planesEnRango = planDeVueloService.obtenerPlanesVuelosPorFecha(fechaInicioLocal,
-                husoHorarioStr, fechaFin.plusHours(24).toLocalDateTime());
+                husoHorarioStr, fechaFin.plusHours(22).toLocalDateTime());
 
+        //450
         grasp.getEnvios().addAll(enviosEnRango);
+        System.out.println(grasp.getEnvios().size());
         ArrayList<Envio> solucion = grasp.ejecutaGrasp(grasp.getAeropuertos(),grasp.getEnvios(),planesEnRango);
         //Implementar una funcion que busque, de solucion, aquellos envios que no tienen paquetes con rutas asignadas
-        ArrayList<Envio> enviosSinRuta = grasp.buscarSinRuta(solucion);
-        grasp.setEnvios(enviosSinRuta);
+        //20 no tienen ruta
+        //ArrayList<Envio> enviosSinRuta = grasp.buscarSinRuta(solucion);
+        //grasp.setEnvios(enviosSinRuta);
 
         long endTime = System.currentTimeMillis();
         long durationInMillis = endTime - startTime;

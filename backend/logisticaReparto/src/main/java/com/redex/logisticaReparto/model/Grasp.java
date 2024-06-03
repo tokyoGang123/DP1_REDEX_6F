@@ -9,14 +9,12 @@ import org.springframework.stereotype.Component;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
 @Component
 public class Grasp {
-
-    //@Autowired
-    //PlanDeVueloService planDeVueloService = new PlanDeVueloService();
 
     ArrayList<Aeropuerto> aeropuertos;
     ArrayList<Pais> paises;
@@ -29,9 +27,6 @@ public class Grasp {
     public Grasp() {
     }
 
-    //public Grasp(PlanDeVueloService planDeVueloService) {
-    //    this.planDeVueloService = planDeVueloService;
-    //}
     public ArrayList<Envio> faseConstructivaGRASP(ArrayList<Aeropuerto> aeropuertos, ArrayList<PlanDeVuelo> planes, ArrayList<Envio> enviosSolicitados) {
 
         //Solucion
@@ -63,52 +58,57 @@ public class Grasp {
 
 
         //Para fines del algoritmo, se va a aumentar y considerar los paquetes asignados en aeropuertos y paquetes
-        ArrayList<Aeropuerto> aeropuertosTemp = new ArrayList<>(aeropuertos);
-        ArrayList<PlanDeVuelo> planesTemp = new ArrayList<>(planes);
+        //ArrayList<Aeropuerto> aeropuertosTemp = new ArrayList<>(aeropuertos);
+        //ArrayList<PlanDeVuelo> planesTemp = new ArrayList<>(planes);
+
+        Map<Integer, List<PlanDeVuelo>> planesPorAeropuertoOrigen = planes.stream()
+                .collect(Collectors.groupingBy(PlanDeVuelo::getCiudad_origen));
 
         //Encontrar la solucion por cada pedido
         for (Envio envio : enviosSolicitados) { //Buscar solucion para cada pedido
             //Quitar envios sin destino de la lista
             System.out.println(envio.getId_envio());
-            if (envio.getAeropuerto_origen() == -1 || envio.getAeropuerto_destino() == -1) continue;
+            //if (envio.getAeropuerto_origen() == -1 || envio.getAeropuerto_destino() == -1) continue;
 
             //LISTA RESTRINGIDA
             ArrayList<ElementoListaRestringida> listaRestringida = new ArrayList<ElementoListaRestringida>(tamRCL);
+            List<PlanDeVuelo> planesVueloOrigen = planesPorAeropuertoOrigen.get(envio.getAeropuerto_origen());
 
             //Por cada vuelo que sale del aeropuerto, ejecutaremos la busqueda de ruta
             //System.out.println("BUSQUEDA INICIADA");
-            for (PlanDeVuelo planDeVuelo : planesTemp) {
+            //for (PlanDeVuelo planDeVuelo : planes) {
+            for (PlanDeVuelo planDeVuelo : planesVueloOrigen){
                 //Se asume que planes estan ordenados
                 //System.out.println(planDeVuelo.getHora_origen() + " vs " + envio.getFecha_llegada_max());
-                if (planDeVuelo.getHora_origen().isAfter(envio.getFecha_llegada_max())) break;
-                if (envio.getAeropuerto_origen() == planDeVuelo.getCiudad_origen()) {
-                    int i = 0;
-                    ArrayList<Long> listaObtenida = generaRutaVuelo(aeropuertosTemp, planesTemp, planDeVuelo, envio, i);
+                if (planDeVuelo.getZonedHora_origen().isAfter(envio.getZonedFechaLlegadaMax())) break; //no creo que suceda con 24h de planes
+                //if (envio.getAeropuerto_origen() == planDeVuelo.getCiudad_origen()) {
+                int i = 0;
+                ArrayList<Long> listaObtenida = generaRutaVuelo(aeropuertos, planesPorAeropuertoOrigen, planDeVuelo, envio, i);
 
-                    //Si hay una ruta encontrada, la colocaremos en nuestra lista restringida
-                    if (!listaObtenida.isEmpty()) {
-                        ArrayList<Long> listaCaminos = new ArrayList<>();
-                        listaCaminos.addAll(listaObtenida);
+                //Si hay una ruta encontrada, la colocaremos en nuestra lista restringida
+                if (!listaObtenida.isEmpty()) {
+                    ArrayList<Long> listaCaminos = new ArrayList<>();
+                    listaCaminos.addAll(listaObtenida);
 
-                        //Determinar si ingresa a nuestra lista
-                        //CAMBIAR A FUNCION DE FITNESS
-                        ElementoListaRestringida rutaPotencial = new ElementoListaRestringida(listaCaminos, getFitness(listaCaminos, planesTemp));
+                    //Determinar si ingresa a nuestra lista
+                    //CAMBIAR A FUNCION DE FITNESS
+                    ElementoListaRestringida rutaPotencial = new ElementoListaRestringida(listaCaminos, getFitness(listaCaminos, planes));
 
-                        //Si la lista no esta completamente llena, agregar
-                        if (listaRestringida.size() < tamRCL) {
-                            listaRestringida.add(rutaPotencial);
-                        } else { //Buscar el peor elemento y cambiarlo, si existe
-                            for (ElementoListaRestringida elem : listaRestringida) {
-                                if (elem.getFitnessSolucion() < rutaPotencial.getFitnessSolucion()) {
-                                    listaRestringida.set(listaRestringida.indexOf(elem), rutaPotencial);
-                                    break;
-                                }
+                    //Si la lista no esta completamente llena, agregar
+                    if (listaRestringida.size() < tamRCL) {
+                        listaRestringida.add(rutaPotencial);
+                    } else { //Buscar el peor elemento y cambiarlo, si existe
+                        for (ElementoListaRestringida elem : listaRestringida) {
+                            if (elem.getFitnessSolucion() < rutaPotencial.getFitnessSolucion()) {
+                                listaRestringida.set(listaRestringida.indexOf(elem), rutaPotencial);
+                                break;
                             }
                         }
-                        //Ordenar la lista segun el fitness
-                        Collections.sort(listaRestringida, Comparator.comparing(ElementoListaRestringida::getFitnessSolucion));
-
                     }
+                    //Ordenar la lista segun el fitness
+                    Collections.sort(listaRestringida, Comparator.comparing(ElementoListaRestringida::getFitnessSolucion));
+
+                    //}
                 }
             }
             //Si la lista está vacía, no habia rutas y ocurre colapso
@@ -125,11 +125,11 @@ public class Grasp {
                 int num = rand.nextInt(listaRestringida.size()); //Obtener numero de lista restringida aleatoriamente
                 ElementoListaRestringida elem = listaRestringida.get(num);
                 //Mientras que haya espacio disponible en todos los vuelos
-                while (espacioDisponible(elem.getListaElementos(), planesTemp)) {
+                while (espacioDisponible(elem.getListaElementos(), planes)) {
                     //Luego de comprobar que se pueda, asignar todas las rutas a dicho paquete, y
                     //aumentar en 1 el espacio ocupado en el plan de vuelo
                     for (Long idPlanAAsignar : elem.getListaElementos()) {
-                        PlanDeVuelo p = obtenerPlanByID(planesTemp,idPlanAAsignar);
+                        PlanDeVuelo p = obtenerPlanByID(planes,idPlanAAsignar);
                         p.setCapacidad_ocupada(p.getCapacidad_ocupada() + 1);
                         envio.getPaquetes().get(numPaquetes).getRuta().getListaRutas().add(idPlanAAsignar);
                     }
@@ -171,10 +171,7 @@ public class Grasp {
 
     }
     public Aeropuerto aeropuertoByID(ArrayList<Aeropuerto> aeropuertos, int id) {
-        for (Aeropuerto aeropuerto : aeropuertos) {
-            if (aeropuerto.getId_aeropuerto() == id) return aeropuerto;
-        }
-        return null;
+        return aeropuertos.stream().filter(a -> a.getId_aeropuerto() == id).findFirst().orElse(null);
     }
 
     public double getFitness(ArrayList<Long> listaCaminos, ArrayList<PlanDeVuelo> planes) {
@@ -202,18 +199,10 @@ public class Grasp {
         double pesoVuelos = 0.4;
         fitnessTotal = (vuelosATomar * pesoVuelos + minutosTotales * pesoMinutos) * -1;
 
-        //fitnessTotal = (1.0 / vuelosATomar*minutosTotales);
-        //
-        //System.out.println(listaCaminos.size() + " - " + minutosTotales);
-        //System.out.println(fitnessTotal);
-
-
         return fitnessTotal;
     }
 
-    ;
-
-    public ArrayList<Long> generaRutaVuelo(ArrayList<Aeropuerto> aeropuertos, ArrayList<PlanDeVuelo> planes, PlanDeVuelo planFinalizado, Envio envio, int i) {
+    public ArrayList<Long> generaRutaVuelo(ArrayList<Aeropuerto> aeropuertos, Map<Integer, List<PlanDeVuelo>> planes, PlanDeVuelo planFinalizado, Envio envio, int i) {
 
         //Arraylist para almacenar datos
         ArrayList<Long> listaEnConstruccion = new ArrayList<>();
@@ -225,26 +214,29 @@ public class Grasp {
         //Si ya estamos en el destino, lo logramos y devolvemos el id de este plan
         if (aeropuertoActual == envio.getAeropuerto_destino()
                 && !planFinalizado.isFull()
-                && envio.getFecha_ingreso().isBefore(planFinalizado.getHora_origen())
-                && envio.getFecha_llegada_max().isAfter(planFinalizado.getHora_destino()) /*Si el vuelo no incumple con los tiempos establecidos*/
+                && envio.getZonedFechaIngreso().isBefore(planFinalizado.getZonedHora_origen())
+                && envio.getZonedFechaLlegadaMax().isAfter(planFinalizado.getZonedHora_destino()) /*Si el vuelo no incumple con los tiempos establecidos*/
         ) {
             listaEnConstruccion.add(planFinalizado.getId_tramo());
             return listaEnConstruccion;
         }
         i++;
-
+        List<PlanDeVuelo> planesVueloOrigen = planes.get(aeropuertoActual);
+        List<PlanDeVuelo> planesFiltrados = planesVueloOrigen.stream()
+                .filter(plan -> plan.getZonedHora_origen().isAfter(planFinalizado.getZonedHora_destino()))
+                .toList();
         //Si no estamos en el destino, buscar un camino
-        for (PlanDeVuelo potencial : planes) {
+        for (PlanDeVuelo potencial : planesFiltrados) {
             if (i > 4) new ArrayList<>(); //borrar si esta mal
             //borrar si esta mal
             if (
                     potencial.getId_tramo() != planFinalizado.getId_tramo() &&
                             aeropuertoActual == potencial.getCiudad_origen() /* Si el plan potencial inicia en donde va a llegar*/
-                            && planFinalizado.getHora_destino().isBefore(potencial.getHora_origen())  /*Si el plan potencial inicia luego del que finalizamos*/
+                            && planFinalizado.getZonedHora_destino().isBefore(potencial.getZonedHora_origen())  /*Si el plan potencial inicia luego del que finalizamos*/
                             && !aeropuertoByID(aeropuertos, potencial.getCiudad_destino()).isFull() /* Si el aeropuerto al que iremos no esta lleno*/
                             && !potencial.isFull() /*Si el plan no esta lleno*/
-                            && envio.getFecha_ingreso().isBefore(potencial.getHora_origen())
-                            && envio.getFecha_llegada_max().isAfter(potencial.getHora_destino()) /*Si el vuelo no incumple con los tiempos establecidos*/) {
+                            && envio.getZonedFechaIngreso().isBefore(potencial.getZonedHora_origen())
+                            && envio.getZonedFechaLlegadaMax().isAfter(potencial.getZonedHora_destino()) /*Si el vuelo no incumple con los tiempos establecidos*/) {
                     /*
                     //Añadimos a esta lista
                     //Si ya estamos en el destino, lo logramos y devolvemos el id de este plan
@@ -297,7 +289,7 @@ public class Grasp {
     }
 
     private void generarCaminos(Ruta rutaActual, ArrayList<PlanDeVuelo> planes, Envio envio, Paquete paquete,
-                                       int destinoFinal, ArrayList<Ruta> vecindario, int[] contador) {
+                                int destinoFinal, ArrayList<Ruta> vecindario, int[] contador) {
         if (contador[0]>=1) return;
         int ciudadActual = obtenerCiudadActual(rutaActual, planes); // Obtener la última ciudad en la ruta actual
         if (ciudadActual == destinoFinal) {
@@ -334,7 +326,7 @@ public class Grasp {
     }
 
     private ArrayList<Ruta> generaVecindario(Ruta rutaActual, ArrayList<PlanDeVuelo> planes, Envio envio,
-                                                    Paquete paquete) {
+                                             Paquete paquete) {
         ArrayList<Ruta> vecindario = new ArrayList<>();
         Ruta rutaInicial = new Ruta();
         int[] contador = {0};
@@ -346,13 +338,12 @@ public class Grasp {
     }
 
     public Ruta getRutaMejorada(Paquete paquete, Ruta rutaActual, ArrayList<Aeropuerto> aeropuertos,
-                                       ArrayList<PlanDeVuelo> planes,Envio envio) {
+                                ArrayList<PlanDeVuelo> planes,Envio envio) {
 
         Ruta mejorRuta = null;
         double mejorFitness = Double.MAX_VALUE;
 
         ArrayList<Ruta> vecindario = generaVecindario(rutaActual, planes, envio, paquete);
-        //System.out.println(vecindario.size());
         for (Ruta rutaVecindario : vecindario) {
             double fitnessVecindario = getFitness(rutaVecindario.getListaRutas(), planes);
 
@@ -369,7 +360,7 @@ public class Grasp {
     }
 
     public ArrayList<Envio> busquedaLocalGRASP(ArrayList<Aeropuerto> aeropuertos, ArrayList<PlanDeVuelo> planes,
-                                                      ArrayList<Envio> enviosCubiertos) {
+                                               ArrayList<Envio> enviosCubiertos) {
         int n = enviosCubiertos.size();
         ArrayList<Envio> enviosMejorados  = new ArrayList<>();
 
@@ -420,8 +411,6 @@ public class Grasp {
             }
 
         }
-
-
     }
 
     public ArrayList<Envio> ejecutaGrasp(ArrayList<Aeropuerto> aeropuertos, ArrayList<Envio> envios,
@@ -439,8 +428,7 @@ public class Grasp {
             mejorSol =enviosCubiertos;
             imprimeSolucionEncontrada(aeropuertos,planes,enviosCubiertos);
             //FASE DE MEJORA
-
-
+            //realizamos la búsqueda local
             //ArrayList<Envio> solucion = busquedaLocalGRASP(aeropuertos, planes, enviosCubiertos);
             //imprimeSolucionEncontrada(aeropuertos,planes,solucion);
             //mejorSol = solucion;
@@ -452,12 +440,14 @@ public class Grasp {
     }
 
     public ArrayList<Envio> buscarSinRuta(ArrayList<Envio> envios){
+
         ArrayList<Envio> enviosSinRuta = new ArrayList<>();
         int i=0;
         for(Envio envio: envios) {
             for (Paquete paquete : envio.getPaquetes()) {
                 ArrayList<Long> listaRutas=paquete.getRuta().getListaRutas();
                 if (listaRutas.isEmpty()){
+                    System.out.println(envio.getId_envio());
                     enviosSinRuta.add(envio);
                     i++;
                     break;
@@ -467,6 +457,7 @@ public class Grasp {
         System.out.println("=============================");
         System.out.println("Envios con paquetes sin ruta:");
         System.out.println(i);
+
         return enviosSinRuta;
     }
 }
