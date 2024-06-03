@@ -1,4 +1,3 @@
-// timerWorker.js
 let timerId = null;
 
 onmessage = function (e) {
