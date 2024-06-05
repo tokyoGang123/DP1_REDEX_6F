@@ -130,7 +130,7 @@ const ListaEnvios = () => {
             accept=".txt"
             id="upload-file"
             style={{ display: 'none' }}
-            onChange={handleFileUpload}
+            onChange={handleFileChange}
           />
           <label htmlFor="upload-file">
             <Button

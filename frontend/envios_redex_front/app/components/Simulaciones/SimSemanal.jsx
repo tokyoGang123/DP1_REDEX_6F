@@ -354,7 +354,7 @@ export default function SimSemanal() {
 
     return (
         <>
-            <Header title="Simulación" />
+            <Header title="Simulación" planesDeVueloRef={planesDeVueloRef}/>
             <Stack direction="row" spacing={2}>
 
                 <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
