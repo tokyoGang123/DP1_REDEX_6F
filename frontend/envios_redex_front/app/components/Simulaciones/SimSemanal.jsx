@@ -58,10 +58,14 @@ export default function SimSemanal() {
 
     //TIEMPO SELECCIONADO PARA EJECUTAR LA SIMULACION
     const [fechaSim, setFechaSim] = useState(dayjs().tz(zonaHorariaUsuario));
-
+    
 
     //useRef de fechaSim
     const fechaSimRef = useRef(fechaSim)
+
+    //Inicio
+    const [fechaStart, setFechaStart] = useState()
+    const fechaStartRef = useRef(fechaStart)
 
     //useEffect de fechaSimRef
     useEffect(() => {
@@ -102,6 +106,11 @@ export default function SimSemanal() {
         enviosRef.current = envios;
     }, [envios])
 
+    const [enviosFuturo, setEnviosFuturo] = useState({})
+    const enviosFuturoRef = useRef(enviosFuturo)
+    useEffect(() => {
+        enviosFuturoRef.current = enviosFuturo;
+    }, [enviosFuturo])
     //Paquetes
     const [paquetes, setPaquetes] = useState({})
 
@@ -157,7 +166,7 @@ export default function SimSemanal() {
     const clickBotonIniciar = async () => {
 
         //"Play"
-        setEstadoSim('PL')
+        fechaStartRef.current = fechaSimRef.current; //fecha inicial
         startTimer()
         await iniciaDatos()
         ejecucionSimulacion()
@@ -208,7 +217,7 @@ export default function SimSemanal() {
     const asignarAPlanes = async (env) => {
 
         //Por cada paquete del envio, asignaremos a un plan de vuelo
-        console.log(env)
+        //console.log(env)
         for (let i = 0; i < env.paquetes.length; i++) {
             let paq = env.paquetes[i]
             let listRut = paq.ruta.listaRutas
@@ -218,13 +227,10 @@ export default function SimSemanal() {
                 //AQUI SE ASIGNA A SU LISTA
                 pdv.listaPaquetes.push(paq.id_paquete)
                 pdv.capacidad_ocupada = pdv.capacidad_ocupada + 1 
-                console.log("Paquete " + paq.id_paquete + " asignado a ruta " + pdv.id_tramo)
-                console.log(pdv)
+                //console.log("Paquete " + paq.id_paquete + " asignado a ruta " + pdv.id_tramo)
+                //console.log(pdv)
             }
-           
-
         }
-
 
     }
 
@@ -236,7 +242,7 @@ export default function SimSemanal() {
         //FOR es "falso", solo revisamos hasta que no tenga sentido
         console.log(enviosRef.current,length)
         for (let i = 0; i < enviosRef.current.length; i++) {
-            console.log("a")
+            //console.log("a")
             const env = enviosRef.current[i];
 
             //Si encontramos algun envio que no se necesite revisar, ignorar
@@ -250,9 +256,23 @@ export default function SimSemanal() {
             //Quitar envio de la lista
             enviosRef.current.splice(i,1);
         }
-        console.log("end")
+        //console.log("end")
         setEnvios(enviosRef.current)
     }
+
+    const obtenerNuevosEnvios = async (fechaLlam) => {
+        let tiempoEnviado = transformaHora(fechaLlam);
+        let p = await ejecutaGRASP(tiempoEnviado);
+        p.sort((a, b) => {
+            let fechaA = new Date(a.zonedFechaIngreso);
+            let fechaB = new Date(b.zonedFechaIngreso);
+            return fechaA - fechaB;
+        })
+        setEnviosFuturo(p)
+        console.log("CON FECHA " + transformaHora(fechaSimRef.current))
+        console.log(p)
+    }
+
 
     //---------------------------------------------------------
     //                      CUERPO SIMULACION
@@ -260,20 +280,34 @@ export default function SimSemanal() {
         let i = 0;
         let llamadas_totales = 10080;
         let ciclo = 120
-        let llamarAGrasp = 50;
+        let currentCiclo = 120
+        let llamarAGrasp = 10;
         let tiempoMax = 1;
         let nF = fechaSimRef.current;
+        let fechaLlam = fechaStartRef.current //Fecha para llamar grasp
+        console.log("LLAMADA INICIO: " + fechaLlam)
+        await setEstadoSim('PL')
 
         while (i <= llamadas_totales) {
-
+            console.log(nF)
             //-----------------------------------
             //MANTENER TIEMPO
             if (i >= llamadas_totales) {
                 break;
             }
-            //Si se han llegado al momento de llamar a GRASP, realizar lo
+            //Si estamos antes que acabe el ciclo, colocar nuevos envios
+            if (i == currentCiclo -1) {
+                enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
+                currentCiclo = currentCiclo + ciclo
+            }
+
+            //Si se han llegado al momento de llamar a GRASP, realizar la llamada a nuevos pedidos
             if (i == llamarAGrasp) {
-                //console.log(llamarAGrasp)
+                console.log("llamada jaja ekide")
+                fechaLlam = fechaLlam.add(ciclo,'m')
+                obtenerNuevosEnvios(fechaLlam)
+                //fechaLlam = fechaLlam.add(ciclo,'m') //Añadir 120 minutos a la fecha de llamada
+                //console.log(enviosNew)
                 llamarAGrasp = llamarAGrasp + ciclo
             }
 
@@ -322,9 +356,6 @@ export default function SimSemanal() {
         <>
             <Header title="Simulación" />
             <Stack direction="row" spacing={2}>
-
-
-
 
                 <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
                 <Stack>
