@@ -1,40 +1,40 @@
 import React from 'react';
 import Link from 'next/link';
+import Button from '@mui/material/Button';
 import '../components/Envios/RegistrarEnvio.css';
 import './Menu.css';
 
 export default function Menu() {
+    return (
+        <div>
+            <header className="header-proyecto">
+                <h1>RedEx</h1>
+                <img src="/icons/usuario1.png" width="30" height="30" />
+            </header>
 
-	return (
-		<div>
-			<header className="header-proyecto">
-				<h1>RedEx</h1>
-				<img src="/icons/usuario1.png" width="30" height="30" />
-			</header>
+            <div className="principal">
+                <div className="welcome-message">Bienvenido al sistema de Simulacion RedEx</div>
 
-			<div className="principal">
-				<div className="welcome-message">Bienvenido al sistema de Simulacion RedEx</div>
-
-				<div className="container">
-					<div className="header">
-						<Link href='/simulacion'>
-							<button className="seleccion">SELECCIONAR TIPO DE EJECUCIÓN</button>
-						</Link>
-					</div>
-					<div className="options">
-						<Link href="/envios">
-							<button className="option">ENVIOS HISTORICOS</button>
-						</Link>
-						<Link href="/aeropuertos">
-							<button className="option">AEROPUERTOS</button>
-						</Link>
-						<Link href="/planes">
-							<button className="option">PLANES DE VUELO</button>
-						</Link>
-						<button className="option">REPORTES Y GRAFICOS</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
+                <div className="container">
+                    <div className="header">
+                        <Link href='/simulacion'>
+                            <Button className="seleccion" variant="contained">SELECCIONAR TIPO DE EJECUCIÓN</Button>
+                        </Link>
+                    </div>
+                    <div className="options">
+                        <Link href="/envios">
+                            <Button className="option" variant="contained">ENVIOS HISTORICOS</Button>
+                        </Link>
+                        <Link href="/aeropuertos">
+                            <Button className="option" variant="contained">AEROPUERTOS</Button>
+                        </Link>
+                        <Link href="/planes">
+                            <Button className="option" variant="contained">PLANES DE VUELO</Button>
+                        </Link>
+                        <Button className="option" variant="contained">REPORTES Y GRAFICOS</Button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
 }

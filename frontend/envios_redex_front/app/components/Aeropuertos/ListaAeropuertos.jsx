@@ -2,38 +2,44 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TablePagination from '@mui/material/TablePagination';
+import TableRow from '@mui/material/TableRow';
+import { getAeropuertosTodos, postAeropuertosArchivo } from '@/app/api/aeropuetos.api';
 import '../Envios/ListaEnvios.css';
 import '../Envios/RegistrarEnvio.css';
-import { getAeropuertosTodos, postAeropuertosArchivo } from '@/app/api/aeropuetos.api';
+import Button from '@mui/material/Button';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+
+const columns = [
+  { id: 'codigo', label: 'Código', minWidth: 100 },
+  { id: 'ciudad', label: 'Ciudad', minWidth: 170 },
+  { id: 'diminutivo', label: 'Diminutivo', minWidth: 100 },
+  { id: 'huso_horario', label: 'Huso Horario', minWidth: 150 },
+  { id: 'capacidad_ocupada', label: 'Capacidad Ocupada', minWidth: 150, align: 'right' },
+  { id: 'capacidad_maxima', label: 'Capacidad Máxima', minWidth: 150, align: 'right' },
+  { id: 'longitud', label: 'Longitud', minWidth: 150, align: 'right' },
+  { id: 'latitud', label: 'Latitud', minWidth: 150, align: 'right' },
+];
 
 const ListaAeropuertos = () => {
   const [airports, setAirports] = useState([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   useEffect(() => {
-    /*
-    const fetchAeropuertos = async () => {
-      try {
-        const res = await fetch('http://inf226-982-6f.inf.pucp.edu.pe/api/aeropuertos/obtenerTodos');
-        //const res = await fetch('http://localhost:8080/api/aeropuertos/obtenerTodos');
-        if (res.ok) {
-          const aeropuertos = await res.json();
-          setAirports(aeropuertos);
-        } else {
-          console.error('Error al obtener los aeropuertos');
-        }
-      } catch (error) {
-        console.error('Error al obtener los aeropuertos:', error);
-      }
-    };
-    fetchAeropuertos();
-    */
     async function carga() {
-      let a = await getAeropuertosTodos()
+      let a = await getAeropuertosTodos();
       setAirports(a);
     }
-    carga()
-
+    carga();
   }, []);
+
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -44,47 +50,32 @@ const ListaAeropuertos = () => {
       const textoApropiado = await changeText(contents);
       const json = await formatJSON(textoApropiado);
 
-      // Verificar el JSON generado
-      console.log('JSON generado:', json);
-      /*
-      // Enviar el contenido del archivo en formato JSON al backend
-      const response = await fetch('http://inf226-982-6f.inf.pucp.edu.pe/api/aeropuertos/lecturaArchivo', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(json),
-      });
-
-      */
-      const response = await postAeropuertosArchivo(json)
-      console.log(response)
-
-      if (response) {
-        const newAirports = await response.data;
-        setAirports(prevAirports => [...prevAirports, ...newAirports]);
-      } else {
-        console.error('Error al cargar los aeropuertos');
+      async function sube() {
+        let res = await postAeropuertosArchivo(json);
+        console.log(res);
       }
-
-
-
+      sube();
     };
     reader.readAsText(file);
   };
 
-  // Procesa el texto del archivo
   async function changeText(texto) {
     const textoApropiado = texto.replace(/\r/g, '');
     return textoApropiado;
   }
 
-  // Formatea el texto en un JSON con la clave "data"
   const formatJSON = async (text) => {
-    const json = {
-      data: text
-    };
+    const json = { data: text };
     return json;
+  };
+
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
   };
 
   return (
@@ -96,47 +87,80 @@ const ListaAeropuertos = () => {
       <div className="customers-container">
         <div className="button-container">
           <Link href="/registroAeropuerto">
-            <button className="button-left">Registrar aeropuerto</button>
+            <Button variant="contained" color="primary" className="button-left">
+              Registrar aeropuerto
+            </Button>
           </Link>
-          <label className="button-right">
-            + Cargar aeropuertos
-            <input type="file" accept=".txt" style={{ display: 'none' }} onChange={handleFileUpload} />
+          <input
+            type="file"
+            accept=".txt"
+            id="upload-file"
+            style={{ display: 'none' }}
+            onChange={handleFileUpload}
+          />
+          <label htmlFor="upload-file">
+            <Button
+              variant="contained"
+              component="span"
+              color="primary"
+              startIcon={<UploadFileIcon />}
+              className="button-right"
+            >
+              + Cargar aeropuertos
+            </Button>
           </label>
         </div>
-        <div className="customers-table">
-          <div className="table-header">
-            <span>Código</span>
-            <span>Ciudad</span>
-            <span>Diminutivo</span>
-            <span>Huso horario</span>
-            <span>Capacidad ocupada</span>
-            <span>Capacidad máxima</span>
-            <span>Longitud</span>
-            <span>Latitud</span>
-            <span className="ulti-header">Estado</span>
-          </div>
-          {airports.map((aeropuerto, index) => (
-            <div className="table-row" key={index}>
-              <span>{aeropuerto.codigo}</span>
-              <span>{aeropuerto.ciudad}</span>
-              <span>{aeropuerto.diminutivo}</span>
-              <span>{aeropuerto.huso_horario}</span>
-              <span>{aeropuerto.capacidad_ocupada}</span>
-              <span>{aeropuerto.capacidad_maxima}</span>
-              <span>{aeropuerto.longitud}</span>
-              <span>{aeropuerto.latitud}</span>
-              <span className={`status ${aeropuerto.full === false ? 'habilitado' : 'no_habilitado'}`}>{aeropuerto.full === false ? 'Habilitado' : 'No habilitado'}</span>
-            </div>
-          ))}
-        </div>
-        <div className="pagination">
-          <span className="active">1</span>
-          <span>2</span>
-          <span>3</span>
-          <span>4</span>
-          <span>...</span>
-          <span>40</span>
-        </div>
+        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+          <TableContainer sx={{ maxHeight: 440 }}>
+            <Table stickyHeader aria-label="sticky table">
+              <TableHead>
+                <TableRow>
+                  {columns.map((column) => (
+                    <TableCell
+                      key={column.id}
+                      align={column.align}
+                      style={{ minWidth: column.minWidth }}
+                    >
+                      {column.label}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {airports
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((aeropuerto, index) => {
+                    return (
+                      <TableRow hover role="checkbox" tabIndex={-1} key={index}>
+                        {columns.map((column) => {
+                          const value = aeropuerto[column.id];
+                          return (
+                            <TableCell key={column.id} align={column.align}>
+                              {column.format && typeof value === 'number' ? column.format(value) : value}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    );
+                  })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 100]}
+            component="div"
+            count={airports.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Paper>
+        <Link href="/">
+          <Button variant="contained" disableElevation sx={{ mt: 2 }}>
+            Regresar
+          </Button>
+        </Link>
       </div>
     </div>
   );
