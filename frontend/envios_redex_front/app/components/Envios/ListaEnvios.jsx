@@ -11,6 +11,26 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 import { getEnviosTodos, postEnviosArchivo } from '@/app/api/envios.api';
 
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TablePagination from '@mui/material/TablePagination';
+import TableRow from '@mui/material/TableRow';
+import Button from '@mui/material/Button';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
+
+const columns = [
+  { id: 'numero_envio_Aeropuerto', label: 'Identificador del envío', minWidth: 170 },
+  { id: 'aeropuerto_origen', label: 'Ciudad origen', minWidth: 170 },
+  { id: 'fecha_ingreso', label: 'Fecha en ciudad origen', minWidth: 170 },
+  { id: 'hora_ingreso', label: 'Hora en ciudad origen', minWidth: 170 },
+  { id: 'aeropuerto_destino', label: 'Ciudad destino', minWidth: 170 },
+  { id: 'numPaquetes', label: 'Cantidad de paquetes', minWidth: 170 },
+];
+
 const ListaEnvios = () => {
 
   dayjs.extend(utc);
@@ -18,45 +38,25 @@ const ListaEnvios = () => {
 
   let zonaHorariaUsuario = dayjs.tz.guess();
   let fechaActualDayJS = dayjs().tz(zonaHorariaUsuario);
-  let fechaActual = fechaActualDayJS.format('YYYYMMDD')
-  //let fechaActual = 20240103
+  let fechaActual = fechaActualDayJS.format('YYYYMMDD');
 
   const [envios, setEnvios] = useState([]);
   const [file, setFile] = useState(null);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const fileInputRef = useRef(null);
 
   useEffect(() => {
-    /*
-    const fetchEnvios = async () => {
-      try {
-        const res = await fetch('http://inf226-982-6f.inf.pucp.edu.pe/api/envios/obtenerTodosFecha/' + fechaActual);
-        //const res = await fetch('http://localhost:8080/api/envios/obtenerTodosFecha/' + fechaActual);
-        if (res.ok) {
-          const env = await res.json();
-          setEnvios(env);
-        } else {
-          console.error('Error al obtener los envios');
-        }
-      } catch (error) {
-        console.error('Error al obtener los envios:', error);
-      }
-    };
-
-    fetchEnvios();
-    */
-
     async function carga() {
       let e = await getEnviosTodos(fechaActual);
       setEnvios(e);
     }
-    carga()
+    carga();
   }, []);
 
   useEffect(() => {
-    console.log(envios)
-  }, [envios])
-
-
+    console.log(envios);
+  }, [envios]);
 
   const handleFileChange = (event) => {
     setFile(event.target.files[0]);
@@ -75,33 +75,14 @@ const ListaEnvios = () => {
       const cleanText = await changeText(text);
       const jsonData = await formatJSON(cleanText);
 
-      console.log('JSON a enviar:', jsonData);  // Agregar el console.log aquí
-      /*
+      console.log('JSON a enviar:', jsonData);
 
-      /*axios.post('http://localhost:8080/api/envios/cargarArchivoEnvios', jsonData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      axios.post('http://inf226-982-6f.inf.pucp.edu.pe/api/envios/cargarArchivoEnvios', jsonData, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      })
-      .then(response => {
-        alert('Archivo cargado exitosamente');
-        console.log('Respuesta del servidor:', response.data);
-      })
-      .catch(error => {
-        console.error('Error al cargar el archivo:', error);
-      });*/
       async function sube() {
         let res = await postEnviosArchivo(jsonData);
-        console.log(res)
+        console.log(res);
       }
-      sube()
-    }
-
+      sube();
+    };
 
     reader.readAsText(file);
   };
@@ -122,6 +103,15 @@ const ListaEnvios = () => {
     fileInputRef.current.click();
   };
 
+  const handleChangePage = (event, newPage) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (event) => {
+    setRowsPerPage(+event.target.value);
+    setPage(0);
+  };
+
   return (
     <div>
       <header className="header-proyecto">
@@ -131,44 +121,93 @@ const ListaEnvios = () => {
       <div className="customers-container">
         <div className="button-container">
           <Link href="/registroEnvio">
-            <button className="button-left">Registrar envío</button>
+            <Button variant="contained" color="primary" className="button-left">
+              Registrar envío
+            </Button>
           </Link>
           <input
             type="file"
-            ref={fileInputRef}
+            accept=".txt"
+            id="upload-file"
             style={{ display: 'none' }}
             onChange={handleFileChange}
           />
-          <button className="button-right" onClick={handleButtonClick}>+ Cargar envíos</button>
+          <label htmlFor="upload-file">
+            <Button
+              variant="contained"
+              component="span"
+              color="primary"
+              startIcon={<UploadFileIcon />}
+              className="button-right"
+            >
+              + Cargar envíos
+            </Button>
+          </label>
         </div>
-        <div className="customers-table">
-          <div className="table-header">
-            <span>Identificador del envío</span>
-            <span>Ciudad origen</span>
-            <span>Fecha en ciudad origen</span>
-            <span>Hora en ciudad origen</span>
-            <span>Ciudad destino</span>
-            <span className='ulti-header'>Cantidad de paquetes</span>
-          </div>
-          {envios.map((envio, index) => (
-            <div className="table-row" key={index}>
-              <span>{envio.numero_envio_Aeropuerto}</span>
-              <span>{envio.aeropuerto_origen}</span>
-              <span>{new Date(envio.fecha_ingreso).toLocaleDateString()}</span>
-              <span>{new Date(envio.fecha_ingreso).toLocaleTimeString()}</span>
-              <span>{envio.aeropuerto_destino}</span>
-              <span>{envio.numPaquetes}</span>
-            </div>
-          ))}
-        </div>
-        <div className="pagination">
-          <span className="active">1</span>
-          <span>2</span>
-          <span>3</span>
-          <span>4</span>
-          <span>...</span>
-          <span>40</span>
-        </div>
+        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
+          <TableContainer sx={{ maxHeight: 440 }}>
+            <Table stickyHeader aria-label="sticky table">
+              <TableHead>
+                <TableRow>
+                  {columns.map((column) => (
+                    <TableCell
+                      key={column.id}
+                      align={column.align}
+                      style={{ minWidth: column.minWidth }}
+                    >
+                      {column.label}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {envios.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((envio, index) => {
+                  const fechaIngreso = new Date(envio.fecha_ingreso);
+                  return (
+                    <TableRow hover role="checkbox" tabIndex={-1} key={index}>
+                      {columns.map((column) => {
+                        const value = envio[column.id];
+                        if (column.id === 'fecha_ingreso') {
+                          return (
+                            <TableCell key={column.id} align={column.align}>
+                              {fechaIngreso.toLocaleDateString()}
+                            </TableCell>
+                          );
+                        }
+                        if (column.id === 'hora_ingreso') {
+                          return (
+                            <TableCell key={column.id} align={column.align}>
+                              {fechaIngreso.toLocaleTimeString()}
+                            </TableCell>
+                          );
+                        }
+                        return (
+                          <TableCell key={column.id} align={column.align}>
+                            {value}
+                          </TableCell>
+                        );
+                      })}
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 100]}
+            component="div"
+            count={envios.length}
+            rowsPerPage={rowsPerPage}
+            page={page}
+            onPageChange={handleChangePage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </Paper>
+        <Link href="/">
+          <Button variant="contained" disableElevation sx={{ mt: 2 }}>
+            Regresar
+          </Button>
+        </Link>
       </div>
     </div>
   );

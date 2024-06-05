@@ -1,97 +1,110 @@
 "use client";
-
 import React, { useState, useEffect } from 'react';
+import Link from 'next/link';
 import '../Envios/ListaEnvios.css';
 import '../Envios/RegistrarEnvio.css';
 import { getPlanesTodos } from '@/app/api/planesDeVuelo.api';
+import Paper from '@mui/material/Paper';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TablePagination from '@mui/material/TablePagination';
+import TableRow from '@mui/material/TableRow';
+import Button from '@mui/material/Button';
 
 const ListaPlanes = () => {
     const [planes, setPlanes] = useState([]);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     useEffect(() => {
-      /*
-        const fetchPlanes = async () => {
-          try {
-            const res = await fetch('http://inf226-982-6f.inf.pucp.edu.pe/api/planesVuelo/obtenerTodos');
-            //const res = await fetch('http://localhost:8080/api/planesVuelo/obtenerTodos');
-            if (res.ok) {
-              const plans = await res.json();
-              setPlanes(plans);
-            } else {
-              console.error('Error al obtener los planes');
-            }
-          } catch (error) {
-            console.error('Error al obtener los planes:', error);
-          }
-        };
-        */
-       //fetchPlanes();
-       async function carga() {
-        let p = await getPlanesTodos();
-        setPlanes(p)
-       }
-      carga()
-        
+        async function carga() {
+            let p = await getPlanesTodos();
+            setPlanes(p);
+        }
+        carga();
     }, []);
 
     const formatFecha = (fechaString) => {
         const fecha = new Date(fechaString);
         const opciones = { year: 'numeric', month: '2-digit', day: '2-digit' };
         return fecha.toLocaleDateString('es-ES', opciones);
-        };
-    
-    const formatHora = (fechaString) => {
-    const fecha = new Date(fechaString);
-    const opciones = { hour: '2-digit', minute: '2-digit' };
-    return fecha.toLocaleTimeString('es-ES', opciones);
     };
 
-  return (
-    <div>
-        <header className="header-proyecto">
-            <h1>Planes de vuelo</h1>
-            <h1>RedEx</h1>
-        </header>
-        <div className="customers-container">
-            <div className="button-container">
-                <button className="button-left">+ Cargar planes de vuelo</button>
-                <button className="button-right">Reiniciar datos</button>
-            </div>
-            <div className="customers-table">
-                <div className="table-header">
-                <span>Ciudad origen</span>
-                <span>Ciudad destino</span>
-                <span>Dia salida</span>
-                <span>Tiempo salida</span>
-                <span>Tiempo llegada</span>
-                <span>Capacidad Ocupada</span>
-                <span>Capacidad Maxima</span>
-                <span className='ulti-header'>Estado</span>
+    const formatHora = (fechaString) => {
+        const fecha = new Date(fechaString);
+        const opciones = { hour: '2-digit', minute: '2-digit' };
+        return fecha.toLocaleTimeString('es-ES', opciones);
+    };
+
+    const handleChangePage = (event, newPage) => {
+        setPage(newPage);
+    };
+
+    const handleChangeRowsPerPage = (event) => {
+        setRowsPerPage(+event.target.value);
+        setPage(0);
+    };
+
+    return (
+        <div>
+            <header className="header-proyecto">
+                <h1>Planes de vuelo</h1>
+                <h1>RedEx</h1>
+            </header>
+            <div className="customers-container">
+                <div className="button-container">
+                    <Button variant="contained" className="button-left">+ Cargar planes de vuelo</Button>
+                    <Button variant="contained" className="button-right">Reiniciar datos</Button>
                 </div>
-                {planes.map((plan, index) => (
-                <div className="table-row" key={index}>
-                    <span>{plan.ciudad_origen}</span>
-                    <span>{plan.ciudad_destino}</span>
-                    <span>{formatFecha(plan.hora_origen)}</span>
-                    <span>{formatHora(plan.hora_origen)}</span>
-                    <span>{formatHora(plan.hora_destino)}</span>
-                    <span>{plan.capacidad_ocupada}</span>
-                    <span>{plan.capacidad_maxima}</span>
-                    <span className={`status ${plan.estado === 1 ? 'Habilitado' : 'No_habilitado'}`}>{plan.estado === 1? 'Habilitado' : 'No_habilitado'}</span>
-                </div>
-                ))}
-            </div>
-            <div className="pagination">
-                <span className="active">1</span>
-                <span>2</span>
-                <span>3</span>
-                <span>4</span>
-                <span>...</span>
-                <span>40</span>
+                <TableContainer component={Paper}>
+                    <Table stickyHeader aria-label="sticky table">
+                        <TableHead>
+                            <TableRow>
+                                <TableCell>Ciudad origen</TableCell>
+                                <TableCell>Ciudad destino</TableCell>
+                                <TableCell>Dia salida</TableCell>
+                                <TableCell>Tiempo salida</TableCell>
+                                <TableCell>Tiempo llegada</TableCell>
+                                <TableCell>Capacidad Ocupada</TableCell>
+                                <TableCell>Capacidad Maxima</TableCell>
+                                
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {planes.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((plan, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>{plan.ciudad_origen}</TableCell>
+                                    <TableCell>{plan.ciudad_destino}</TableCell>
+                                    <TableCell>{formatFecha(plan.hora_origen)}</TableCell>
+                                    <TableCell>{formatHora(plan.hora_origen)}</TableCell>
+                                    <TableCell>{formatHora(plan.hora_destino)}</TableCell>
+                                    <TableCell>{plan.capacidad_ocupada}</TableCell>
+                                    <TableCell>{plan.capacidad_maxima}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                    <TablePagination
+                    rowsPerPageOptions={[10, 25, 100]}
+                    component="div"
+                    count={planes.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                    />
+                </TableContainer>
+                <Link href="/">
+                  <Button variant="contained" disableElevation sx={{ mt: 2 }}>
+                    Regresar
+                  </Button>
+                </Link>
             </div>
         </div>
-    </div>
-  );
+    );
 };
 
 export default ListaPlanes;
