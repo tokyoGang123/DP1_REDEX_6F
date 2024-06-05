@@ -4,14 +4,17 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import '../Envios/ListaEnvios.css';
 import '../Envios/RegistrarEnvio.css';
+import { getAeropuertosTodos, postAeropuertosArchivo } from '@/app/api/aeropuetos.api';
 
 const ListaAeropuertos = () => {
   const [airports, setAirports] = useState([]);
 
   useEffect(() => {
+    /*
     const fetchAeropuertos = async () => {
       try {
-        const res = await fetch('http://localhost:8080/api/aeropuertos/obtenerTodos');
+        const res = await fetch('http://inf226-982-6f.inf.pucp.edu.pe/api/aeropuertos/obtenerTodos');
+        //const res = await fetch('http://localhost:8080/api/aeropuertos/obtenerTodos');
         if (res.ok) {
           const aeropuertos = await res.json();
           setAirports(aeropuertos);
@@ -22,8 +25,14 @@ const ListaAeropuertos = () => {
         console.error('Error al obtener los aeropuertos:', error);
       }
     };
-
     fetchAeropuertos();
+    */
+    async function carga() {
+      let a = await getAeropuertosTodos()
+      setAirports(a);
+    }
+    carga()
+
   }, []);
   const handleFileUpload = async (event) => {
     const file = event.target.files[0];
@@ -37,9 +46,9 @@ const ListaAeropuertos = () => {
 
       // Verificar el JSON generado
       console.log('JSON generado:', json);
-
+      /*
       // Enviar el contenido del archivo en formato JSON al backend
-      const response = await fetch('http://localhost:8080/api/aeropuertos/lecturaArchivo', {
+      const response = await fetch('http://inf226-982-6f.inf.pucp.edu.pe/api/aeropuertos/lecturaArchivo', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,12 +56,19 @@ const ListaAeropuertos = () => {
         body: JSON.stringify(json),
       });
 
-      if (response.ok) {
-        const newAirports = await response.json();
+      */
+      const response = await postAeropuertosArchivo(json)
+      console.log(response)
+
+      if (response) {
+        const newAirports = await response.data;
         setAirports(prevAirports => [...prevAirports, ...newAirports]);
       } else {
         console.error('Error al cargar los aeropuertos');
       }
+
+
+
     };
     reader.readAsText(file);
   };

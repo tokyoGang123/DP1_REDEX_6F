@@ -3,14 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import '../Envios/ListaEnvios.css';
 import '../Envios/RegistrarEnvio.css';
+import { getPlanesTodos } from '@/app/api/planesDeVuelo.api';
 
 const ListaPlanes = () => {
     const [planes, setPlanes] = useState([]);
 
     useEffect(() => {
+      /*
         const fetchPlanes = async () => {
           try {
-            const res = await fetch('http://localhost:8080/api/planesVuelo/obtenerTodos');
+            const res = await fetch('http://inf226-982-6f.inf.pucp.edu.pe/api/planesVuelo/obtenerTodos');
+            //const res = await fetch('http://localhost:8080/api/planesVuelo/obtenerTodos');
             if (res.ok) {
               const plans = await res.json();
               setPlanes(plans);
@@ -21,8 +24,14 @@ const ListaPlanes = () => {
             console.error('Error al obtener los planes:', error);
           }
         };
-    
-        fetchPlanes();
+        */
+       //fetchPlanes();
+       async function carga() {
+        let p = await getPlanesTodos();
+        setPlanes(p)
+       }
+      carga()
+        
     }, []);
 
     const formatFecha = (fechaString) => {

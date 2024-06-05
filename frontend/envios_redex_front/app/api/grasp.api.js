@@ -1,8 +1,8 @@
 import baseApi from "./mainAxios.api";
 
-export const getPlanesTodos = async () => {
+export const iniciaGRASP = async () => {
     try {
-        let data = await baseApi.get('planesVuelo/obtenerTodos').then(({data}) => data)
+        let data = await baseApi.get('grasp/iniciar').then(({data}) => data)
         console.log(data)
         return data;
     } catch (error) {
@@ -11,14 +11,13 @@ export const getPlanesTodos = async () => {
     }
 }
 
-export const cargarPlanesFecha = async (fecha) => {
+export const ejecutaGRASP = async (fechaHoraHuso) => {
     try {
-        baseApi.post('planesVuelo/cargarArchivoPlanes/' + fecha).then(({data}) => data)
+        let data = await baseApi.get('grasp/ejecutar/' + fechaHoraHuso).then(({data}) => data)
         console.log(data)
         return data;
     } catch (error) {
         console.log('Error al buscar data:', error)
         return null;
     }
-
 }

@@ -9,14 +9,14 @@ import java.util.ArrayList;
 public class ElementoListaRestringida {
 
     private int id_elementoLista;
-    public ArrayList<Integer> listaElementos;
+    public ArrayList<Long> listaElementos;
     private double  fitnessSolucion;
 
     public ElementoListaRestringida() {
 
     }
 
-    public ElementoListaRestringida(ArrayList<Integer> listaElementos, double fitnessSolucion) {
+    public ElementoListaRestringida(ArrayList<Long> listaElementos, double fitnessSolucion) {
         this.listaElementos = listaElementos;
         this.fitnessSolucion = fitnessSolucion;
     }

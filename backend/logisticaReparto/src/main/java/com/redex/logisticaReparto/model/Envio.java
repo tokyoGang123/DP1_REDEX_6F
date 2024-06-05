@@ -36,7 +36,7 @@ public class Envio {
     private ZonedDateTime zonedFechaLlegadaMax;
 
     @OneToMany(mappedBy = "envio", cascade = CascadeType.ALL)
-    @JsonIgnore
+    //@JsonIgnore
     private List<Paquete> paquetes =new ArrayList<>();
 
     public Envio() {

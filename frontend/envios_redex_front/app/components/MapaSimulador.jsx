@@ -3,10 +3,13 @@ import { MapContainer, Marker, TileLayer, Popup, FeatureGroup } from "react-leaf
 import { Icon, divIcon, point } from "leaflet";
 import { EditControl } from "react-leaflet-draw"
 import { useState, useEffect, use } from "react";
-import Aeropuerto from "./Aeropuerto";
-import PlanDeVuelo from "./PlanDeVuelo";
+import dynamic from "next/dynamic";
+const Aeropuerto = dynamic(() => import('./Aeropuerto'), {ssr: false});
+const PlanDeVuelo = dynamic(() => import('./PlanDeVuelo'), {ssr: false});
+//import Aeropuerto from "";
+//import PlanDeVuelo from "./PlanDeVuelo";
 import { Cronometro } from "./Elementos/SelectorFecha";
-
+//import 'leaflet-canvas-markers'
 
 //Temporal, reemplazada por la API de aeropuertos
 let aeropuertosTemp = [
@@ -36,14 +39,14 @@ export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDe
   },[planesDeVueloBD])
 
   useEffect(() => {
-    //console.log(planesDeVuelo)
+    console.log("PLANES",planesDeVuelo)
   },[planesDeVuelo])
 
-
+const idsTemp = [624,741,408,471,750]
   return (
     <>
       <div style={{ position: 'relative', zIndex: 0, height: '100%', width: '100%'  }}>
-        <MapContainer center={[48.8566, 2.3522]} zoom={3} style={{ height: '100%', width: '100%' }}>
+        <MapContainer center={[48.8566, 2.3522]} zoom={3} style={{ height: '100%', width: '100%' }} preferCanvas={true}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -54,7 +57,7 @@ export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDe
           {planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.map((pos,index) => (
             <PlanDeVuelo key={index} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} intervaloMS={intervaloMS}></PlanDeVuelo>
           )) : <></>}
-          {/*planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.filter(pos => pos.id_tramo == 588).map((pos,index) => (
+          {/*planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.filter(pos => idsTemp.includes(pos.id_tramo)).map((pos,index) => (
             <PlanDeVuelo key={index} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} intervaloMS={intervaloMS}></PlanDeVuelo>
           )) : <></>*/}
         </MapContainer>

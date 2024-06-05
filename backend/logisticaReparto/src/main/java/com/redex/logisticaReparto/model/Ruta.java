@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Ruta {
 
     private int id_ruta;
-    private ArrayList<Integer> listaRutas;
+    private ArrayList<Long> listaRutas = new ArrayList<>();
 
     public Ruta() {
         this.listaRutas = new ArrayList<>();
@@ -20,7 +20,7 @@ public class Ruta {
         this.id_ruta = id_ruta;
     }
 
-    public void setListaRutas(ArrayList<Integer> listaRutas) {
+    public void setListaRutas(ArrayList<Long> listaRutas) {
         this.listaRutas = listaRutas;
     }
 
@@ -28,7 +28,7 @@ public class Ruta {
         return id_ruta;
     }
 
-    public ArrayList<Integer> getListaRutas() {
+    public ArrayList<Long> getListaRutas() {
         return listaRutas;
     }
 

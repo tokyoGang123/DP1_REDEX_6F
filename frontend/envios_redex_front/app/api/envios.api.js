@@ -1,8 +1,9 @@
 import baseApi from "./mainAxios.api";
 
-export const getAeropuertosTodos = async () => {
+export const getEnviosTodos = async (fecha) => {
     try {
-        let data = await baseApi.get('aeropuertos/obtenerTodos').then(({data}) => data)
+        let data = await baseApi.get('envios/obtenerTodosFecha/' + fecha).then(({data}) => data)
+        console.log(data)
         return data;
     } catch (error) {
         console.log('Error al buscar data:', error)
@@ -10,10 +11,10 @@ export const getAeropuertosTodos = async () => {
     }
 }
 
-export const postAeropuertosArchivo = async (data) => {
+export const postEnviosArchivo = async (data) =>{
     try {
         //console.log("DATA",data)
-        let res = await baseApi.post('aeropuertos/lecturaArchivo',data)
+        let res = await baseApi.post('envios/cargarArchivoEnvios',data)
         //console.log(res)
         return res
     } catch(error) {
@@ -21,4 +22,3 @@ export const postAeropuertosArchivo = async (data) => {
         return null
     }
 }
-

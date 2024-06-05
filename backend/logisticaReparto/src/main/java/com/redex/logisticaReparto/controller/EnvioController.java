@@ -1,11 +1,9 @@
 package com.redex.logisticaReparto.controller;
 
-import com.redex.logisticaReparto.model.Aeropuerto;
-import com.redex.logisticaReparto.model.Envio;
-import com.redex.logisticaReparto.model.Paquete;
-import com.redex.logisticaReparto.model.PlanDeVuelo;
+import com.redex.logisticaReparto.model.*;
 import com.redex.logisticaReparto.services.AeropuertoService;
 import com.redex.logisticaReparto.services.EnvioService;
+import com.redex.logisticaReparto.services.PaisService;
 import com.redex.logisticaReparto.services.PaqueteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
@@ -28,9 +27,19 @@ public class EnvioController {
     private AeropuertoService aeropuertoService;
     @Autowired
     private PaqueteService paqueteService;
+    @Autowired
+    private PaisService paisService;
 
     @GetMapping("/envios/obtenerTodos")
     ArrayList<Envio> obtenerTodosEnvios() { return envioService.obtenerEnvios();}
+
+    @GetMapping("/envios/obtenerTodosFecha/{fecha}")
+    ArrayList<Envio> obtenerTodosEnviosFecha(@PathVariable String fecha) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+        LocalDate localDate = LocalDate.parse(fecha, formatter);
+
+        return envioService.obtenerEnviosPorFecha(localDate);
+    }
 
     @PostMapping("/envios/insertar")
     Envio insertarEnvio(Envio envio) { return envioService.insertarEnvio(envio); }
@@ -44,6 +53,7 @@ public class EnvioController {
     @PostMapping("envios/cargarArchivoEnvios")
     ArrayList<Envio> cargarEnvios(@RequestBody Map<String, String> datos){
         long startTime = System.currentTimeMillis();
+        ArrayList<Pais> paises = paisService.obtenerTodosPaises();
         ArrayList<Envio> envios = new ArrayList<>();
         String enviosDatos = datos.get("data");
         String[] lineas = enviosDatos.split("\n");
@@ -79,9 +89,11 @@ public class EnvioController {
                     int minutos = Integer.parseInt(tiempoHM[1]);
 
                     LocalDateTime tiempoOrigen = LocalDateTime .of(LocalDate.of(anho,mes,dia), LocalTime.of(hora,minutos,0));
-
+                    //ZonedDateTime tiempoOrigenZoned = ZonedDateTime()
                     //AGREGAR CONDICION PARA VER SI ES VUELO NACIONAL O INTERNACIONAL
-                    LocalDateTime tiempoMax = tiempoOrigen.plusDays(2); //ya que en el juego de datos aun no hay del mismo pais xd ni habra :v
+                    int numDias = envioService.tipoVuelo(ciudadOrigen, ciudadDestino, paises);
+                    //ZonedDateTime tiempoMax = tiempoOrigenZoned.withZoneSameLocal(ZoneId.of(husoCiudadDestino)).plusDays(numDias);
+                    LocalDateTime tiempoMax = tiempoOrigen.plusDays(numDias); //ya que en el juego de datos aun no hay del mismo pais xd ni habra :v
                     //
                     Envio newEnvio = new Envio(0,numero_envio_Aeropuerto,tiempoOrigen,ciudadOrigen,
                             ciudadDestino,tiempoMax,numPaquetes,husoCiudadOrigen,husoCiudadDestino);
@@ -122,7 +134,7 @@ public class EnvioController {
         long startTime = System.currentTimeMillis();
         ArrayList<Envio> envios = new ArrayList<>();
         try {
-            File enviosFile = new File("src/main/resources/EnviosVictor/pack_enviado_EBCI.txt");
+            File enviosFile = new File("src/main/resources/EnviosAngelo/pack_all.txt");
             Scanner scanner = new Scanner(enviosFile);
             int i= 0;
             while (scanner.hasNextLine()) {
