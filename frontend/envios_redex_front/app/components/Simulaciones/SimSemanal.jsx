@@ -14,6 +14,8 @@ import { getPlanesTodos } from "@/app/api/planesDeVuelo.api"
 import { TryOutlined } from "@mui/icons-material"
 import { useTimer } from "../usoTimer"
 import { ejecutaGRASP, iniciaGRASP } from "@/app/api/grasp.api"
+import MapaSimuladorOL from "../MapaSimuladorOL"
+import hallarPuntosIntermedios from "../funcionesRuta"
 
 dayjs.extend(advancedFormat);
 
@@ -123,6 +125,12 @@ export default function SimSemanal() {
     //Tiempo hasta llamada de datos nueva
     const tiempoLlamaGRASP = 120;
 
+
+
+
+
+    
+
     //---------------------------------------------------------
     //                      USE EFFECTS E INTERVALS
 
@@ -182,11 +190,13 @@ export default function SimSemanal() {
         
         //TEMPORAL
         c = c.map(pdv => {
-            return { ...pdv, listaPaquetes: [] };
+            let ruta = hallarPuntosIntermedios(pdv.latitud_origen, pdv.latitud_destino, pdv.longitud_origen, pdv.longitud_destino)
+            return { ...pdv, listaPaquetes: [], listaCamino : ruta};
         });
         //TEMPORAL
         
         await setPlanesDeVuelo(c);
+        console.log(c)
 
         //Comando para inicializar la simulación
         let res = await iniciaGRASP();
@@ -366,7 +376,8 @@ export default function SimSemanal() {
 
             </Stack>
             <div style={{ height: 'calc(100vh - 50px)', width: '100%' }}>
-                <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={planesDeVueloRef.current} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} />
+                {/*<MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={planesDeVueloRef.current} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} />*/}
+                <MapaSimuladorOL aeropuertosBD={aeropuertos} planesDeVueloBD={planesDeVueloRef.current}></MapaSimuladorOL>
             </div>
 
         </>
