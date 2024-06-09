@@ -6,9 +6,10 @@ import { Vector as VectorSource } from 'ol/source';
 import { Vector as VectorLayer } from 'ol/layer';
 import { Icon, Style } from 'ol/style';
 import AeropuertoMarkers from './OLMapsComponents/AeropuertoMarkers';
-import PlanesMarkers from './OLMapsComponents/PlanesMarkers';
+import PlanesMarkers from './OLMapsComponents/PlanesMarkers3';
+import PlanMarker from './OLMapsComponents/PlanMarker';
 
-export default function MapaSimuladorOL({ aeropuertosBD, planesDeVueloBD, fechaSim }) {
+export default function MapaSimuladorOL({ aeropuertosBD, planesDeVueloBD, fechaSim, estadoSim }) {
 
     //Variable para manejar los aeropuertos
     const [aeropuertos, setAeropuertos] = useState({});
@@ -28,7 +29,7 @@ export default function MapaSimuladorOL({ aeropuertosBD, planesDeVueloBD, fechaS
 
     useEffect(() => {
         console.log("AEROPUERTOS", aeropuertos)
-    },[aeropuertos])
+    }, [aeropuertos])
 
     //--------------------------------------------------------
     //                  VARIABLES DEL MAPA      
@@ -53,15 +54,19 @@ export default function MapaSimuladorOL({ aeropuertosBD, planesDeVueloBD, fechaS
     return (
         <div className='App'>
             <MapComponent vectorLayer={vectorLayer} ref={mapRef}></MapComponent>
-            {mapRef.current && aeropuertos  && (aeropuertos.length > 0) &&  (
+            {mapRef.current && aeropuertos && (aeropuertos.length > 0) && (
                 <AeropuertoMarkers aeropuertos={aeropuertos} map={mapRef.current.getMap()}></AeropuertoMarkers>
             )
             }
-            {mapRef.current && planesDeVuelo && (planesDeVuelo.length > 0) && (
-                <PlanesMarkers planesDeVuelo={planesDeVuelo} map={mapRef.current.getMap()}></PlanesMarkers>
+            {/*mapRef.current && planesDeVuelo && (planesDeVuelo.length > 0) && (
+                <PlanesMarkers planesDeVuelo={planesDeVuelo} map={mapRef.current.getMap()} estadoSim={estadoSim} fechaSim={fechaSim}></PlanesMarkers>
             ) 
-
+                */
             }
+            { mapRef && planesDeVuelo && planesDeVuelo.length > 0 &&
+                planesDeVuelo.map((plan, index) => (
+                    <PlanMarker key={index} map={mapRef.current.getMap()} planDeVuelo={plan} planes={planesDeVuelo}/>
+                ))}
         </div>
     )
 

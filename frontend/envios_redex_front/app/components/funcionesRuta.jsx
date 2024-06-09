@@ -9,7 +9,7 @@ async function hallarPuntosIntermedios(la1,lo1,la2,lo2) {
         const factor = i/numPuntos
         const latitud = la1 + factor * (la2-la1)
         const longitud = lo1 + factor * (lo2-lo1)
-        puntos.push({lat: latitud, lng: longitud}) 
+        puntos.push({lat: latitud, lon: longitud}) 
     }
     return puntos;
 }

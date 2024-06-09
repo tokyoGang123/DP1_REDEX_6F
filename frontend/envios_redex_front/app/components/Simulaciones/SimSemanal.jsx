@@ -10,7 +10,7 @@ import timezone from 'dayjs/plugin/timezone'
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import { getAeropuertosTodos } from "@/app/api/aeropuetos.api"
 import Header from '../Header/Header'
-import { getPlanesTodos } from "@/app/api/planesDeVuelo.api"
+import { getPlanesPorIntervalo, getPlanesTodos } from "@/app/api/planesDeVuelo.api"
 import { TryOutlined } from "@mui/icons-material"
 import { useTimer } from "../usoTimer"
 import { ejecutaGRASP, iniciaGRASP } from "@/app/api/grasp.api"
@@ -101,6 +101,21 @@ export default function SimSemanal() {
         planesDeVueloRef.current = planesDeVuelo
     },[planesDeVuelo])
 
+    //Planes de Vuelo FUturos
+    const [planesDeVueloFuturo, setPlanesDeVueloFuturo] = useState({})
+    const planesDeVueloFuturoRef = useRef(planesDeVueloFuturo)
+    useEffect(() => {
+        planesDeVueloFuturoRef.current = planesDeVueloFuturo
+    },[planesDeVueloFuturo])
+
+    //Planes de Vuelo Mapa
+    const [pdvMapa, setPdvMapa] = useState([])
+    const pdvMapaRef = useRef(pdvMapa);
+    useEffect(() => {
+        pdvMapaRef.current = pdvMapa;
+        console.log("change")
+    },[pdvMapa])
+
     //Envios
     const [envios, setEnvios] = useState({})
     const enviosRef = useRef(envios)
@@ -174,7 +189,7 @@ export default function SimSemanal() {
     const clickBotonIniciar = async () => {
 
         //"Play"
-        fechaStartRef.current = fechaSimRef.current; //fecha inicial
+        fechaStartRef.current = fechaSimRef.current.second(0); //fecha inicial
         startTimer()
         await iniciaDatos()
         ejecucionSimulacion()
@@ -186,17 +201,45 @@ export default function SimSemanal() {
     const iniciaDatos = async () => {
 
         //Leer planes de vuelo de la fecha inicial + X tiempo
-        let c = await getPlanesTodos() //Solicitar luego que se pueda dar la fecha
-        
+
+        //http://localhost:8080/api/planesVuelo/obtenerPorFechas/20240530T20:00:-05:00/20240530T21:00:-05:00
+        let planInicio = transformaHora(fechaSimRef.current)
+        let planFin = transformaHora(fechaSimRef.current.add(2,"h").add(2,"d")) //Obtener 2 dias + 2 horas para cubrir todos los posibles vuelos
+
+        //let c = await getPlanesPorIntervalo(planInicio,planFin) //Solicitar luego que se pueda dar la fecha
+        let c = await getPlanesTodos()
+        //c = c.slice(0,500)
+        await c.sort((a, b) => {
+            let fechaA = new Date(a.hora_origen);
+            let fechaB = new Date(b.hora_origen);
+            return fechaA - fechaB;
+        })
+        //console.log(c)
+
         //TEMPORAL
+        /*
         c = c.map(pdv => {
             let ruta = hallarPuntosIntermedios(pdv.latitud_origen, pdv.latitud_destino, pdv.longitud_origen, pdv.longitud_destino)
             return { ...pdv, listaPaquetes: [], listaCamino : ruta};
+        });*/
+        const handlePdvMapping = async () => {
+            // Supongo que `c` es tu array original de puntos de venta
+            const updatedC = await Promise.all(c.map(async pdv => {
+                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.latitud_destino, pdv.longitud_origen, pdv.longitud_destino);
+                return { ...pdv, listaPaquetes: [], listaCamino: ruta };
+            }));
+            return updatedC;
+        };
+        
+        // Uso de la función handlePdvMapping
+        await handlePdvMapping().then(updatedC => {
+            c = updatedC;
+            // Aquí puedes trabajar con el array actualizado `updatedC`
         });
         //TEMPORAL
         
         await setPlanesDeVuelo(c);
-        console.log(c)
+        console.log("PLANES FINALES", c)
 
         //Comando para inicializar la simulación
         let res = await iniciaGRASP();
@@ -250,7 +293,7 @@ export default function SimSemanal() {
     const revisaEnvios = async () => {
   
         //FOR es "falso", solo revisamos hasta que no tenga sentido
-        console.log(enviosRef.current,length)
+        //console.log(enviosRef.current,length)
         for (let i = 0; i < enviosRef.current.length; i++) {
             //console.log("a")
             const env = enviosRef.current[i];
@@ -270,6 +313,18 @@ export default function SimSemanal() {
         setEnvios(enviosRef.current)
     }
 
+    const revisaPlanes = async () => {
+        for (let i = 0; i < planesDeVueloRef.current.length; i++) {
+            const pc = planesDeVueloRef.current[i];
+            //console.log()
+            if (dayjs(pc.hora_origen).tz(zonaHorariaUsuario) > fechaSimRef.current) break;
+            if (pdvMapaRef.current.some(plan => plan.id_tramo == pc.id_tramo)) continue; //Si existe ya en el mapa, ignorar
+            //console.log("PLAN " + pc.id_tramo + " CONFIRMADO")
+            pdvMapaRef.current.push(pc)
+        }
+
+    }
+
     const obtenerNuevosEnvios = async (fechaLlam) => {
         let tiempoEnviado = transformaHora(fechaLlam);
         let p = await ejecutaGRASP(tiempoEnviado);
@@ -280,6 +335,20 @@ export default function SimSemanal() {
         })
         setEnviosFuturo(p)
         console.log("CON FECHA " + transformaHora(fechaSimRef.current))
+        console.log(p)
+    }
+
+    const obtenerNuevosPlanes = async (fechaLlam, ciclo) => {
+        let tiempoI = transformaHora(fechaLlam)
+        let tiempoF = transformaHora(fechaLlam.add(ciclo,'m'))
+        let p = await getPlanesPorIntervalo(tiempoI, tiempoF)
+        p.sort((a,b) => {
+            let fechaA = new Date(a.zonedFechaIngreso);
+            let fechaB = new Date(b.zonedFechaIngreso);
+            return fechaA - fechaB;
+        })
+        setPlanesDeVueloFuturo(p)
+        console.log("DESDE: " + tiempoI + " HASTA " + tiempoF)
         console.log(p)
     }
 
@@ -295,11 +364,12 @@ export default function SimSemanal() {
         let tiempoMax = 1;
         let nF = fechaSimRef.current;
         let fechaLlam = fechaStartRef.current //Fecha para llamar grasp
-        console.log("LLAMADA INICIO: " + fechaLlam)
+        let fechaLlamPlan = fechaStartRef.current.add(2,'d').add(2,'h') // 2 días + 2 horas ya se tienen leidos, se procedera a llamar bloques posteriores de 2 horas
+        //console.log("LLAMADA INICIO: " + fechaLlam)
         await setEstadoSim('PL')
 
         while (i <= llamadas_totales) {
-            console.log(nF)
+            //console.log(nF)
             //-----------------------------------
             //MANTENER TIEMPO
             if (i >= llamadas_totales) {
@@ -308,14 +378,17 @@ export default function SimSemanal() {
             //Si estamos antes que acabe el ciclo, colocar nuevos envios
             if (i == currentCiclo -1) {
                 enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
+                planesDeVueloRef.current = planesDeVueloRef.current.concat(planesDeVueloFuturoRef.current)
                 currentCiclo = currentCiclo + ciclo
             }
 
             //Si se han llegado al momento de llamar a GRASP, realizar la llamada a nuevos pedidos
             if (i == llamarAGrasp) {
-                console.log("llamada jaja ekide")
+                //console.log("llamada jaja ekide")
                 fechaLlam = fechaLlam.add(ciclo,'m')
-                obtenerNuevosEnvios(fechaLlam)
+                obtenerNuevosPlanes(fechaLlamPlan,ciclo)
+                fechaLlamPlan = fechaLlamPlan.add(ciclo,'m')
+                //obtenerNuevosEnvios(fechaLlam)
                 //fechaLlam = fechaLlam.add(ciclo,'m') //Añadir 120 minutos a la fecha de llamada
                 //console.log(enviosNew)
                 llamarAGrasp = llamarAGrasp + ciclo
@@ -331,8 +404,10 @@ export default function SimSemanal() {
             //Revisar envios
 
             //let enviosAsignados = await evaluarEnvios()
-            console.log(enviosRef.current)
-            await revisaEnvios()
+            //console.log(enviosRef.current)
+            //await revisaEnvios()
+            await revisaPlanes() //Ver si inicia algun plan para colocarlo en el arreglo y mostrarlo en mapa
+
 
             //agregar un minuto simulado
             nF = await nF.add(1, 'm');
@@ -377,7 +452,7 @@ export default function SimSemanal() {
             </Stack>
             <div style={{ height: 'calc(100vh - 50px)', width: '100%' }}>
                 {/*<MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={planesDeVueloRef.current} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} />*/}
-                <MapaSimuladorOL aeropuertosBD={aeropuertos} planesDeVueloBD={planesDeVueloRef.current}></MapaSimuladorOL>
+                <MapaSimuladorOL aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapaRef.current} estadoSim={estadoSim} fechaSim={fechaSimRef.current}></MapaSimuladorOL>
             </div>
 
         </>

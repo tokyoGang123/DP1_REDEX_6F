@@ -22,3 +22,14 @@ export const cargarPlanesFecha = async (fecha) => {
     }
 
 }
+
+export const getPlanesPorIntervalo = async (fechaI,fechaF) => {
+    try {
+        let data = await baseApi.get('planesVuelo/obtenerPorFechas/' + fechaI + "/" + fechaF).then(({data}) => data)
+        console.log(data)
+        return data;
+    } catch (error) {
+        console.log('Error al buscar data:', error)
+        return null;
+    }
+}
