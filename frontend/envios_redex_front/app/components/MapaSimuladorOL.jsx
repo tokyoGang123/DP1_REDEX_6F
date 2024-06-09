@@ -65,7 +65,7 @@ export default function MapaSimuladorOL({ aeropuertosBD, planesDeVueloBD, fechaS
             }
             { mapRef && planesDeVuelo && planesDeVuelo.length > 0 &&
                 planesDeVuelo.map((plan, index) => (
-                    <PlanMarker key={index} map={mapRef.current.getMap()} planDeVuelo={plan} planes={planesDeVuelo}/>
+                    <PlanMarker key={index} map={mapRef.current.getMap()} planDeVuelo={plan} planes={planesDeVuelo} vectorLayer={vectorLayer}/>
                 ))}
         </div>
     )

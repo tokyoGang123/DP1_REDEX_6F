@@ -9,14 +9,14 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 
-const PlanMarker = ({ map, planDeVuelo, planesDeVuelo }) => {
+const PlanMarker = ({ map, planDeVuelo, planesDeVuelo,vectorLayer }) => {
 
     //console.log(planDeVuelo)
     dayjs.extend(utc);
     dayjs.extend(timezone);
 
     useEffect(() => {
-        if (!map) return;
+        if (!map || !vectorLayer) return;
 
         let horaOrigen = dayjs(planDeVuelo.hora_origen)
         //console.log(horaOrigen)
@@ -41,6 +41,7 @@ const PlanMarker = ({ map, planDeVuelo, planesDeVuelo }) => {
 
         iconFeature.setStyle(iconStyle);
 
+        /*
         const vectorSource = new VectorSource({
             features: [iconFeature]
         })
@@ -48,11 +49,14 @@ const PlanMarker = ({ map, planDeVuelo, planesDeVuelo }) => {
         const vectorLayer = new VectorLayer({
             source: vectorSource,
         })
+            */
+        
+        vectorLayer.getSource().addFeature(iconFeature)
 
-        map.addLayer(vectorLayer);
+        //map.addLayer(vectorLayer);
 
         let step = 0;
-        const steps = 100;
+        const steps = 50;
 
 
         const movePlane = () => {
@@ -72,7 +76,12 @@ const PlanMarker = ({ map, planDeVuelo, planesDeVuelo }) => {
 
         movePlane();
 
-        return () => map.removeLayer(vectorLayer)
+        return () => {
+            if(vectorLayer) {
+                vectorLayer.getSource().removeFeature(iconFeature)
+            }
+
+        }
 
 
     }, [map, planDeVuelo])
