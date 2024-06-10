@@ -206,14 +206,23 @@ export default function SimSemanal() {
         let planInicio = transformaHora(fechaSimRef.current)
         let planFin = transformaHora(fechaSimRef.current.add(2,"h").add(2,"d")) //Obtener 2 dias + 2 horas para cubrir todos los posibles vuelos
 
-        //let c = await getPlanesPorIntervalo(planInicio,planFin) //Solicitar luego que se pueda dar la fecha
+        /*
         let c = await getPlanesTodos()
-        //c = c.slice(0,500)
         await c.sort((a, b) => {
             let fechaA = new Date(a.hora_origen);
             let fechaB = new Date(b.hora_origen);
             return fechaA - fechaB;
         })
+            */
+        //c = c.slice(0,500)
+        
+        let c = await getPlanesPorIntervalo(planInicio,planFin)
+        await c.sort((a, b) => {
+            let fechaA = new Date(a.zonedHora_origen);
+            let fechaB = new Date(b.zonedHora_origen);
+            return fechaA - fechaB;
+        })
+            
         //console.log(c)
 
         //TEMPORAL

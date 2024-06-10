@@ -9,7 +9,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 
-const PlanMarker = ({ map, planDeVuelo, planesDeVuelo,vectorLayer }) => {
+const PlanMarker = ({ map, planDeVuelo, planesDeVuelo,vectorLayer,onRemovePlan }) => {
 
     //console.log(planDeVuelo)
     dayjs.extend(utc);
@@ -71,6 +71,8 @@ const PlanMarker = ({ map, planDeVuelo, planesDeVuelo,vectorLayer }) => {
                 requestAnimationFrame(movePlane);
             } else {
                 vectorLayer.getSource().removeFeature(iconFeature);
+                //planesDeVuelo = planesDeVuelo.filter(item => item.id_tramo !== planDeVuelo.id_tramo)
+                onRemovePlan(planDeVuelo.id_tramo)
             }
         }
 

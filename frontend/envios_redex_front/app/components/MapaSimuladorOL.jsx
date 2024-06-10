@@ -49,6 +49,11 @@ export default function MapaSimuladorOL({ aeropuertosBD, planesDeVueloBD, fechaS
         }),
     })).current;
 
+    //Remover un plan
+    const removerPlan = (idTramo) => {
+        planesDeVueloBD.filter(plan => plan.id_tramo != idTramo)
+        console.log(idTramo + " removido")
+    }
 
 
     return (
@@ -65,7 +70,7 @@ export default function MapaSimuladorOL({ aeropuertosBD, planesDeVueloBD, fechaS
             }
             { mapRef && planesDeVuelo && planesDeVuelo.length > 0 &&
                 planesDeVuelo.map((plan, index) => (
-                    <PlanMarker key={index} map={mapRef.current.getMap()} planDeVuelo={plan} planes={planesDeVuelo} vectorLayer={vectorLayer}/>
+                    <PlanMarker key={index} map={mapRef.current.getMap()} planDeVuelo={plan} planes={planesDeVueloBD} vectorLayer={vectorLayer} onRemovePlan={removerPlan}/>
                 ))}
         </div>
     )
