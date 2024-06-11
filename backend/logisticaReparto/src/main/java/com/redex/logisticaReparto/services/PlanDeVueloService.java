@@ -33,6 +33,11 @@ public class PlanDeVueloService {
     public ArrayList<PlanDeVuelo> obtenerPlanesVuelosPorFecha(LocalDateTime fechaInicio, String husoHorario, LocalDateTime fechaFin){
         return planDeVueloRepository.findByFechaIngresoInRange(fechaInicio, husoHorario, fechaFin);
     }
+
+    public ArrayList<PlanVueloResponse> obtenerPlanesVuelosPorFechaLatLong(LocalDateTime fechaInicio, String husoHorario, LocalDateTime fechaFin){
+        return planDeVueloRepository.queryPlanDeVueloWithFechaIngresoFechaFin(fechaInicio, husoHorario, fechaFin);
+    }
+
     public boolean planAcabaElSiguienteDia(String tInicio, String tFin) {
 
         String dataInicio[] = tInicio.split(":");
