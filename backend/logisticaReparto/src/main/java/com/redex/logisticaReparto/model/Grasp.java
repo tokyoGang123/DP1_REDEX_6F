@@ -61,8 +61,12 @@ public class Grasp {
         //ArrayList<Aeropuerto> aeropuertosTemp = new ArrayList<>(aeropuertos);
         //ArrayList<PlanDeVuelo> planesTemp = new ArrayList<>(planes);
 
+        // Agrupar planes por aeropuerto de origen
         Map<Integer, List<PlanDeVuelo>> planesPorAeropuertoOrigen = planes.stream()
                 .collect(Collectors.groupingBy(PlanDeVuelo::getCiudad_origen));
+
+        // Ordenar envíos por fecha de llegada max, de menor a mayor
+        enviosSolicitados.sort(Comparator.comparing(Envio::getZonedFechaLlegadaMax));
 
         //Encontrar la solucion por cada pedido
         for (Envio envio : enviosSolicitados) {
