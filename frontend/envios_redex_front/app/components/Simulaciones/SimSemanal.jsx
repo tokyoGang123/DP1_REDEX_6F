@@ -10,7 +10,7 @@ import timezone from 'dayjs/plugin/timezone'
 import advancedFormat from 'dayjs/plugin/advancedFormat';
 import { getAeropuertosTodos } from "@/app/api/aeropuetos.api"
 import Header from '../Header/Header'
-import { getPlanesPorIntervalo, getPlanesTodos } from "@/app/api/planesDeVuelo.api"
+import { getPlanesPorIntervalo, getPlanesPorIntervaloLatLon, getPlanesTodos } from "@/app/api/planesDeVuelo.api"
 import { TryOutlined } from "@mui/icons-material"
 import { useTimer } from "../usoTimer"
 import { ejecutaGRASP, iniciaGRASP } from "@/app/api/grasp.api"
@@ -108,6 +108,14 @@ export default function SimSemanal() {
         planesDeVueloFuturoRef.current = planesDeVueloFuturo
     },[planesDeVueloFuturo])
 
+    //Planes de Vuelo Eliminar
+    const [planesEliminar, setPlanesEliminar] = useState([])
+    const planesEliminarRef = useRef(planesEliminar)
+    useEffect(() => {
+        planesEliminarRef.current = planesEliminar;
+        console.log("change")
+    },[planesEliminar])
+    
     //Planes de Vuelo Mapa
     const [pdvMapa, setPdvMapa] = useState([])
     const pdvMapaRef = useRef(pdvMapa);
@@ -216,10 +224,10 @@ export default function SimSemanal() {
             */
         //c = c.slice(0,500)
         
-        let c = await getPlanesPorIntervalo(planInicio,planFin)
+        let c = await getPlanesPorIntervaloLatLon(planInicio,planFin)
         await c.sort((a, b) => {
-            let fechaA = new Date(a.zonedHora_origen);
-            let fechaB = new Date(b.zonedHora_origen);
+            let fechaA = new Date(a.hora_origen);
+            let fechaB = new Date(b.hora_origen);
             return fechaA - fechaB;
         })
             
@@ -234,8 +242,8 @@ export default function SimSemanal() {
         const handlePdvMapping = async () => {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(c.map(async pdv => {
-                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.latitud_destino, pdv.longitud_origen, pdv.longitud_destino);
-                return { ...pdv, listaPaquetes: [], listaCamino: ruta };
+                //let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.latitud_destino, pdv.longitud_origen, pdv.longitud_destino);
+                return { ...pdv, listaPaquetes: []};
             }));
             return updatedC;
         };
@@ -247,7 +255,8 @@ export default function SimSemanal() {
         });
         //TEMPORAL
         
-        await setPlanesDeVuelo(c);
+        await setPlanesDeVuelo([...c]);
+        await setPlanesEliminar([...c])
         console.log("PLANES FINALES", c)
 
         //Comando para inicializar la simulación
@@ -284,8 +293,10 @@ export default function SimSemanal() {
             let paq = env.paquetes[i]
             let listRut = paq.ruta.listaRutas
             for (let j = 0; j < listRut.length; j++){
+                console.log("Buscar", listRut[j])
                 //Encontrar plan de vuelo asignado a parte de la ruta
                 let pdv = planesDeVueloRef.current.find(plan => plan.id_tramo == listRut[j])
+                console.log(pdv)
                 //AQUI SE ASIGNA A SU LISTA
                 pdv.listaPaquetes.push(paq.id_paquete)
                 pdv.capacidad_ocupada = pdv.capacidad_ocupada + 1 
@@ -323,13 +334,14 @@ export default function SimSemanal() {
     }
 
     const revisaPlanes = async () => {
-        for (let i = 0; i < planesDeVueloRef.current.length; i++) {
-            const pc = planesDeVueloRef.current[i];
+        for (let i = 0; i < planesEliminarRef.current.length; i++) {
+            const pc = planesEliminarRef.current[i];
             //console.log()
             if (dayjs(pc.hora_origen).tz(zonaHorariaUsuario) > fechaSimRef.current) break;
             if (pdvMapaRef.current.some(plan => plan.id_tramo == pc.id_tramo)) continue; //Si existe ya en el mapa, ignorar
             //console.log("PLAN " + pc.id_tramo + " CONFIRMADO")
             pdvMapaRef.current.push(pc)
+            planesEliminarRef.current.splice(i,1)
         }
 
     }
@@ -350,7 +362,7 @@ export default function SimSemanal() {
     const obtenerNuevosPlanes = async (fechaLlam, ciclo) => {
         let tiempoI = transformaHora(fechaLlam)
         let tiempoF = transformaHora(fechaLlam.add(ciclo,'m'))
-        let p = await getPlanesPorIntervalo(tiempoI, tiempoF)
+        let p = await getPlanesPorIntervaloLatLon(tiempoI, tiempoF)
         p.sort((a,b) => {
             let fechaA = new Date(a.zonedFechaIngreso);
             let fechaB = new Date(b.zonedFechaIngreso);
@@ -387,7 +399,8 @@ export default function SimSemanal() {
             //Si estamos antes que acabe el ciclo, colocar nuevos envios
             if (i == currentCiclo -1) {
                 enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
-                planesDeVueloRef.current = planesDeVueloRef.current.concat(planesDeVueloFuturoRef.current)
+                planesDeVueloRef.current = planesDeVueloRef.current.concat([...planesDeVueloFuturoRef.current])
+                planesEliminarRef.current = planesEliminarRef.current.concat([...planesDeVueloFuturoRef.current])
                 currentCiclo = currentCiclo + ciclo
             }
 
@@ -397,8 +410,7 @@ export default function SimSemanal() {
                 fechaLlam = fechaLlam.add(ciclo,'m')
                 obtenerNuevosPlanes(fechaLlamPlan,ciclo)
                 fechaLlamPlan = fechaLlamPlan.add(ciclo,'m')
-                //obtenerNuevosEnvios(fechaLlam)
-                //fechaLlam = fechaLlam.add(ciclo,'m') //Añadir 120 minutos a la fecha de llamada
+                obtenerNuevosEnvios(fechaLlam)
                 //console.log(enviosNew)
                 llamarAGrasp = llamarAGrasp + ciclo
             }
@@ -414,7 +426,7 @@ export default function SimSemanal() {
 
             //let enviosAsignados = await evaluarEnvios()
             //console.log(enviosRef.current)
-            //await revisaEnvios()
+            await revisaEnvios()
             await revisaPlanes() //Ver si inicia algun plan para colocarlo en el arreglo y mostrarlo en mapa
 
 

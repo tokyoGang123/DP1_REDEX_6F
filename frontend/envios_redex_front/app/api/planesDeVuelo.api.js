@@ -33,3 +33,14 @@ export const getPlanesPorIntervalo = async (fechaI,fechaF) => {
         return null;
     }
 }
+
+export const getPlanesPorIntervaloLatLon = async (fechaI, fechaF) => {
+    try {
+        let data = await baseApi.get('planesVuelo/obtenerPorFechasConLatitudLongitud/' + fechaI + "/" + fechaF).then(({data}) => data)
+        console.log(data)
+        return data;
+    } catch (error) {
+        console.log('Error al buscar data:', error)
+        return null;
+    }
+}
