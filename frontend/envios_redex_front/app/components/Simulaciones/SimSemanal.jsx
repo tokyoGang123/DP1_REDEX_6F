@@ -230,8 +230,9 @@ export default function SimSemanal() {
             let fechaB = new Date(b.hora_origen);
             return fechaA - fechaB;
         })
+        //c = c.slice(0,2)
             
-        //console.log(c)
+        console.log(c)
 
         //TEMPORAL
         /*
@@ -293,10 +294,10 @@ export default function SimSemanal() {
             let paq = env.paquetes[i]
             let listRut = paq.ruta.listaRutas
             for (let j = 0; j < listRut.length; j++){
-                console.log("Buscar", listRut[j])
+                //console.log("Buscar", listRut[j])
                 //Encontrar plan de vuelo asignado a parte de la ruta
                 let pdv = planesDeVueloRef.current.find(plan => plan.id_tramo == listRut[j])
-                console.log(pdv)
+                //console.log(pdv)
                 //AQUI SE ASIGNA A SU LISTA
                 pdv.listaPaquetes.push(paq.id_paquete)
                 pdv.capacidad_ocupada = pdv.capacidad_ocupada + 1 
@@ -355,8 +356,8 @@ export default function SimSemanal() {
             return fechaA - fechaB;
         })
         setEnviosFuturo(p)
-        console.log("CON FECHA " + transformaHora(fechaSimRef.current))
-        console.log(p)
+        //console.log("CON FECHA " + transformaHora(fechaSimRef.current))
+        //console.log(p)
     }
 
     const obtenerNuevosPlanes = async (fechaLlam, ciclo) => {
@@ -369,8 +370,8 @@ export default function SimSemanal() {
             return fechaA - fechaB;
         })
         setPlanesDeVueloFuturo(p)
-        console.log("DESDE: " + tiempoI + " HASTA " + tiempoF)
-        console.log(p)
+        //console.log("DESDE: " + tiempoI + " HASTA " + tiempoF)
+        //console.log(p)
     }
 
 
@@ -410,7 +411,7 @@ export default function SimSemanal() {
                 fechaLlam = fechaLlam.add(ciclo,'m')
                 obtenerNuevosPlanes(fechaLlamPlan,ciclo)
                 fechaLlamPlan = fechaLlamPlan.add(ciclo,'m')
-                obtenerNuevosEnvios(fechaLlam)
+                //obtenerNuevosEnvios(fechaLlam)
                 //console.log(enviosNew)
                 llamarAGrasp = llamarAGrasp + ciclo
             }
@@ -428,7 +429,7 @@ export default function SimSemanal() {
             //console.log(enviosRef.current)
             await revisaEnvios()
             await revisaPlanes() //Ver si inicia algun plan para colocarlo en el arreglo y mostrarlo en mapa
-
+            
 
             //agregar un minuto simulado
             nF = await nF.add(1, 'm');

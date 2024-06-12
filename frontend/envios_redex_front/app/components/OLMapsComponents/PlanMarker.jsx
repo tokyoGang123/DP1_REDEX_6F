@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Feature } from 'ol';
 import { Point } from 'ol/geom';
 import { Vector as VectorLayer } from 'ol/layer';
@@ -8,17 +8,19 @@ import { transform } from 'ol/proj';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
+import {BatchUpdateContext} from '../MapaSimuladorOL'
 
-const PlanMarker = ({ map, planDeVuelo, planesDeVuelo,vectorLayer,onRemovePlan }) => {
+const PlanMarker = ({ map, planDeVuelo, planesDeVuelo,vectorLayer,onRemovePlan ,style}) => {
 
     //console.log(planDeVuelo)
     dayjs.extend(utc);
     dayjs.extend(timezone);
+    const batchUpdatePlanes = useContext(BatchUpdateContext)
 
     useEffect(() => {
         if (!map || !vectorLayer) return;
-
-        let horaOrigen = dayjs(planDeVuelo.hora_origen)
+        //console.log(useContext(BatchUpdateContext))
+        
         //console.log(horaOrigen)
         let origen = [planDeVuelo.longitud_origen, planDeVuelo.latitud_origen]
         let destino = [planDeVuelo.longitud_destino, planDeVuelo.latitud_destino]
@@ -29,15 +31,7 @@ const PlanMarker = ({ map, planDeVuelo, planesDeVuelo,vectorLayer,onRemovePlan }
             geometry: new Point(transform(origen, 'EPSG:4326', 'EPSG:3857')),
         })
 
-        const iconStyle = new Style({
-            image: new Icon({
-                anchor: [0.5, 1],
-                anchorXUnits: 'fraction',
-                anchorYUnits: 'fraction',
-                src: '/planes/plane_green.svg',
-                scale: 0.4
-            })
-        })
+        const iconStyle = style
 
         iconFeature.setStyle(iconStyle);
 
@@ -56,8 +50,13 @@ const PlanMarker = ({ map, planDeVuelo, planesDeVuelo,vectorLayer,onRemovePlan }
         //map.addLayer(vectorLayer);
 
         let step = 0;
-        const steps = 50;
 
+        let horaOrigen = dayjs(planDeVuelo.hora_origen)
+        let horaDestino = dayjs(planDeVuelo.hora_destino)
+        let tiempoSimulado = horaDestino.diff(horaOrigen,'minute')
+        let tiempoReal = tiempoSimulado * 100/1000 //En segundos
+        //const steps = tiempoReal * 60;
+        const steps = 100
 
         const movePlane = () => {
             if (step <= steps) {
@@ -76,7 +75,11 @@ const PlanMarker = ({ map, planDeVuelo, planesDeVuelo,vectorLayer,onRemovePlan }
             }
         }
 
-        movePlane();
+        const addToBatch = () => {
+            batchUpdatePlanes(movePlane)
+        }
+
+        addToBatch();
 
         return () => {
             if(vectorLayer) {
