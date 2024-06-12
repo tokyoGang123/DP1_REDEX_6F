@@ -61,23 +61,25 @@ public class Grasp {
         //ArrayList<Aeropuerto> aeropuertosTemp = new ArrayList<>(aeropuertos);
         //ArrayList<PlanDeVuelo> planesTemp = new ArrayList<>(planes);
 
+        // Agrupar planes por aeropuerto de origen
         Map<Integer, List<PlanDeVuelo>> planesPorAeropuertoOrigen = planes.stream()
                 .collect(Collectors.groupingBy(PlanDeVuelo::getCiudad_origen));
 
+        // Ordenar envíos por fecha de llegada max, de menor a mayor
+        enviosSolicitados.sort(Comparator.comparing(Envio::getZonedFechaLlegadaMax));
+
         //Encontrar la solucion por cada pedido
-        for (Envio envio : enviosSolicitados) { //Buscar solucion para cada pedido
+        for (Envio envio : enviosSolicitados) {
             //Quitar envios sin destino de la lista
             System.out.println(envio.getId_envio());
-            //if (envio.getAeropuerto_origen() == -1 || envio.getAeropuerto_destino() == -1) continue;
 
-            //LISTA RESTRINGIDA
             ArrayList<ElementoListaRestringida> listaRestringida = new ArrayList<ElementoListaRestringida>(tamRCL);
             List<PlanDeVuelo> planesVueloOrigen = planesPorAeropuertoOrigen.get(envio.getAeropuerto_origen());
 
-            //Por cada vuelo que sale del aeropuerto, ejecutaremos la busqueda de ruta
-            //System.out.println("BUSQUEDA INICIADA");
-            //for (PlanDeVuelo planDeVuelo : planes) {
+
             for (PlanDeVuelo planDeVuelo : planesVueloOrigen){
+
+
                 //Se asume que planes estan ordenados
                 //System.out.println(planDeVuelo.getHora_origen() + " vs " + envio.getFecha_llegada_max());
                 if (planDeVuelo.getZonedHora_origen().isAfter(envio.getZonedFechaLlegadaMax())) break; //no creo que suceda con 24h de planes
@@ -111,7 +113,9 @@ public class Grasp {
                     //}
                 }
             }
+
             //Si la lista está vacía, no habia rutas y ocurre colapso
+
             if (listaRestringida.isEmpty()) {
                 //System.out.println("No se pudo encontrar rutas posibles para paquetes del envio " + envio.getId_envio());
                 //Descomentar break en producto final
@@ -222,21 +226,24 @@ public class Grasp {
         }
         i++;
         List<PlanDeVuelo> planesVueloOrigen = planes.get(aeropuertoActual);
-        List<PlanDeVuelo> planesFiltrados = planesVueloOrigen.stream()
-                .filter(plan -> plan.getZonedHora_origen().isAfter(planFinalizado.getZonedHora_destino()))
-                .toList();
-        //Si no estamos en el destino, buscar un camino
-        for (PlanDeVuelo potencial : planesFiltrados) {
-            if (i > 4) new ArrayList<>(); //borrar si esta mal
-            //borrar si esta mal
-            if (
-                    potencial.getId_tramo() != planFinalizado.getId_tramo() &&
-                            aeropuertoActual == potencial.getCiudad_origen() /* Si el plan potencial inicia en donde va a llegar*/
-                            && planFinalizado.getZonedHora_destino().isBefore(potencial.getZonedHora_origen())  /*Si el plan potencial inicia luego del que finalizamos*/
-                            && !aeropuertoByID(aeropuertos, potencial.getCiudad_destino()).isFull() /* Si el aeropuerto al que iremos no esta lleno*/
-                            && !potencial.isFull() /*Si el plan no esta lleno*/
-                            && envio.getZonedFechaIngreso().isBefore(potencial.getZonedHora_origen())
-                            && envio.getZonedFechaLlegadaMax().isAfter(potencial.getZonedHora_destino()) /*Si el vuelo no incumple con los tiempos establecidos*/) {
+
+        if (planesVueloOrigen != null) {
+            List<PlanDeVuelo> planesFiltrados = planesVueloOrigen.stream()
+                    .filter(plan -> plan.getZonedHora_origen().isAfter(planFinalizado.getZonedHora_destino()))
+                    .toList();
+
+            //Si no estamos en el destino, buscar un camino
+            for (PlanDeVuelo potencial : planesFiltrados) {
+                if (i > 4) new ArrayList<>(); //borrar si esta mal
+                //borrar si esta mal
+                if (
+                        potencial.getId_tramo() != planFinalizado.getId_tramo() &&
+                                aeropuertoActual == potencial.getCiudad_origen() /* Si el plan potencial inicia en donde va a llegar*/
+                                && planFinalizado.getZonedHora_destino().isBefore(potencial.getZonedHora_origen())  /*Si el plan potencial inicia luego del que finalizamos*/
+                                && !aeropuertoByID(aeropuertos, potencial.getCiudad_destino()).isFull() /* Si el aeropuerto al que iremos no esta lleno*/
+                                && !potencial.isFull() /*Si el plan no esta lleno*/
+                                && envio.getZonedFechaIngreso().isBefore(potencial.getZonedHora_origen())
+                                && envio.getZonedFechaLlegadaMax().isAfter(potencial.getZonedHora_destino()) /*Si el vuelo no incumple con los tiempos establecidos*/) {
                     /*
                     //Añadimos a esta lista
                     //Si ya estamos en el destino, lo logramos y devolvemos el id de este plan
@@ -246,21 +253,25 @@ public class Grasp {
                         return listaEnConstruccion;
                     }*/
 
-                //Buscamos nuevas rutas basadas en esta
-                ArrayList<Long> nuevasRutas = generaRutaVuelo(aeropuertos, planes, potencial, envio, i);
-                //Si tenemos una lista no vacia, agregamos y devolvemos
-                if (!nuevasRutas.isEmpty()) {
-                    //if (i != 1) {listaEnConstruccion.add(potencial.getId_tramo());}
-                    listaEnConstruccion.add(planFinalizado.getId_tramo());
-                    listaEnConstruccion.addAll(nuevasRutas);
-                    return listaEnConstruccion;
+                    //Buscamos nuevas rutas basadas en esta
+                    ArrayList<Long> nuevasRutas = generaRutaVuelo(aeropuertos, planes, potencial, envio, i);
+                    //Si tenemos una lista no vacia, agregamos y devolvemos
+                    if (!nuevasRutas.isEmpty()) {
+                        //if (i != 1) {listaEnConstruccion.add(potencial.getId_tramo());}
+                        listaEnConstruccion.add(planFinalizado.getId_tramo());
+                        listaEnConstruccion.addAll(nuevasRutas);
+                        return listaEnConstruccion;
+                    }
                 }
+
             }
 
         }
+
         //Si no se encontro nada, regresar un ArrayList vacio
         return new ArrayList<>();
     }
+
     private int obtenerCiudadActual(Ruta ruta, ArrayList<PlanDeVuelo> planes) {
         // Obtener la última ciudad en la ruta actual
         int ultimaCiudad = 0;

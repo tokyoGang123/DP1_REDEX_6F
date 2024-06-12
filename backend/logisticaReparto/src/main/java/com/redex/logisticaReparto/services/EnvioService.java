@@ -37,6 +37,15 @@ public class EnvioService {
     public ArrayList<Envio> obtenerEnviosPorFecha(LocalDateTime  fechaInicio, String husoHorario, LocalDateTime fechaFin){
         return envioRepository.findByFechaIngresoInRange(fechaInicio, husoHorario, fechaFin);
     }
+
+    public int calcularTotalPaquetesEnvio(ArrayList<Envio> envios) {
+        int totalPaquetes = 0;
+        for (Envio envio : envios) {
+            totalPaquetes += envio.getNumPaquetes();
+        }
+        return totalPaquetes;
+    }
+
     public int tipoVuelo(int ciudadOrigen, int ciudadDestino, ArrayList<Pais> paises) {
         int contA = 0, contB = 0;
         for (Pais pais : paises) {

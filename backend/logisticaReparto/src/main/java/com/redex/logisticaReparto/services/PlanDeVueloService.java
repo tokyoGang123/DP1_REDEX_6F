@@ -33,6 +33,20 @@ public class PlanDeVueloService {
     public ArrayList<PlanDeVuelo> obtenerPlanesVuelosPorFecha(LocalDateTime fechaInicio, String husoHorario, LocalDateTime fechaFin){
         return planDeVueloRepository.findByFechaIngresoInRange(fechaInicio, husoHorario, fechaFin);
     }
+
+    public ArrayList<PlanVueloResponse> obtenerPlanesVuelosPorFechaLatLong(LocalDateTime fechaInicio, String husoHorario, LocalDateTime fechaFin){
+        return planDeVueloRepository.queryPlanDeVueloWithFechaIngresoFechaFin(fechaInicio, husoHorario, fechaFin);
+    }
+
+    public int calcularTotalPaquetesPlanes(ArrayList<PlanDeVuelo> planes) {
+        int totalPaquetes = 0;
+        for (PlanDeVuelo plan : planes) {
+            System.out.println(plan.getId_tramo() + " - paquetes: " + plan.getCapacidad_ocupada());
+            totalPaquetes += plan.getCapacidad_ocupada();
+        }
+        return totalPaquetes;
+    }
+
     public boolean planAcabaElSiguienteDia(String tInicio, String tFin) {
 
         String dataInicio[] = tInicio.split(":");
