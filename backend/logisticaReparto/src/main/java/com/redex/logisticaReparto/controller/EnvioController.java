@@ -211,4 +211,61 @@ public class EnvioController {
 
     }
 
+    @PostMapping("/envios/insertarEnvio/{codigoOrigen}/{codigoDestino}/{paquetes}")
+    Envio insertarSimulacionDiaria(@PathVariable String codigoOrigen, @PathVariable String codigoDestino,
+                                  @PathVariable String paquetes){
+        Envio envio=new Envio();
+        Optional<Aeropuerto> aeropuertoOrigen=aeropuertoService.obtenerAeropuertoPorCodigo(codigoOrigen);
+        Optional<Aeropuerto> aeropuertoDestino=aeropuertoService.obtenerAeropuertoPorCodigo(codigoDestino);
+        ArrayList<Pais> paises = paisService.obtenerTodosPaises();
+        int numPaquetes=Integer.parseInt(paquetes);
+
+        //Seteo ID
+        envio.setAeropuerto_origen(aeropuertoOrigen.get().getId_aeropuerto());
+        envio.setAeropuerto_destino(aeropuertoDestino.get().getId_aeropuerto());
+
+        //Set Huso
+        String husoHorarioOrigen = aeropuertoOrigen.get().getHuso_horario();
+        envio.setHuso_horario_origen(husoHorarioOrigen);
+
+        String husoHorarioDestino= aeropuertoDestino.get().getHuso_horario();
+        envio.setHuso_horario_destino(husoHorarioDestino);
+
+        //Set NumPaquetes
+        envio.setNumPaquetes(numPaquetes);
+
+        //Set Estado
+        envio.setEstado(0);
+
+
+        ZoneId zonaOrigen = ZoneId.of(husoHorarioOrigen);
+
+        // Obtener la fecha y hora actual en la zona horaria del aeropuerto de origen
+        ZonedDateTime fechaEnvioZoned = ZonedDateTime.now(zonaOrigen);
+        LocalDateTime fechaEnvio = fechaEnvioZoned.toLocalDateTime().withNano(0);
+
+        envio.setFecha_ingreso(fechaEnvio);
+
+        //    private LocalDateTime fecha_llegada_max;
+        int ciudadOrigen = aeropuertoOrigen.get().getId_aeropuerto();
+        int ciudadDestino = aeropuertoDestino.get().getId_aeropuerto();
+        int numDias = envioService.tipoVuelo(ciudadOrigen, ciudadDestino, paises);
+        LocalDateTime tiempoMax = fechaEnvio.plusDays(numDias);
+
+        envio.setFecha_llegada_max(tiempoMax);
+
+
+        System.out.println("Ciudad Origen:  " + ciudadOrigen);
+        System.out.println("Ciudad Destino: " + ciudadDestino);
+        System.out.println("Paquetes:  "+ numPaquetes);
+        System.out.println("Huso Origen:  "+husoHorarioOrigen);
+        System.out.println("Huso Destino:  "+husoHorarioDestino);
+        System.out.println("Tiempo Max:  "+tiempoMax);
+
+
+        envioService.insertarEnvio(envio);
+
+        return envio;
+
+    }
 }
