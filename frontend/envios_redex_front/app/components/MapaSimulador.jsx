@@ -54,9 +54,9 @@ const idsTemp = [624,741,408,471,750]
           {aeropuertos && aeropuertos.length > 0 ? aeropuertos.map((pos, index) => (
             <Aeropuerto key={index} aeropuerto={pos}></Aeropuerto>
           )) : <></>}
-          {/*planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.map((pos,index) => (
+          {planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.map((pos,index) => (
             <PlanDeVuelo key={index} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} intervaloMS={intervaloMS}></PlanDeVuelo>
-          )) : <></>*/}
+          )) : <></>}
           {/*planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.filter(pos => idsTemp.includes(pos.id_tramo)).map((pos,index) => (
             <PlanDeVuelo key={index} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} intervaloMS={intervaloMS}></PlanDeVuelo>
           )) : <></>*/}

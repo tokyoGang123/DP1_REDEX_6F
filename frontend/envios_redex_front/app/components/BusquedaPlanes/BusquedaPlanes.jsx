@@ -100,7 +100,7 @@ export default function BusquedaPlanes({ open, onClose, planesDeVueloRef }) {
                 <ListItemIcon><Flight /></ListItemIcon>
                 <ListItemText 
                   primary={plan.id_tramo} 
-                  secondary={`${plan.origen || 'Origen'} → ${plan.destino || 'Destino'}`} 
+                  secondary={`${plan.ciudad_origen || 'Origen'} → ${plan.ciudad_destino || 'Destino'}`} 
                 />
                 <ListItemSecondaryAction>
                   <IconButton edge="end" onClick={() => handleOpenModal(plan)}>
@@ -143,7 +143,7 @@ export default function BusquedaPlanes({ open, onClose, planesDeVueloRef }) {
                     <Paper elevation={3} sx={{ p: 2, bgcolor: '#e3f2fd' }}>
                       <Typography variant="subtitle1">
                         <LocationOn fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} />
-                        {vueloSeleccionado.origen || 'Origen no disponible'}
+                        {vueloSeleccionado.origen || 'Ciudad '} ({vueloSeleccionado.ciudad_origen || 'Ciudad de Origen no disponible'})
                       </Typography>
                     </Paper>
                   </Grid>
@@ -151,7 +151,7 @@ export default function BusquedaPlanes({ open, onClose, planesDeVueloRef }) {
                     <Paper elevation={3} sx={{ p: 2, bgcolor: '#ffebee' }}>
                       <Typography variant="subtitle1">
                         <FlightLand fontSize="small" sx={{ mr: 1, verticalAlign: 'middle' }} />
-                        {vueloSeleccionado.destino || 'Destino no disponible'}
+                        {vueloSeleccionado.destino || 'Ciudad '} ({vueloSeleccionado.ciudad_destino || 'Ciudad de Destino no disponible'})
                       </Typography>
                     </Paper>
                   </Grid>
@@ -189,4 +189,5 @@ export default function BusquedaPlanes({ open, onClose, planesDeVueloRef }) {
     </Modal>
   );
 }
+
 
