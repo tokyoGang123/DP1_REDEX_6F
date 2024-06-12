@@ -425,7 +425,6 @@ export default function SimSemanal() {
 
             //Revisar envios
 
-            //let enviosAsignados = await evaluarEnvios()
             //console.log(enviosRef.current)
             await revisaEnvios()
             await revisaPlanes() //Ver si inicia algun plan para colocarlo en el arreglo y mostrarlo en mapa
@@ -449,6 +448,7 @@ export default function SimSemanal() {
             //-----------------------------------
 
 
+            //if (0 < delay) 
             await new Promise(r => setTimeout(r, delay)); //originalmente 200
             //console.log(fechaSimRef.current.toDate() + " - " + tiempo)
             //console.log(timeRef)
