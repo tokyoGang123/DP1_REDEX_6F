@@ -411,7 +411,7 @@ export default function SimSemanal() {
                 fechaLlam = fechaLlam.add(ciclo,'m')
                 obtenerNuevosPlanes(fechaLlamPlan,ciclo)
                 fechaLlamPlan = fechaLlamPlan.add(ciclo,'m')
-                //obtenerNuevosEnvios(fechaLlam)
+                obtenerNuevosEnvios(fechaLlam)
                 //console.log(enviosNew)
                 llamarAGrasp = llamarAGrasp + ciclo
             }
@@ -425,7 +425,7 @@ export default function SimSemanal() {
 
             //Revisar envios
 
-            //console.log(enviosRef.current)
+            console.log(enviosRef.current)
             await revisaEnvios()
             await revisaPlanes() //Ver si inicia algun plan para colocarlo en el arreglo y mostrarlo en mapa
             
