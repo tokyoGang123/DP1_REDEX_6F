@@ -230,9 +230,9 @@ export default function SimSemanal() {
             let fechaB = new Date(b.hora_origen);
             return fechaA - fechaB;
         })
-        //c = c.slice(0,2)
+        //c = c.slice(0,1)
             
-        console.log(c)
+        
 
         //TEMPORAL
         /*
@@ -243,12 +243,14 @@ export default function SimSemanal() {
         const handlePdvMapping = async () => {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(c.map(async pdv => {
-                //let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.latitud_destino, pdv.longitud_origen, pdv.longitud_destino);
-                return { ...pdv, listaPaquetes: []};
+                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino,pdv);
+                return { ...pdv, listaPaquetes: [], ruta: ruta};
             }));
             return updatedC;
         };
         
+        console.log(c)
+
         // Uso de la función handlePdvMapping
         await handlePdvMapping().then(updatedC => {
             c = updatedC;
@@ -411,7 +413,7 @@ export default function SimSemanal() {
                 fechaLlam = fechaLlam.add(ciclo,'m')
                 obtenerNuevosPlanes(fechaLlamPlan,ciclo)
                 fechaLlamPlan = fechaLlamPlan.add(ciclo,'m')
-                obtenerNuevosEnvios(fechaLlam)
+                //obtenerNuevosEnvios(fechaLlam)
                 //console.log(enviosNew)
                 llamarAGrasp = llamarAGrasp + ciclo
             }
@@ -426,7 +428,7 @@ export default function SimSemanal() {
             //Revisar envios
 
             console.log(enviosRef.current)
-            await revisaEnvios()
+            //await revisaEnvios()
             await revisaPlanes() //Ver si inicia algun plan para colocarlo en el arreglo y mostrarlo en mapa
             
 
