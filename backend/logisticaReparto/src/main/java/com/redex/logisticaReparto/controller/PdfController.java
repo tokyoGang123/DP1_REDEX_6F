@@ -28,7 +28,7 @@ public class PdfController {
         //this.vehiculoBDService = vehiculoBDService;
     }
 
-    @GetMapping(value = "/generar",produces =  MediaType.APPLICATION_PDF_VALUE)
+    @GetMapping(value = "/PDF/generar",produces =  MediaType.APPLICATION_PDF_VALUE)
     public ModelAndView generarPDF(){
         //List<VehiculoBD> vehiculos = vehiculoBDService.listar();
         Map<String, Object> model = new HashMap<>();
