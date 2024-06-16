@@ -25,6 +25,7 @@ export default function MapaSimuladorOL({ aeropuertosBD, planesDeVueloBD, fechaS
         return () => clearInterval(intervalId);
     }, []);
 
+
     const [aeropuertos, setAeropuertos] = useState({});
     const [planesDeVuelo, setPlanesDeVuelo] = useState({});
 
@@ -45,14 +46,24 @@ export default function MapaSimuladorOL({ aeropuertosBD, planesDeVueloBD, fechaS
     }, [aeropuertos]);
 
     const mapRef = useRef();
-    const vectorSource = useRef(new VectorSource()).current;
+    const vectorSource = useRef(new VectorSource({
+        batch: true
+    })).current;
     const vectorLayer = useRef(new VectorLayer({
         source: vectorSource,
+        updateWhileAnimating: true,
+
     })).current;
 
     const removerPlan = (idTramo) => {
-        planesDeVueloBD.filter(plan => plan.id_tramo !== idTramo);
+        /*
+        setPlanesDeVuelo((prevPlanes) => {
+            const newPlanes = planesDeVueloBD.filter(plan => plan.id_tramo !== idTramo);
+            return newPlanes
+        })
+        
         let f = dayjs(fechaSim).toISOString();
+        */
     };
 
     const iconStyle = new Style({
@@ -62,6 +73,7 @@ export default function MapaSimuladorOL({ aeropuertosBD, planesDeVueloBD, fechaS
             anchorYUnits: 'fraction',
             src: '/planes/plane_green.svg',
             scale: 0.3,
+            renderMode: 'image'
         }),
     });
 

@@ -26,19 +26,21 @@ const PlanMarker = ({ map, planDeVuelo, vectorLayer, onRemovePlan, style }) => {
                 iconFeature.setGeometry(new Point(planDeVuelo.ruta[step]));
                 step++;
                 //requestAnimationFrame(movePlane);
+                //new Promise(100)
                 setTimeout(movePlane, 1000);
             } else {
                 vectorLayer.getSource().removeFeature(iconFeature);
                 onRemovePlan(planDeVuelo.id_tramo);
             }
         };
-
+        /*
         const addToBatch = () => {
             batchUpdatePlanes(movePlane);
         };
 
         addToBatch();
-
+        */
+       movePlane()
         return () => {
             if (vectorLayer) {
                 vectorLayer.getSource().removeFeature(iconFeature);
