@@ -212,8 +212,8 @@ export default function SimSemanal() {
 
         //http://localhost:8080/api/planesVuelo/obtenerPorFechas/20240530T20:00:-05:00/20240530T21:00:-05:00
         let planInicio = transformaHora(fechaSimRef.current)
-        let planFin = transformaHora(fechaSimRef.current.add(2, "h").add(2, "d")) //Obtener 2 dias + 2 horas para cubrir todos los posibles vuelos
-
+        //let planFin = transformaHora(fechaSimRef.current.add(2, "h").add(2, "d")) //Obtener 2 dias + 2 horas para cubrir todos los posibles vuelos
+        let planFin = transformaHora(fechaSimRef.current.add(7, "d").add(2,"h"))
         /*
         let c = await getPlanesTodos()
         await c.sort((a, b) => {
@@ -359,7 +359,7 @@ export default function SimSemanal() {
             let fechaB = new Date(b.zonedFechaIngreso);
             return fechaA - fechaB;
         })
-        setEnviosFuturo(p)
+        setEnviosFuturo([...p])
         //console.log("CON FECHA " + transformaHora(fechaSimRef.current))
         //console.log(p)
     }
@@ -390,7 +390,7 @@ export default function SimSemanal() {
             console.log("ACTUALIZADOS", updatedC)
         });
         //console.log(p)
-        setPlanesDeVueloFuturo(p)
+        setPlanesDeVueloFuturo([...p])
         //console.log("DESDE: " + tiempoI + " HASTA " + tiempoF)
         //console.log(p)
     }
@@ -421,8 +421,8 @@ export default function SimSemanal() {
             //Si estamos antes que acabe el ciclo, colocar nuevos envios
             if (i == currentCiclo - 1) {
                 enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
-                planesDeVueloRef.current = planesDeVueloRef.current.concat([...planesDeVueloFuturoRef.current])
-                planesEliminarRef.current = planesEliminarRef.current.concat([...planesDeVueloFuturoRef.current])
+                //planesDeVueloRef.current = planesDeVueloRef.current.concat([...planesDeVueloFuturoRef.current])
+                //planesEliminarRef.current = planesEliminarRef.current.concat([...planesDeVueloFuturoRef.current])
                 currentCiclo = currentCiclo + ciclo
             }
 
@@ -431,7 +431,7 @@ export default function SimSemanal() {
                 //console.log("llamada jaja ekide")
                 fechaLlam = fechaLlam.add(ciclo, 'm')
                 obtenerNuevosPlanes(fechaLlamPlan, ciclo)
-                fechaLlamPlan = fechaLlamPlan.add(ciclo, 'm')
+                //fechaLlamPlan = fechaLlamPlan.add(ciclo, 'm')
                 obtenerNuevosEnvios(fechaLlam)
                 //console.log(enviosNew)
                 llamarAGrasp = llamarAGrasp + ciclo

@@ -93,6 +93,8 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
                     <Popup>
                         <h1>Info vuelo {planDeVuelo.id_tramo}</h1>
                         <p>Paquetes asignados: </p>
+                        <p>SALE EL: {planDeVuelo.hora_origen}</p>
+                        <p>llega EL: {planDeVuelo.hora_destino}</p>
                         <ul>
                             {planDeVuelo.listaPaquetes.map(paq => <li>{paq}</li>).join('')}
                         </ul>
