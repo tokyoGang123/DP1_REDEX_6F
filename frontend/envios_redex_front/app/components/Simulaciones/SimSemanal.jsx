@@ -373,6 +373,23 @@ export default function SimSemanal() {
             let fechaB = new Date(b.zonedFechaIngreso);
             return fechaA - fechaB;
         })
+        const handlePdvMapping = async () => {
+            // Supongo que `c` es tu array original de puntos de venta
+            const updatedC = await Promise.all(p.map(async pdv => {
+                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, pdv);
+                return { ...pdv, listaPaquetes: [], ruta: ruta };
+            }));
+            return updatedC;
+        };
+
+        
+
+        // Uso de la función handlePdvMapping
+        await handlePdvMapping().then(updatedC => {
+            p = updatedC;
+            console.log("ACTUALIZADOS", updatedC)
+        });
+        //console.log(p)
         setPlanesDeVueloFuturo(p)
         //console.log("DESDE: " + tiempoI + " HASTA " + tiempoF)
         //console.log(p)
@@ -415,7 +432,7 @@ export default function SimSemanal() {
                 fechaLlam = fechaLlam.add(ciclo, 'm')
                 obtenerNuevosPlanes(fechaLlamPlan, ciclo)
                 fechaLlamPlan = fechaLlamPlan.add(ciclo, 'm')
-                //obtenerNuevosEnvios(fechaLlam)
+                obtenerNuevosEnvios(fechaLlam)
                 //console.log(enviosNew)
                 llamarAGrasp = llamarAGrasp + ciclo
             }
@@ -430,7 +447,7 @@ export default function SimSemanal() {
             //Revisar envios
 
             //console.log(enviosRef.current)
-            //await revisaEnvios()
+            await revisaEnvios()
             await revisaPlanes() //Ver si inicia algun plan para colocarlo en el arreglo y mostrarlo en mapa
 
 
@@ -438,7 +455,7 @@ export default function SimSemanal() {
             // Update fechaSim
             nF = await new Promise((resolve) => setTimeout(() => resolve(nF.add(1, 'm')), 200));
             setFechaSim(nF);
-            console.log(fechaSim)
+            console.log(nF)
             fechaSimRef.current = nF;
 
             //console.log(timeRef)

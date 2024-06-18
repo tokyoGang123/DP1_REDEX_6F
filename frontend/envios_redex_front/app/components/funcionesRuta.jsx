@@ -14,7 +14,7 @@ async function hallarPuntosIntermedios(la1, lo1, la2, lo2, planDeVuelo) {
     const horaOrigen = dayjs(planDeVuelo.hora_origen);
     const horaDestino = dayjs(planDeVuelo.hora_destino);
     const tiempoSimuladoMinutos = horaDestino.diff(horaOrigen, 'minute');
-    if (tiempoSimuladoMinutos < 0) return [[lo1, la1]]
+    if (tiempoSimuladoMinutos < 0) return [[la1, lo1]]
     //console.log(planDeVuelo.hora_origen + " -> " + planDeVuelo.hora_destino)
     //console.log(tiempoSimuladoMinutos)
     const tiempoRealMs = tiempoSimuladoMinutos * 215; // Ajusta según tu rango 200-230 ms
