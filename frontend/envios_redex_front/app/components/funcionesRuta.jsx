@@ -21,15 +21,16 @@ async function hallarPuntosIntermedios(la1, lo1, la2, lo2, planDeVuelo) {
     const steps = Math.ceil(tiempoRealMs / 1000); // Ajusta el intervalo de actualización
     //console.log(steps)
 
-    const origen = [lo1, la1];
-    const destino = [lo2, la2];
+    const origen = [la1, lo1];
+    const destino = [la2, lo2];
 
     const coordenadas = Array.from({ length: steps }, (_, step) => {
         const coord = [
             origen[0] + ((destino[0] - origen[0]) * step) / steps,
             origen[1] + ((destino[1] - origen[1]) * step) / steps,
         ];
-        return transform(coord, 'EPSG:4326', 'EPSG:3857');
+        return coord
+        //return transform(coord, 'EPSG:4326', 'EPSG:3857');
     });
 
     return coordenadas

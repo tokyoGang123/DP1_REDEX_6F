@@ -31,19 +31,19 @@ export default function Aeropuerto({ aeropuerto }) {
     },[])
     */
     const iconoRojo = new Icon({
-        iconUrl: "/locationSigns/location_red.png",
+        iconUrl: "/locationSigns/location_red.svg",
         //iconUrl: require(""),
         iconSize: [markerSize, markerSize],
     });
 
     const iconoAmarillo = new Icon({
-        iconUrl: "/locationSigns/location_yellow.png",
+        iconUrl: "/locationSigns/location_yellow.svg",
         //iconUrl: require(""),
         iconSize: [markerSize, markerSize],
     });
 
     const iconoVerde = new Icon({
-        iconUrl: "/locationSigns/location_green.png",
+        iconUrl: "/locationSigns/location_green.svg",
         //iconUrl: require(""),
         iconSize: [markerSize, markerSize],
     });

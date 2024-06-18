@@ -1,6 +1,5 @@
-import React, { useState, useRef, useEffect, createContext } from 'react';
+import React, { useState, useRef, useEffect, createContext, useMemo } from 'react';
 import MapComponent from './OLMapsComponents/MapComponent';
-//import Markers from './Markers';
 import { Vector as VectorSource } from 'ol/source';
 import { Vector as VectorLayer } from 'ol/layer';
 import { Icon, Style } from 'ol/style';
@@ -9,6 +8,24 @@ import PlanesMarkers from './OLMapsComponents/PlanesMarkers3';
 import PlanMarker from './OLMapsComponents/PlanMarker';
 import dayjs from 'dayjs';
 export const BatchUpdateContext = createContext();
+
+function mergeObjects(obj1, obj2) {
+    if (Array.isArray(obj1) && Array.isArray(obj2)) {
+      return [...obj1, ...obj2];
+    } else if (typeof obj1 === 'object' && obj1 !== null && typeof obj2 === 'object' && obj2 !== null) {
+      const result = { ...obj1 };
+      Object.keys(obj2).forEach(key => {
+        if (typeof obj2[key] === 'object' && obj2[key] !== null) {
+          result[key] = mergeObjects(result[key], obj2[key]);
+        } else {
+          result[key] = obj2[key];
+        }
+      });
+      return result;
+    } else {
+      return obj2;
+    }
+  }
 
 export default function MapaSimuladorOL({ aeropuertosBD, planesDeVueloBD, fechaSim, estadoSim }) {
     const updateQueue = useRef([]);
@@ -25,16 +42,19 @@ export default function MapaSimuladorOL({ aeropuertosBD, planesDeVueloBD, fechaS
         return () => clearInterval(intervalId);
     }, []);
 
-
     const [aeropuertos, setAeropuertos] = useState({});
-    const [planesDeVuelo, setPlanesDeVuelo] = useState({});
+    const [memoizedPlanesDeVueloBD, setMemoizedPlanesDeVueloBD] = useState(planesDeVueloBD);
 
     useEffect(() => {
         setAeropuertos(aeropuertosBD);
     }, [aeropuertosBD]);
 
+    const planesDeVuelo = useMemo(() => {
+        return mergeObjects({}, memoizedPlanesDeVueloBD);
+    }, [memoizedPlanesDeVueloBD]);
+
     useEffect(() => {
-        setPlanesDeVuelo(planesDeVueloBD);
+        setMemoizedPlanesDeVueloBD(planesDeVueloBD);
     }, [planesDeVueloBD]);
 
     useEffect(() => {
@@ -55,15 +75,16 @@ export default function MapaSimuladorOL({ aeropuertosBD, planesDeVueloBD, fechaS
 
     })).current;
 
+    
     const removerPlan = (idTramo) => {
-        /*
+        
         setPlanesDeVuelo((prevPlanes) => {
-            const newPlanes = planesDeVueloBD.filter(plan => plan.id_tramo !== idTramo);
+            const newPlanes = prevPlanes.filter(plan => plan.id_tramo !== idTramo);
             return newPlanes
         })
         
-        let f = dayjs(fechaSim).toISOString();
-        */
+        //let f = dayjs(fechaSim).toISOString();
+        
     };
 
     const iconStyle = new Style({
@@ -76,6 +97,7 @@ export default function MapaSimuladorOL({ aeropuertosBD, planesDeVueloBD, fechaS
             renderMode: 'image'
         }),
     });
+
 
     return (
         <BatchUpdateContext.Provider value={batchUpdatePlanes}>

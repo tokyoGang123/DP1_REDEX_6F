@@ -33,14 +33,14 @@ const PlanMarker = ({ map, planDeVuelo, vectorLayer, onRemovePlan, style }) => {
                 onRemovePlan(planDeVuelo.id_tramo);
             }
         };
-        /*
+        
         const addToBatch = () => {
             batchUpdatePlanes(movePlane);
         };
 
         addToBatch();
-        */
-       movePlane()
+        
+       //movePlane()
         return () => {
             if (vectorLayer) {
                 vectorLayer.getSource().removeFeature(iconFeature);

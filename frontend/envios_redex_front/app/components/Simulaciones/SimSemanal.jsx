@@ -337,16 +337,18 @@ export default function SimSemanal() {
     }
 
     const revisaPlanes = async () => {
+        const newPlanes = []
         for (let i = 0; i < planesEliminarRef.current.length; i++) {
             const pc = planesEliminarRef.current[i];
             //console.log()
             if (dayjs(pc.hora_origen).tz(zonaHorariaUsuario) > fechaSimRef.current) break;
             if (pdvMapa.some(plan => plan.id_tramo == pc.id_tramo)) continue; //Si existe ya en el mapa, ignorar
             //console.log("PLAN " + pc.id_tramo + " CONFIRMADO")
-            setPdvMapa(prevPdvMapa => [...prevPdvMapa, pc]);
+            newPlanes.push(pc)
             planesEliminarRef.current.splice(i, 1)
         }
-
+        console.log(newPlanes)
+        setPdvMapa(newPlanes)
     }
 
     const obtenerNuevosEnvios = async (fechaLlam) => {
@@ -462,8 +464,9 @@ export default function SimSemanal() {
 
             </Stack>
             <div style={{ height: 'calc(100vh - 50px)', width: '100%' }}>
-                {/*<MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={planesDeVueloRef.current} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} />*/}
-                <MapaSimuladorOL aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} setPlanesDeVuelo={setPdvMapa} estadoSim={estadoSim} fechaSim={fechaSimRef.current}></MapaSimuladorOL>
+                {<MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} />}
+                {/*<MapaSimuladorOL aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} setPlanesDeVuelo={setPdvMapa} estadoSim={estadoSim} fechaSim={fechaSimRef.current}></MapaSimuladorOL>*/}
+                
             </div>
 
         </>
