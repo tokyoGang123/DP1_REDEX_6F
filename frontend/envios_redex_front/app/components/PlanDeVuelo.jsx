@@ -38,7 +38,7 @@ const iconoGris = new Icon({
 dayjs.extend(duration);
 dayjs.extend(utc);
 
-export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, intervaloMS }) {
+export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, intervaloMS, removerPlan }) {
 
     const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
     const markerRef = useRef(null);
@@ -54,6 +54,7 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
                 } else {
                     setRutaCompleta(true)
                     clearInterval(interval);
+                    removerPlan(planDeVuelo.id_tramo)
                     return prevIndex;
                 }
             })
