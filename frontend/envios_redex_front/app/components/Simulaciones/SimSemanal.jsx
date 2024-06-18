@@ -59,8 +59,8 @@ export default function SimSemanal() {
     const zonaHorariaUsuario = dayjs.tz.guess();
 
     //TIEMPO SELECCIONADO PARA EJECUTAR LA SIMULACION
-    //const [fechaSim, setFechaSim] = useState(dayjs().tz(zonaHorariaUsuario));
-    const [fechaSim, setFechaSim] = useState(dayjs("2024-05-30T00:00:00Z").tz(zonaHorariaUsuario));
+    const [fechaSim, setFechaSim] = useState(dayjs().tz(zonaHorariaUsuario));
+    //const [fechaSim, setFechaSim] = useState(dayjs("2024-05-30T00:00:00Z").tz(zonaHorariaUsuario));
 
     //useRef de fechaSim
     const fechaSimRef = useRef(fechaSim)
@@ -473,8 +473,8 @@ export default function SimSemanal() {
 
                 <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
                 <Stack>
-                {/*<SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>*/}
-                    <h1>{fechaSim.toISOString()}</h1>
+                {<SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>}
+                    {/*<h1>{fechaSim.toISOString()}</h1>*/}
                     <BotonIniciar onClick={clickBotonIniciar}></BotonIniciar>
                     <h2>ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</h2>
                 </Stack>

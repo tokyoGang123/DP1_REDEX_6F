@@ -48,7 +48,7 @@ export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDe
     console.log("Removido " + id)
   }
 
-const idsTemp = [624,741,408,471,750]
+const idsTemp = [3860]
   return (
     <>
       <div style={{ position: 'relative', zIndex: 0, height: '100%', width: '100%'  }}>
