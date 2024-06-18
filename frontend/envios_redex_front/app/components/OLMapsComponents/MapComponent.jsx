@@ -29,6 +29,7 @@ const MapComponent = forwardRef(({ vectorLayer, aeropuertos }, ref) => {
             center: [0, 0],
             zoom: 2,
           }),
+          renderer: 'canvas'
         });
       }
   

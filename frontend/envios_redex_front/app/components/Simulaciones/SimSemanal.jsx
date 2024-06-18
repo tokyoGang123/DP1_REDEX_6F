@@ -60,7 +60,7 @@ export default function SimSemanal() {
 
     //TIEMPO SELECCIONADO PARA EJECUTAR LA SIMULACION
     const [fechaSim, setFechaSim] = useState(dayjs().tz(zonaHorariaUsuario));
-    
+    //const [fechaSim, setFechaSim] = useState(dayjs("2024-05-30T00:00:00Z").tz(zonaHorariaUsuario));
 
     //useRef de fechaSim
     const fechaSimRef = useRef(fechaSim)
@@ -99,14 +99,14 @@ export default function SimSemanal() {
     const planesDeVueloRef = useRef(planesDeVuelo)
     useEffect(() => {
         planesDeVueloRef.current = planesDeVuelo
-    },[planesDeVuelo])
+    }, [planesDeVuelo])
 
     //Planes de Vuelo FUturos
     const [planesDeVueloFuturo, setPlanesDeVueloFuturo] = useState({})
     const planesDeVueloFuturoRef = useRef(planesDeVueloFuturo)
     useEffect(() => {
         planesDeVueloFuturoRef.current = planesDeVueloFuturo
-    },[planesDeVueloFuturo])
+    }, [planesDeVueloFuturo])
 
     //Planes de Vuelo Eliminar
     const [planesEliminar, setPlanesEliminar] = useState([])
@@ -114,15 +114,18 @@ export default function SimSemanal() {
     useEffect(() => {
         planesEliminarRef.current = planesEliminar;
         console.log("change")
-    },[planesEliminar])
-    
+    }, [planesEliminar])
+
     //Planes de Vuelo Mapa
     const [pdvMapa, setPdvMapa] = useState([])
-    const pdvMapaRef = useRef(pdvMapa);
+    //console.log(pdvMapa)
+    //const pdvMapaRef = useRef(pdvMapa);
+    /*
     useEffect(() => {
         pdvMapaRef.current = pdvMapa;
+        setPdvMapa()
         console.log("change")
-    },[pdvMapa])
+    }, [])*/
 
     //Envios
     const [envios, setEnvios] = useState({})
@@ -150,10 +153,6 @@ export default function SimSemanal() {
 
 
 
-
-
-    
-
     //---------------------------------------------------------
     //                      USE EFFECTS E INTERVALS
 
@@ -173,6 +172,7 @@ export default function SimSemanal() {
     }, [])
 
     //Cambio del cronómetro real (mediante variable segundosReales)
+    /*
     useEffect(() => {
         let interval = null
         if (estadoSim === 'PL') {
@@ -186,7 +186,7 @@ export default function SimSemanal() {
             clearInterval(interval)
         }
 
-    }, [estadoSim, segundosReales])
+    }, [estadoSim, segundosReales])*/
 
 
 
@@ -212,7 +212,7 @@ export default function SimSemanal() {
 
         //http://localhost:8080/api/planesVuelo/obtenerPorFechas/20240530T20:00:-05:00/20240530T21:00:-05:00
         let planInicio = transformaHora(fechaSimRef.current)
-        let planFin = transformaHora(fechaSimRef.current.add(2,"h").add(2,"d")) //Obtener 2 dias + 2 horas para cubrir todos los posibles vuelos
+        let planFin = transformaHora(fechaSimRef.current.add(2, "h").add(2, "d")) //Obtener 2 dias + 2 horas para cubrir todos los posibles vuelos
 
         /*
         let c = await getPlanesTodos()
@@ -223,16 +223,16 @@ export default function SimSemanal() {
         })
             */
         //c = c.slice(0,500)
-        
-        let c = await getPlanesPorIntervaloLatLon(planInicio,planFin)
+
+        let c = await getPlanesPorIntervaloLatLon(planInicio, planFin)
         await c.sort((a, b) => {
             let fechaA = new Date(a.hora_origen);
             let fechaB = new Date(b.hora_origen);
             return fechaA - fechaB;
         })
-        //c = c.slice(0,2)
-            
-        console.log(c)
+        //c = c.slice(0,1)
+
+
 
         //TEMPORAL
         /*
@@ -243,19 +243,21 @@ export default function SimSemanal() {
         const handlePdvMapping = async () => {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(c.map(async pdv => {
-                //let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.latitud_destino, pdv.longitud_origen, pdv.longitud_destino);
-                return { ...pdv, listaPaquetes: []};
+                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, pdv);
+                return { ...pdv, listaPaquetes: [], ruta: ruta };
             }));
             return updatedC;
         };
-        
+
+        console.log(c)
+
         // Uso de la función handlePdvMapping
         await handlePdvMapping().then(updatedC => {
             c = updatedC;
             // Aquí puedes trabajar con el array actualizado `updatedC`
         });
         //TEMPORAL
-        
+
         await setPlanesDeVuelo([...c]);
         await setPlanesEliminar([...c])
         console.log("PLANES FINALES", c)
@@ -293,14 +295,14 @@ export default function SimSemanal() {
         for (let i = 0; i < env.paquetes.length; i++) {
             let paq = env.paquetes[i]
             let listRut = paq.ruta.listaRutas
-            for (let j = 0; j < listRut.length; j++){
+            for (let j = 0; j < listRut.length; j++) {
                 //console.log("Buscar", listRut[j])
                 //Encontrar plan de vuelo asignado a parte de la ruta
                 let pdv = planesDeVueloRef.current.find(plan => plan.id_tramo == listRut[j])
                 //console.log(pdv)
                 //AQUI SE ASIGNA A SU LISTA
                 pdv.listaPaquetes.push(paq.id_paquete)
-                pdv.capacidad_ocupada = pdv.capacidad_ocupada + 1 
+                pdv.capacidad_ocupada = pdv.capacidad_ocupada + 1
                 //console.log("Paquete " + paq.id_paquete + " asignado a ruta " + pdv.id_tramo)
                 //console.log(pdv)
             }
@@ -312,7 +314,7 @@ export default function SimSemanal() {
     //---------------------------------------------------------
     //                      REVISAR ENVIOS
     const revisaEnvios = async () => {
-  
+
         //FOR es "falso", solo revisamos hasta que no tenga sentido
         //console.log(enviosRef.current,length)
         for (let i = 0; i < enviosRef.current.length; i++) {
@@ -328,23 +330,25 @@ export default function SimSemanal() {
             await asignarAPlanes(env)
 
             //Quitar envio de la lista
-            enviosRef.current.splice(i,1);
+            enviosRef.current.splice(i, 1);
         }
         //console.log("end")
         setEnvios(enviosRef.current)
     }
 
     const revisaPlanes = async () => {
+        const newPlanes = []
         for (let i = 0; i < planesEliminarRef.current.length; i++) {
             const pc = planesEliminarRef.current[i];
             //console.log()
             if (dayjs(pc.hora_origen).tz(zonaHorariaUsuario) > fechaSimRef.current) break;
-            if (pdvMapaRef.current.some(plan => plan.id_tramo == pc.id_tramo)) continue; //Si existe ya en el mapa, ignorar
+            if (pdvMapa.some(plan => plan.id_tramo == pc.id_tramo)) continue; //Si existe ya en el mapa, ignorar
             //console.log("PLAN " + pc.id_tramo + " CONFIRMADO")
-            pdvMapaRef.current.push(pc)
-            planesEliminarRef.current.splice(i,1)
+            newPlanes.push(pc)
+            planesEliminarRef.current.splice(i, 1)
         }
-
+        console.log(newPlanes)
+        setPdvMapa(newPlanes)
     }
 
     const obtenerNuevosEnvios = async (fechaLlam) => {
@@ -362,13 +366,30 @@ export default function SimSemanal() {
 
     const obtenerNuevosPlanes = async (fechaLlam, ciclo) => {
         let tiempoI = transformaHora(fechaLlam)
-        let tiempoF = transformaHora(fechaLlam.add(ciclo,'m'))
+        let tiempoF = transformaHora(fechaLlam.add(ciclo, 'm'))
         let p = await getPlanesPorIntervaloLatLon(tiempoI, tiempoF)
-        p.sort((a,b) => {
+        p.sort((a, b) => {
             let fechaA = new Date(a.zonedFechaIngreso);
             let fechaB = new Date(b.zonedFechaIngreso);
             return fechaA - fechaB;
         })
+        const handlePdvMapping = async () => {
+            // Supongo que `c` es tu array original de puntos de venta
+            const updatedC = await Promise.all(p.map(async pdv => {
+                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, pdv);
+                return { ...pdv, listaPaquetes: [], ruta: ruta };
+            }));
+            return updatedC;
+        };
+
+        
+
+        // Uso de la función handlePdvMapping
+        await handlePdvMapping().then(updatedC => {
+            p = updatedC;
+            console.log("ACTUALIZADOS", updatedC)
+        });
+        //console.log(p)
         setPlanesDeVueloFuturo(p)
         //console.log("DESDE: " + tiempoI + " HASTA " + tiempoF)
         //console.log(p)
@@ -386,7 +407,7 @@ export default function SimSemanal() {
         let tiempoMax = 1;
         let nF = fechaSimRef.current;
         let fechaLlam = fechaStartRef.current //Fecha para llamar grasp
-        let fechaLlamPlan = fechaStartRef.current.add(2,'d').add(2,'h') // 2 días + 2 horas ya se tienen leidos, se procedera a llamar bloques posteriores de 2 horas
+        let fechaLlamPlan = fechaStartRef.current.add(2, 'd').add(2, 'h') // 2 días + 2 horas ya se tienen leidos, se procedera a llamar bloques posteriores de 2 horas
         //console.log("LLAMADA INICIO: " + fechaLlam)
         await setEstadoSim('PL')
 
@@ -398,7 +419,7 @@ export default function SimSemanal() {
                 break;
             }
             //Si estamos antes que acabe el ciclo, colocar nuevos envios
-            if (i == currentCiclo -1) {
+            if (i == currentCiclo - 1) {
                 enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
                 planesDeVueloRef.current = planesDeVueloRef.current.concat([...planesDeVueloFuturoRef.current])
                 planesEliminarRef.current = planesEliminarRef.current.concat([...planesDeVueloFuturoRef.current])
@@ -408,10 +429,10 @@ export default function SimSemanal() {
             //Si se han llegado al momento de llamar a GRASP, realizar la llamada a nuevos pedidos
             if (i == llamarAGrasp) {
                 //console.log("llamada jaja ekide")
-                fechaLlam = fechaLlam.add(ciclo,'m')
-                obtenerNuevosPlanes(fechaLlamPlan,ciclo)
-                fechaLlamPlan = fechaLlamPlan.add(ciclo,'m')
-                //obtenerNuevosEnvios(fechaLlam)
+                fechaLlam = fechaLlam.add(ciclo, 'm')
+                obtenerNuevosPlanes(fechaLlamPlan, ciclo)
+                fechaLlamPlan = fechaLlamPlan.add(ciclo, 'm')
+                obtenerNuevosEnvios(fechaLlam)
                 //console.log(enviosNew)
                 llamarAGrasp = llamarAGrasp + ciclo
             }
@@ -428,29 +449,15 @@ export default function SimSemanal() {
             //console.log(enviosRef.current)
             await revisaEnvios()
             await revisaPlanes() //Ver si inicia algun plan para colocarlo en el arreglo y mostrarlo en mapa
-            
+
 
             //agregar un minuto simulado
-            nF = await nF.add(1, 'm');
-            await setFechaSim(nF);
-            fechaSimRef.current = nF
-            //console.log(fechaSimRef.current)
-            //OPERACIONES
-            //-----------------------------------
+            // Update fechaSim
+            nF = await new Promise((resolve) => setTimeout(() => resolve(nF.add(1, 'm')), 200));
+            setFechaSim(nF);
+            console.log(nF)
+            fechaSimRef.current = nF;
 
-
-            //-----------------------------------
-            //MANTENER TIEMPO
-            const fin = performance.now();
-            const tiempo = fin - inicio;
-            const delay = Math.max(intervaloMS - tiempo)
-            //MANTENER TIEMPO
-            //-----------------------------------
-
-
-            //if (0 < delay) 
-            await new Promise(r => setTimeout(r, delay)); //originalmente 200
-            //console.log(fechaSimRef.current.toDate() + " - " + tiempo)
             //console.log(timeRef)
             i++;
         }
@@ -461,20 +468,22 @@ export default function SimSemanal() {
 
     return (
         <>
-            <Header title="Simulación" planesDeVueloRef={planesDeVueloRef}/>
+            <Header title="Simulación" planesDeVueloRef={planesDeVueloRef} />
             <Stack direction="row" spacing={2}>
 
                 <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
                 <Stack>
-                    <SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>
+                {<SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>}
+                    {/*<h1>{fechaSim.toISOString()}</h1>*/}
                     <BotonIniciar onClick={clickBotonIniciar}></BotonIniciar>
                     <h2>ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</h2>
                 </Stack>
 
             </Stack>
             <div style={{ height: 'calc(100vh - 50px)', width: '100%' }}>
-                {/*<MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={planesDeVueloRef.current} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} />*/}
-                <MapaSimuladorOL aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapaRef.current} estadoSim={estadoSim} fechaSim={fechaSimRef.current}></MapaSimuladorOL>
+                {<MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} />}
+                {/*<MapaSimuladorOL aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} setPlanesDeVuelo={setPdvMapa} estadoSim={estadoSim} fechaSim={fechaSimRef.current}></MapaSimuladorOL>*/}
+                
             </div>
 
         </>
