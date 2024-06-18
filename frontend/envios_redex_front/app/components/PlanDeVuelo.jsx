@@ -81,22 +81,25 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
 
     return (
         <>
-            <Marker position={planDeVuelo.ruta[currentPositionIndex]}
-                icon={colorMarcador == 'Verde' ? iconoVerde : (colorMarcador == 'Amarillo' ? iconoAmarillo : (colorMarcador == 'Rojo' ? iconoRojo : iconoGris))}
-                ref={(ref) => {
-                    if (ref && ref.leafletElement) {
-                        markerRef.current = ref.leafletElement;
-                    }
-                  }}>
-                <Popup>
-                    <h1>Info vuelo {planDeVuelo.id_tramo}</h1>
-                    <p>Paquetes asignados: </p>
-                    <ul>
-                        {planDeVuelo.listaPaquetes.map(paq => <li>{paq}</li>).join('')}
-                    </ul>
+            {!rutaCompleta ?
+                <Marker position={planDeVuelo.ruta[currentPositionIndex]}
+                    icon={colorMarcador == 'Verde' ? iconoVerde : (colorMarcador == 'Amarillo' ? iconoAmarillo : (colorMarcador == 'Rojo' ? iconoRojo : iconoGris))}
+                    ref={(ref) => {
+                        if (ref && ref.leafletElement) {
+                            markerRef.current = ref.leafletElement;
+                        }
+                    }}>
+                    <Popup>
+                        <h1>Info vuelo {planDeVuelo.id_tramo}</h1>
+                        <p>Paquetes asignados: </p>
+                        <ul>
+                            {planDeVuelo.listaPaquetes.map(paq => <li>{paq}</li>).join('')}
+                        </ul>
 
-                </Popup>
-            </Marker>
+                    </Popup>
+                </Marker>
+                : <></>}
+
         </>
     )
 
