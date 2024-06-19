@@ -36,6 +36,35 @@ async function hallarPuntosIntermedios(la1, lo1, la2, lo2, planDeVuelo) {
     return coordenadas
 }
 
+async function hallarPuntosIntermediosDiaria(la1, lo1, la2, lo2, planDeVuelo) {
+    dayjs.extend(utc);
+    dayjs.extend(timezone);
+
+    const horaOrigen = dayjs(planDeVuelo.hora_origen);
+    const horaDestino = dayjs(planDeVuelo.hora_destino);
+    const tiempoVuelo = horaDestino.diff(horaOrigen, 'minute');
+    if (tiempoVuelo < 0) return [[la1, lo1]]
+    //console.log(planDeVuelo.hora_origen + " -> " + planDeVuelo.hora_destino)
+    //console.log(tiempoSimuladoMinutos)
+    //const tiempoRealMs = tiempoSimuladoMinutos * 215; // Ajusta según tu rango 200-230 ms
+    const steps = Math.ceil(tiempoVuelo); // Ajusta el intervalo de actualización
+    //console.log(steps)
+
+    const origen = [la1, lo1];
+    const destino = [la2, lo2];
+
+    const coordenadas = Array.from({ length: steps }, (_, step) => {
+        const coord = [
+            origen[0] + ((destino[0] - origen[0]) * step) / steps,
+            origen[1] + ((destino[1] - origen[1]) * step) / steps,
+        ];
+        return coord
+        //return transform(coord, 'EPSG:4326', 'EPSG:3857');
+    });
+
+    return coordenadas
+}
+
 /*
 async function hallarPuntosIntermedios(la1,lo1,la2,lo2) {
     const distanciaARecorrer = distanciaPuntos(la1,lo1,la2,lo2)

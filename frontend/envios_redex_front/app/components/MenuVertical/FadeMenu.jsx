@@ -26,6 +26,15 @@ const FadeMenu = ({ planesDeVueloRef, aeropuertos, envios2Ref }) => { // Agrega 
     setAnchorEl(null);
   };
 
+  const handleOpenBusquedaAeropuertos = () => {
+    setOpenBusquedaAeropuertos(true);
+    setAnchorEl(null);
+  };
+
+  const handleOpenBusquedaEnvios = () => {
+    setOpenBusquedaEnvios(true);
+    setAnchorEl(null);
+  };
 
   const handleCloseBusquedaPlanes = () => {
     setOpenBusquedaPlanes(false);

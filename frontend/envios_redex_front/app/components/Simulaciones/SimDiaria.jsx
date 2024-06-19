@@ -1,7 +1,7 @@
 import MapaSimulador from "../MapaSimulador"
 import SelectorFecha from "../Elementos/SelectorFecha"
 import { CuadroTiempo } from "../Elementos/CuadroTiempo"
-import { Stack, Grid, Box, Button } from "@mui/material"
+import { Stack } from "@mui/material"
 import BotonIniciar from "../Botones/BotonIniciar"
 import { useEffect, useRef, useState } from "react"
 import dayjs from "dayjs"
@@ -19,7 +19,6 @@ import hallarPuntosIntermedios from "../funcionesRuta"
 import BusquedaPlanes from '../BusquedaPlanes/BusquedaPlanes';
 import BusquedaAeropuertos from '../BusquedaAeropuertos/BusquedaAeropuertos';
 import BusquedaEnvios from '../BusquedaEnvios/BusquedaEnvios';
-import { getPDFFinal } from "@/app/api/pdf.api"
 
 
 dayjs.extend(advancedFormat);
@@ -188,6 +187,10 @@ export default function SimSemanal() {
             //let c = await getPlanesTodos()
             //await setPlanesDeVuelo(c);
             console.log(a)
+
+            //INICIAR SIMULACION
+
+
         }
         if (isInitialMount.current) obtenerDatos()
         fechaSimRef.current = fechaSim;
@@ -211,27 +214,6 @@ export default function SimSemanal() {
     }, [estadoSim, segundosReales])*/
 
 
-    const [pdfFin, setPdfFin] = useState(null)
-
-    const obtenerpdf = async () => {
-        try {
-            let pdf = await getPDFFinal();
-            setPdfFin(pdf)
-
-            const url = window.URL.createObjectURL(pdf)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = 'ReporteFinalizacion.pdf'
-            document.body.appendChild(a)
-            a.click()
-            document.body.removeChild(a)
-            window.URL.revokeObjectURL(url)
-
-        } catch (error) {
-            console.log("ERROR AL OBTENER PDF: ", error)
-        }
-
-    }
 
     //---------------------------------------------------------
     //                      FUNCIONES
@@ -240,7 +222,7 @@ export default function SimSemanal() {
     const clickBotonIniciar = async () => {
 
         //"Play"
-        fechaStartRef.current = fechaSimRef.current.second(0); //fecha inicial
+        fechaStartRef.current = fechaSimRef.current; //fecha inicial
         startTimer()
         await iniciaDatos()
 
@@ -260,32 +242,13 @@ export default function SimSemanal() {
         let planInicio = transformaHora(fechaSimRef.current)
         let planFin = transformaHora(fechaSimRef.current.add(7, "d").add(2, "h"))
 
-        /*
-        let c = await getPlanesTodos()
-        await c.sort((a, b) => {
-            let fechaA = new Date(a.hora_origen);
-            let fechaB = new Date(b.hora_origen);
-            return fechaA - fechaB;
-        })
-            */
-        //c = c.slice(0,500)
-
         let c = await getPlanesPorIntervaloLatLon(planInicio, planFin)
         await c.sort((a, b) => {
             let fechaA = new Date(a.hora_origen);
             let fechaB = new Date(b.hora_origen);
             return fechaA - fechaB;
         })
-        //c = c.slice(0,1)
 
-
-
-        //TEMPORAL
-        /*
-        c = c.map(pdv => {
-            let ruta = hallarPuntosIntermedios(pdv.latitud_origen, pdv.latitud_destino, pdv.longitud_origen, pdv.longitud_destino)
-            return { ...pdv, listaPaquetes: [], listaCamino : ruta};
-        });*/
         const handlePdvMapping = async () => {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(c.map(async pdv => {
@@ -590,7 +553,7 @@ export default function SimSemanal() {
 
             //agregar un minuto simulado
             // Update fechaSim
-            nF = await new Promise((resolve) => setTimeout(() => resolve(nF.add(1, 'm')), 200));
+            nF = await new Promise((resolve) => setTimeout(() => resolve(nF.add(1, 'm')), 60000));
             setFechaSim(nF);
             console.log(nF)
             fechaSimRef.current = nF;
@@ -604,34 +567,25 @@ export default function SimSemanal() {
 
     //console.log("envios2Ref en SimSemanal:",envios2Ref);
 
-    const [activePanel, setActivePanel] = useState('');
-
     return (
         <>
-            <Header setActivePanel={setActivePanel} />
-            <Grid container sx={{ height: 'calc(100vh - 64px)' }}>
-                <Grid item xs={9}>
-                    <Box sx={{ p: 2, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                        <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
-                        <SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>
-                        <BotonIniciar onClick={clickBotonIniciar}></BotonIniciar>
-                        <h2>ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</h2>
-                        {<Button onClick={obtenerpdf}>DESCARGAR PDF</Button>}
-                    </Box>
-                    <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} ingresarAeropuertos={ingresaAeropuertoPorPlan}/>
-                </Grid>
-                <Grid item xs={3} sx={{ overflowY: 'auto', p: 2, borderLeft: '1px solid #ccc' }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <Button variant="contained" onClick={() => setActivePanel('planes')}>Planes de Vuelo</Button>
-                        <Button variant="contained" onClick={() => setActivePanel('aeropuertos')}>Aeropuertos</Button>
-                        <Button variant="contained" onClick={() => setActivePanel('envios')}>Envíos</Button>
-                    </Box>
-                    {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} />}
-                    {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
-                    {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} />}
-                </Grid>
-            </Grid>
+            <Header title="Simulación" planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} envios2Ref={envios2Ref} />
+
+            <Stack direction="row" spacing={2}>
+
+                <Stack>
+                    {<h1>{fechaSim.toISOString()}</h1>}
+                    <h2>ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</h2>
+                </Stack>
+
+            </Stack>
+            <div style={{ height: 'calc(100vh - 50px)', width: '100%' }}>
+                {<MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} ingresarAeropuertos={ingresaAeropuertoPorPlan} />}
+                {/*<MapaSimuladorOL aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} setPlanesDeVuelo={setPdvMapa} estadoSim={estadoSim} fechaSim={fechaSimRef.current}></MapaSimuladorOL>*/}
+
+            </div>
 
         </>
-    );
+
+    )
 }

@@ -91,7 +91,7 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
                         }
                     }}>
                     <Popup>
-                        <h1>Info vuelo {planDeVuelo.id_tramo}</h1>
+                        <h1>Vuelo #{planDeVuelo.id_tramo}</h1>
                         <p>Hora salida: {planDeVuelo.hora_origen}</p>
                         <p>Hora llegada: {planDeVuelo.hora_destino}</p>
 
