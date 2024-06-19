@@ -17,8 +17,8 @@ import java.util.Map;
 @Service
 @RestController
 @RequestMapping(path = "api")
-public class PdfController {
-    private final PdfService reporteSimulacionPDFService;
+public class PdfControllera {
+    /*private final PdfService reporteSimulacionPDFService;
     //private final VehiculoBDService vehiculoBDService;
     @Autowired
     public PdfController(PdfService reporteSimulacionPDFService
@@ -35,4 +35,6 @@ public class PdfController {
         //model.put("Vehiculos", vehiculos);
         return new ModelAndView(reporteSimulacionPDFService,model);
     }
+
+     */
 }
