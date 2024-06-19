@@ -168,7 +168,6 @@ export default function SimSemanal() {
             isInitialMount.current = false;
             let a = await getAeropuertosTodos()
 
-            
             //Agregar lista a aeropuertos
             const handlePdvMapping = async () => {
                 // Supongo que `c` es tu array original de puntos de venta
@@ -176,13 +175,12 @@ export default function SimSemanal() {
                     return { ...a, listaPaquetes: [] };
                 }));
                 return updatedA;
-            };    
+            };
             // Uso de la función handlePdvMapping
             await handlePdvMapping().then(updatedA => {
                 a = updatedA;
-                // Aquí puedes trabajar con el array actualizado `updatedC`
             });
-            
+
 
             await setAeropuertos(a);
             //let b = await cargarPlanesFecha(fechaSimRef)
@@ -238,7 +236,7 @@ export default function SimSemanal() {
 
         //http://localhost:8080/api/planesVuelo/obtenerPorFechas/20240530T20:00:-05:00/20240530T21:00:-05:00
         let planInicio = transformaHora(fechaSimRef.current)
-        let planFin = transformaHora(fechaSimRef.current.add(7, "d").add(2,"h"))
+        let planFin = transformaHora(fechaSimRef.current.add(7, "d").add(2, "h"))
 
         /*
         let c = await getPlanesTodos()
@@ -374,9 +372,10 @@ export default function SimSemanal() {
             if (pdvMapa.some(plan => plan.id_tramo == pc.id_tramo)) continue; //Si existe ya en el mapa, ignorar
             //console.log("PLAN " + pc.id_tramo + " CONFIRMADO")
             newPlanes.push(pc)
+            await saleAeropuertoPorPlan(pc)
             planesEliminarRef.current.splice(i, 1)
         }
-        console.log(newPlanes)
+        //console.log(newPlanes)
         setPdvMapa(newPlanes)
     }
 
@@ -411,7 +410,7 @@ export default function SimSemanal() {
             return updatedC;
         };
 
-        
+
 
         // Uso de la función handlePdvMapping
         await handlePdvMapping().then(updatedC => {
@@ -425,21 +424,90 @@ export default function SimSemanal() {
     }
 
     //Añadir a aeropuerto de origen cuando un vuelo llega al aeropuerto deseado
-    const ingresaAeropuertoPorInicio = (envio) => {
+    const ingresaAeropuertoPorInicio = async (envio) => {
+
+        setAeropuertos((prevAeropuertos) => {
+            //Copia de seguridad
+            const aeropuertosActualizados = [...prevAeropuertos]
+
+            //Encontrar aeropuerto al que ingresan todos los paquetes
+            const index = aeropuertosActualizados.findIndex(
+                (aeropuerto) => aeropuerto.id_aeropuerto === envio.aeropuerto_origen
+            )
+
+            if (index != -1) {
+                aeropuertosActualizados[index].listaPaquetes = [
+                    ...aeropuertosActualizados[index].listaPaquetes,
+                    ...envio.paquetes
+                ]
+            }
+
+            aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada + envio.paquetes.length
+
+            return aeropuertosActualizados;
+
+
+        })
 
     }
 
     //Añadir a aeropuerto elegido todos los paquetes que ingresan al acabar un plan de vuelo
-    const ingresaAeropuertoPorPlan = (planDeVuelo, aeropuertoDest) => {
-        
-        
-        //Por cada paquete en el plan, registrar
-        for (let i = 0; i < planDeVuelo.listaPaquetes.length; i++) {
-            
-        }
+    const ingresaAeropuertoPorPlan = (planDeVuelo) => {
+
+        setAeropuertos((prevAeropuertos) => {
+            //Copia de seguridad
+            const aeropuertosActualizados = [...prevAeropuertos]
+
+            //Encontrar aeropuerto al que van a ingresar todos los paquetes
+            const index = aeropuertosActualizados.findIndex(
+                (aeropuerto) => aeropuerto.id_aeropuerto === planDeVuelo.ciudad_destino
+            )
+
+            if (index != -1) {
+                aeropuertosActualizados[index].listaPaquetes = [
+                    ...aeropuertosActualizados[index].listaPaquetes,
+                    ...planDeVuelo.listaPaquetes
+                ]
+            }
+            //console.log("Agregados ", planDeVuelo.listaPaquetes.length)
+
+            aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada + planDeVuelo.listaPaquetes.length
+
+            return aeropuertosActualizados;
+
+
+        })
+
     }
+
+
+
     //Quitar de aeropuertos los planes que llegan de un plan
-    const saleAeropuertoPorPlan = () => {
+    const saleAeropuertoPorPlan = (planDeVuelo) => {
+
+        setAeropuertos((prevAeropuertos) => {
+            //Copia de seguridad
+            const aeropuertosActualizados = [...prevAeropuertos]
+
+            //Encontrar aeropuerto del que salen todos los paquetes
+            const index = aeropuertosActualizados.findIndex(
+                (aeropuerto) => aeropuerto.id_aeropuerto === planDeVuelo.ciudad_origen
+            )
+
+            if (index != -1) {
+                aeropuertosActualizados[index].listaPaquetes = aeropuertosActualizados[index].listaPaquetes.filter(
+                    (paquete) => !planDeVuelo.listaPaquetes.includes(paquete)
+                )
+            }
+
+            //console.log("Quitados ", planDeVuelo.listaPaquetes.length)
+
+            aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada - planDeVuelo.listaPaquetes.length
+
+            return aeropuertosActualizados;
+
+
+        })
 
     }
 
@@ -513,16 +581,16 @@ export default function SimSemanal() {
     //---------------------------------------------------------
 
     //console.log("envios2Ref en SimSemanal:",envios2Ref);
-    
+
     return (
         <>
-            <Header title="Simulación" planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} envios2Ref={envios2Ref}/>
+            <Header title="Simulación" planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} envios2Ref={envios2Ref} />
 
             <Stack direction="row" spacing={2}>
 
                 <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
                 <Stack>
-                {<SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>}
+                    {<SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>}
                     {/*<h1>{fechaSim.toISOString()}</h1>*/}
                     <BotonIniciar onClick={clickBotonIniciar}></BotonIniciar>
                     <h2>ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</h2>
@@ -530,9 +598,9 @@ export default function SimSemanal() {
 
             </Stack>
             <div style={{ height: 'calc(100vh - 50px)', width: '100%' }}>
-                {<MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} />}
+                {<MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} ingresarAeropuertos={ingresaAeropuertoPorPlan} />}
                 {/*<MapaSimuladorOL aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} setPlanesDeVuelo={setPdvMapa} estadoSim={estadoSim} fechaSim={fechaSimRef.current}></MapaSimuladorOL>*/}
-                
+
             </div>
 
         </>
