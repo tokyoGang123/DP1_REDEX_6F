@@ -57,9 +57,8 @@ public class EnvioController {
         ArrayList<Envio> envios = new ArrayList<>();
         String enviosDatos = datos.get("data");
         String[] lineas = enviosDatos.split("\n");
-
+        int i= 0;
         for (String linea : lineas) {
-            int i= 0;
             String data[] = linea.split("-");
             if (data.length > 1) {
                 Optional<Aeropuerto> aeropuertoOptionalOrig = aeropuertoService.obtenerAeropuertoPorCodigo(data[0]);
@@ -101,8 +100,9 @@ public class EnvioController {
                 }
 
             }
-            System.out.println(i);
             i++;
+            System.out.println("Envio #" + i);
+
         }
         envioService.insertarListaEnvios(envios);
         ArrayList<Paquete> paquetes = new ArrayList<>();

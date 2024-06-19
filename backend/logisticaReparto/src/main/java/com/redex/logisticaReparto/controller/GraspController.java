@@ -160,14 +160,6 @@ public class GraspController {
         grasp.getEnvios().addAll(enviosEnRango);
         System.out.println(grasp.getEnvios().size());
         ArrayList<Envio> solucion = grasp.ejecutaGrasp(grasp.getAeropuertos(),grasp.getEnvios(),grasp.getPlanes());
-        //Implementar una funcion que busque, de solucion, aquellos envios que no tienen paquetes con rutas asignadas
-        //20 no tienen ruta
-
-        //int totalPaquetesPlanes = planDeVueloService.calcularTotalPaquetesPlanes(grasp.getPlanes());
-        //System.out.println("Total de paquetes en los planes de vuelo: " + totalPaquetesPlanes);
-
-        //int totalPaquetesEnvios = envioService.calcularTotalPaquetesEnvio(grasp.getEnvios());
-        //System.out.println("Total de paquetes en los envios: " + totalPaquetesEnvios);
 
         ArrayList<Envio> enviosSinRuta = grasp.buscarSinRuta(solucion);
         grasp.setEnvios(enviosSinRuta);

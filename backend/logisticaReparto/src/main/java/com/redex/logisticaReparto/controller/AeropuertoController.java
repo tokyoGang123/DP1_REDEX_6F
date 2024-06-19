@@ -31,7 +31,6 @@ public class AeropuertoController {
         this.paisService = paisService;
     }
 
-
     @GetMapping("/aeropuertos/obtenerTodos")
     ArrayList<Aeropuerto> obtenerTodosAeropuertos() { return aeropuertoService.obtenerTodosAeropuertos();}
 
