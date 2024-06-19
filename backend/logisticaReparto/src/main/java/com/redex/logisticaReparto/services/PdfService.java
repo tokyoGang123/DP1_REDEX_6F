@@ -1,6 +1,7 @@
 package com.redex.logisticaReparto.services;
 
 import com.lowagie.text.*;
+import com.lowagie.text.Cell;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
@@ -17,6 +18,7 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfPageEventHelper;
 import com.lowagie.text.pdf.PdfWriter;
+import com.redex.logisticaReparto.model.Envio;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
@@ -37,7 +39,7 @@ public class PdfService extends AbstractPdfView {
     protected void buildPdfDocument(Map<String, Object> model, Document document, PdfWriter writer,
                                     HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-        //List<Vehiculo> vehiculos = (List<Vehiculo>)model.get("Vehiculos");
+        List<Envio> envios = (List<Envio>)model.get("Envios");
         //LocalDateTime fecha = (LocalDateTime)model.get("Fecha");
         LocalDateTime fecha = LocalDateTime.now();
 
@@ -114,7 +116,7 @@ public class PdfService extends AbstractPdfView {
         tablaRutasEntregados.addCell(celda);
 
         final int[] j = {1};
-        /*for(Vehiculo lista: vehiculos){
+        for(Envio lista: envios){
             for(Cell posicion : lista.getRoute()) {
                 for (Pedido pedido : lista.getOrder()) {
                     if(pedido.getX() == posicion.getX() && pedido.getY() == posicion.getY()){
@@ -154,7 +156,7 @@ public class PdfService extends AbstractPdfView {
                 }
             }
         }
-        */
+
 
         tablaRutasEntregados.setSpacingAfter(30);
 
