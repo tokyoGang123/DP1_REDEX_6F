@@ -1,6 +1,7 @@
 package com.redex.logisticaReparto.services;
 
 import com.lowagie.text.*;
+import com.lowagie.text.Cell;
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
 import com.lowagie.text.Element;
@@ -17,8 +18,12 @@ import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfPageEventHelper;
 import com.lowagie.text.pdf.PdfWriter;
+import com.redex.logisticaReparto.model.Envio;
+import com.redex.logisticaReparto.model.Paquete;
+import com.redex.logisticaReparto.model.Ruta;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.view.document.AbstractPdfView;
 
@@ -29,15 +34,20 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import com.redex.logisticaReparto.model.Aeropuerto;
+import java.util.HashMap;
 
 @Component
 public class PdfService extends AbstractPdfView {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+    @Autowired
+    PlanDeVueloService planDeVueloService;
+
     @Override
     protected void buildPdfDocument(Map<String, Object> model, Document document, PdfWriter writer,
                                     HttpServletRequest request, HttpServletResponse response) throws Exception {
 
-        //List<Vehiculo> vehiculos = (List<Vehiculo>)model.get("Vehiculos");
+        List<Envio> envios = (List<Envio>)model.get("Envios");
         //LocalDateTime fecha = (LocalDateTime)model.get("Fecha");
         LocalDateTime fecha = LocalDateTime.now();
 
@@ -55,11 +65,10 @@ public class PdfService extends AbstractPdfView {
 
         celda = new PdfPCell(new Phrase("REPORTE DE FIN DE SIMULACIÓN "+ fecha.format(formatter),fuentetitulo));
         celda.setBorder(0);
-        celda.setBackgroundColor(new Color(0,143,57));
+        celda.setBackgroundColor(new Color(8,157,227));
         celda.setHorizontalAlignment(Element.ALIGN_CENTER);
         celda.setVerticalAlignment(Element.ALIGN_CENTER);
         celda.setPadding(30);
-
 
         tablaTitulo.addCell(celda);
         tablaTitulo.setSpacingAfter(10);
@@ -85,7 +94,7 @@ public class PdfService extends AbstractPdfView {
         celda.setPadding(10);
         tablaRutasEntregados.addCell(celda);
 
-        celda = new PdfPCell(new Phrase("CANT PAQUETES",fuenteTituloColumnas));
+        celda = new PdfPCell(new Phrase("ID PAQUETE",fuenteTituloColumnas));
         celda.setBackgroundColor(Color.DARK_GRAY);
         celda.setHorizontalAlignment(Element.ALIGN_CENTER);
         celda.setVerticalAlignment(Element.ALIGN_CENTER);
@@ -113,53 +122,97 @@ public class PdfService extends AbstractPdfView {
         celda.setPadding(10);
         tablaRutasEntregados.addCell(celda);
 
+
+        HashMap<Long, String> cities = new HashMap<>();
+
+        // Agregar ciudades con su respectivo ID
+        cities.put(1L, "Bogotá");
+        cities.put(2L, "Quito");
+        cities.put(3L, "Caracas");
+        cities.put(4L, "Brasilia");
+        cities.put(5L, "Lima");
+        cities.put(6L, "La Paz");
+        cities.put(7L, "Santiago de Chile");
+        cities.put(8L, "Buenos Aires");
+        cities.put(9L, "Asunción");
+        cities.put(10L, "Montevideo");
+        cities.put(11L, "Tirana");
+        cities.put(12L, "Berlín");
+        cities.put(13L, "Viena");
+        cities.put(14L, "Bruselas");
+        cities.put(15L, "Minsk");
+        cities.put(16L, "Sofía");
+        cities.put(17L, "Praga");
+        cities.put(18L, "Zagreb");
+        cities.put(19L, "Copenhague");
+        cities.put(20L, "Amsterdam");
+        cities.put(21L, "Delhi");
+        cities.put(22L, "Seúl");
+        cities.put(23L, "Bangkok");
+        cities.put(24L, "Dubái");
+        cities.put(25L, "Beijing");
+        cities.put(26L, "Tokio");
+        cities.put(27L, "Kuala Lumpur");
+        cities.put(28L, "Singapur");
+        cities.put(29L, "Yakarta");
+        cities.put(30L, "Manila");
+
+
+
         final int[] j = {1};
-        /*for(Vehiculo lista: vehiculos){
-            for(Cell posicion : lista.getRoute()) {
-                for (Pedido pedido : lista.getOrder()) {
-                    if(pedido.getX() == posicion.getX() && pedido.getY() == posicion.getY()){
-                        celda = new PdfPCell(new Phrase(String.valueOf(j[0]), fuenteDataCeldas));
-                        celda.setPadding(5);
-                        celda.setHorizontalAlignment(Element.ALIGN_CENTER);
-                        celda.setVerticalAlignment(Element.ALIGN_CENTER);
-                        tablaRutasEntregados.addCell(celda);
+        for(Envio envio: envios){
+                for (Paquete paquete : envio.getPaquetes()) {
+                    if(paquete.getRuta()!=null) {
+                        for (Long ruta : paquete.getRuta().getListaRutas()) {
 
-                        celda = new PdfPCell(new Phrase(lista.getTipo(), fuenteDataCeldas));
-                        celda.setPadding(5);
-                        celda.setHorizontalAlignment(Element.ALIGN_CENTER);
-                        celda.setVerticalAlignment(Element.ALIGN_CENTER);
-                        tablaRutasEntregados.addCell(celda);
+                            celda = new PdfPCell(new Phrase(String.valueOf(j[0]), fuenteDataCeldas));
+                            celda.setPadding(5);
+                            celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                            celda.setVerticalAlignment(Element.ALIGN_CENTER);
+                            tablaRutasEntregados.addCell(celda);
 
 
-                        celda = new PdfPCell(new Phrase(String.valueOf(posicion.getX()), fuenteDataCeldas));
-                        celda.setPadding(5);
-                        celda.setHorizontalAlignment(Element.ALIGN_CENTER);
-                        celda.setVerticalAlignment(Element.ALIGN_CENTER);
-                        tablaRutasEntregados.addCell(celda);
+                            long idCiudadOrigen=planDeVueloService.obtenerPlanVueloPorId(ruta).get().getCiudad_origen();
+                            long idCiudadDestino=planDeVueloService.obtenerPlanVueloPorId(ruta).get().getCiudad_destino();
+                            String ciudadOrigen = cities.get(idCiudadOrigen);
+                            String ciudadDestino = cities.get(idCiudadDestino);
 
-                        celda = new PdfPCell(new Phrase(String.valueOf(posicion.getY()), fuenteDataCeldas));
-                        celda.setPadding(5);
-                        celda.setHorizontalAlignment(Element.ALIGN_CENTER);
-                        celda.setVerticalAlignment(Element.ALIGN_CENTER);
-                        tablaRutasEntregados.addCell(celda);
+                            celda = new PdfPCell(new Phrase(String.valueOf(paquete.getId_paquete()), fuenteDataCeldas));
+                            celda.setPadding(5);
+                            celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                            celda.setVerticalAlignment(Element.ALIGN_CENTER);
+                            tablaRutasEntregados.addCell(celda);
 
-                        celda = new PdfPCell(new Phrase("ENTREGADO", fuenteResaltado));
-                        celda.setPadding(5);
-                        celda.setHorizontalAlignment(Element.ALIGN_CENTER);
-                        celda.setVerticalAlignment(Element.ALIGN_CENTER);
-                        tablaRutasEntregados.addCell(celda);
 
-                        j[0]++;
+                            celda = new PdfPCell(new Phrase(ciudadOrigen, fuenteDataCeldas));
+                            celda.setPadding(5);
+                            celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                            celda.setVerticalAlignment(Element.ALIGN_CENTER);
+                            tablaRutasEntregados.addCell(celda);
+
+                            celda = new PdfPCell(new Phrase(ciudadDestino, fuenteDataCeldas));
+                            celda.setPadding(5);
+                            celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                            celda.setVerticalAlignment(Element.ALIGN_CENTER);
+                            tablaRutasEntregados.addCell(celda);
+
+                            celda = new PdfPCell(new Phrase("ENTREGADO", fuenteResaltado));
+                            celda.setPadding(5);
+                            celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                            celda.setVerticalAlignment(Element.ALIGN_CENTER);
+                            tablaRutasEntregados.addCell(celda);
+
+                            j[0]++;
+                        }
                     }
-                }
             }
         }
-        */
+
 
         tablaRutasEntregados.setSpacingAfter(30);
 
 
-
+    /*
         PdfPTable tablaRutas = new PdfPTable(5);
         tablaRutas.setWidths(new float[]{0.5f,1f,1f,1f,1.5f});
 
@@ -198,7 +251,7 @@ public class PdfService extends AbstractPdfView {
         celda.setPadding(10);
         tablaRutas.addCell(celda);
 
-
+    */
         final int[] n = {1};
 
         /*
@@ -268,18 +321,21 @@ public class PdfService extends AbstractPdfView {
         document.add(tablaTitulo);
         document.add(tablaSubTitulo);
         document.add(tablaRutasEntregados);
-        document.add(tablaRutas);
+        //document.add(tablaRutas);
 
 
     }
 }
+
+
+
 class FooterEvent extends PdfPageEventHelper {
     @Override
     public void onEndPage(PdfWriter writer, Document document) {
         try {
             PdfContentByte cb = writer.getDirectContent();
             Font fuenteDataCeldas = FontFactory.getFont(FontFactory.COURIER, 10, Color.BLACK);
-            Phrase footer = new Phrase("SAG \n", fuenteDataCeldas);
+            Phrase footer = new Phrase("REDEX \n", fuenteDataCeldas);
             ColumnText.showTextAligned(cb, Element.ALIGN_CENTER, footer,
                     (document.right() - document.left()) / 2 + document.leftMargin(), document.bottom() - 20, 0);
         } catch (DocumentException e) {
