@@ -191,7 +191,7 @@ public class GraspController {
         System.out.println("Tiempo de ejecución: " + durationInSeconds + " segundos");
 
         num_ejecu_semanal++;
-        if(num_ejecu_semanal == 1){
+        if(num_ejecu_semanal >= 80){
             ultimoEnvioSemanal=solucion;
         }
         return solucion;
