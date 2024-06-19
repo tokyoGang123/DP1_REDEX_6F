@@ -16,6 +16,10 @@ import { useTimer } from "../usoTimer"
 import { ejecutaGRASP, iniciaGRASP } from "@/app/api/grasp.api"
 import MapaSimuladorOL from "../MapaSimuladorOL"
 import hallarPuntosIntermedios from "../funcionesRuta"
+import BusquedaPlanes from '../BusquedaPlanes/BusquedaPlanes';
+import BusquedaAeropuertos from '../BusquedaAeropuertos/BusquedaAeropuertos';
+import BusquedaEnvios from '../BusquedaEnvios/BusquedaEnvios';
+
 
 dayjs.extend(advancedFormat);
 
@@ -134,6 +138,8 @@ export default function SimSemanal() {
         enviosRef.current = envios;
     }, [envios])
 
+    const envios2Ref = useRef([]);
+
     const [enviosFuturo, setEnviosFuturo] = useState({})
     const enviosFuturoRef = useRef(enviosFuturo)
     useEffect(() => {
@@ -215,6 +221,9 @@ export default function SimSemanal() {
         fechaStartRef.current = fechaSimRef.current.second(0); //fecha inicial
         startTimer()
         await iniciaDatos()
+
+        //envios2Ref.current = [...enviosRef.current];
+
         ejecucionSimulacion()
 
     }
@@ -291,6 +300,7 @@ export default function SimSemanal() {
         })
         await setEnvios(p)
         enviosRef.current = p
+
         //console.log("PEDIDOS")
         //console.log(p)
 
@@ -344,6 +354,7 @@ export default function SimSemanal() {
 
             await asignarAPlanes(env)
             await ingresaAeropuertoPorInicio(env)
+            envios2Ref.current.push(env);
 
             //Quitar envio de la lista
             enviosRef.current.splice(i, 1);
@@ -549,10 +560,12 @@ export default function SimSemanal() {
 
     //---------------------------------------------------------
 
-
+    //console.log("envios2Ref en SimSemanal:",envios2Ref);
+    
     return (
         <>
-            <Header title="Simulación" planesDeVueloRef={planesDeVueloRef} />
+            <Header title="Simulación" planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} envios2Ref={envios2Ref}/>
+
             <Stack direction="row" spacing={2}>
 
                 <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
