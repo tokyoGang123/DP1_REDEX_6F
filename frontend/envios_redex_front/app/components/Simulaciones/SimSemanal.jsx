@@ -162,7 +162,7 @@ export default function SimSemanal() {
             isInitialMount.current = false;
             let a = await getAeropuertosTodos()
 
-            /*
+            
             //Agregar lista a aeropuertos
             const handlePdvMapping = async () => {
                 // Supongo que `c` es tu array original de puntos de venta
@@ -176,7 +176,7 @@ export default function SimSemanal() {
                 a = updatedA;
                 // Aquí puedes trabajar con el array actualizado `updatedC`
             });
-            */
+            
 
             await setAeropuertos(a);
             //let b = await cargarPlanesFecha(fechaSimRef)
@@ -345,6 +345,7 @@ export default function SimSemanal() {
             //console.log(env.id_envio)
 
             await asignarAPlanes(env)
+            await ingresaAeropuertoPorInicio(env)
 
             //Quitar envio de la lista
             enviosRef.current.splice(i, 1);
@@ -410,6 +411,11 @@ export default function SimSemanal() {
         setPlanesDeVueloFuturo([...p])
         //console.log("DESDE: " + tiempoI + " HASTA " + tiempoF)
         //console.log(p)
+    }
+
+    //Añadir a aeropuerto de origen cuando un vuelo llega al aeropuerto deseado
+    const ingresaAeropuertoPorInicio = (envio) => {
+
     }
 
     //Añadir a aeropuerto elegido todos los paquetes que ingresan al acabar un plan de vuelo
