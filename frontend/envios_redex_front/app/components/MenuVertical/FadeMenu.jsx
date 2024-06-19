@@ -36,6 +36,18 @@ const FadeMenu = ({ planesDeVueloRef, aeropuertos, envios2Ref }) => { // Agrega 
     setAnchorEl(null);
   };
 
+
+  const handleOpenBusquedaAeropuertos = () => {
+    setOpenBusquedaAeropuertos(true);
+    setAnchorEl(null);
+  };
+
+  const handleOpenBusquedaEnvios = () => {
+    setOpenBusquedaEnvios(true);
+    setAnchorEl(null);
+  };
+
+
   const handleCloseBusquedaPlanes = () => {
     setOpenBusquedaPlanes(false);
   };
@@ -48,7 +60,8 @@ const FadeMenu = ({ planesDeVueloRef, aeropuertos, envios2Ref }) => { // Agrega 
     setOpenBusquedaEnvios(false);
   };
 
-  console.log("envios2Ref en FadeMenu:",envios2Ref);
+  //console.log("envios2Ref en FadeMenu:",envios2Ref);
+
   return (
     <div>
       <IconButton

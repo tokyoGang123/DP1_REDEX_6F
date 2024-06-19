@@ -3,7 +3,7 @@ import FadeMenu from '../MenuVertical/FadeMenu'; // Importa el componente FadeMe
 import styles from './Header.module.css';
 
 const Header = ({ title, planesDeVueloRef, aeropuertos, envios2Ref}) => { // Agrega aeropuertos como un parámetro
-  console.log("envios2Ref en Header:",envios2Ref);
+  //console.log("envios2Ref en Header:",envios2Ref);
   return (
     <header className={styles['header-proyecto']}>
       <FadeMenu planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} envios2Ref={envios2Ref} /> {/* Pasa aeropuertos como una propiedad */}
