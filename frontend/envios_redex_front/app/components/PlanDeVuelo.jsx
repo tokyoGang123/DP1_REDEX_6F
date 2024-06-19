@@ -54,7 +54,7 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
                 } else {
                     setRutaCompleta(true)
                     clearInterval(interval);
-                    removerPlan(planDeVuelo.id_tramo)
+                    removerPlan(planDeVuelo,planDeVuelo.id_tramo)
                     return prevIndex;
                 }
             })

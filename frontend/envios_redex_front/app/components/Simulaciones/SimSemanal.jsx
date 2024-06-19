@@ -375,7 +375,7 @@ export default function SimSemanal() {
             await saleAeropuertoPorPlan(pc)
             planesEliminarRef.current.splice(i, 1)
         }
-        console.log(newPlanes)
+        //console.log(newPlanes)
         setPdvMapa(newPlanes)
     }
 
@@ -454,12 +454,32 @@ export default function SimSemanal() {
     //Añadir a aeropuerto elegido todos los paquetes que ingresan al acabar un plan de vuelo
     const ingresaAeropuertoPorPlan = (planDeVuelo) => {
 
-        setAeropuertos(
+        setAeropuertos((prevAeropuertos) => {
+            //Copia de seguridad
+            const aeropuertosActualizados = [...prevAeropuertos]
 
-        )
-        
+            //Encontrar aeropuerto al que van a ingresar todos los paquetes
+            const index = aeropuertosActualizados.findIndex(
+                (aeropuerto) => aeropuerto.id_aeropuerto === planDeVuelo.ciudad_destino
+            )
+
+            if (index != -1) {
+                aeropuertosActualizados[index].listaPaquetes = [
+                    ...aeropuertosActualizados[index].listaPaquetes,
+                    ...planDeVuelo.listaPaquetes
+                ]
+            }
+            //console.log("Agregados ", planDeVuelo.listaPaquetes.length)
+
+            aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada + planDeVuelo.listaPaquetes.length
+
+            return aeropuertosActualizados;
+
+
+        })
+
     }
-    
+
 
 
     //Quitar de aeropuertos los planes que llegan de un plan
@@ -480,7 +500,7 @@ export default function SimSemanal() {
                 )
             }
 
-            console.log("Quitados ", planDeVuelo.listaPaquetes.length)
+            //console.log("Quitados ", planDeVuelo.listaPaquetes.length)
 
             aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada - planDeVuelo.listaPaquetes.length
 
@@ -561,10 +581,10 @@ export default function SimSemanal() {
     //---------------------------------------------------------
 
     //console.log("envios2Ref en SimSemanal:",envios2Ref);
-    
+
     return (
         <>
-            <Header title="Simulación" planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} envios2Ref={envios2Ref}/>
+            <Header title="Simulación" planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} envios2Ref={envios2Ref} />
 
             <Stack direction="row" spacing={2}>
 
@@ -578,7 +598,7 @@ export default function SimSemanal() {
 
             </Stack>
             <div style={{ height: 'calc(100vh - 50px)', width: '100%' }}>
-                {<MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} />}
+                {<MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} ingresarAeropuertos={ingresaAeropuertoPorPlan} />}
                 {/*<MapaSimuladorOL aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} setPlanesDeVuelo={setPdvMapa} estadoSim={estadoSim} fechaSim={fechaSimRef.current}></MapaSimuladorOL>*/}
 
             </div>
