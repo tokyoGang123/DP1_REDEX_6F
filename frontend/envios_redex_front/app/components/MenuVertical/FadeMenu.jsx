@@ -25,6 +25,29 @@ const FadeMenu = ({ planesDeVueloRef }) => {
     handleClose(); // Cierra el menú al abrir el modal
   };
 
+  const handleOpenBusquedaAeropuertos = () => {
+    setOpenBusquedaAeropuertos(true);
+    setAnchorEl(null);
+  };
+
+  const handleOpenBusquedaEnvios = () => {
+    setOpenBusquedaEnvios(true);
+    setAnchorEl(null);
+  };
+
+  const handleCloseBusquedaPlanes = () => {
+    setOpenBusquedaPlanes(false);
+  };
+
+  const handleCloseBusquedaAeropuertos = () => {
+    setOpenBusquedaAeropuertos(false);
+  };
+
+  const handleCloseBusquedaEnvios = () => {
+    setOpenBusquedaEnvios(false);
+  };
+
+  //console.log("envios2Ref en FadeMenu:",envios2Ref);
   return (
     <div>
       <IconButton

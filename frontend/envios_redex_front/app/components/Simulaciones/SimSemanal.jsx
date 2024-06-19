@@ -217,6 +217,7 @@ export default function SimSemanal() {
         fechaStartRef.current = fechaSimRef.current.second(0); //fecha inicial
         startTimer()
         await iniciaDatos()
+        //envios2Ref.current = [...enviosRef.current];
         ejecucionSimulacion()
 
     }
@@ -345,7 +346,8 @@ export default function SimSemanal() {
             //console.log(env.id_envio)
 
             await asignarAPlanes(env)
-
+            await ingresaAeropuertoPorInicio(env)
+            envios2Ref.current.push(env);
             //Quitar envio de la lista
             enviosRef.current.splice(i, 1);
         }
@@ -495,10 +497,11 @@ export default function SimSemanal() {
 
     //---------------------------------------------------------
 
-
+    //console.log("envios2Ref en SimSemanal:",envios2Ref);
+    
     return (
         <>
-            <Header title="Simulación" planesDeVueloRef={planesDeVueloRef} />
+            <Header title="Simulación" planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} envios2Ref={envios2Ref}/>
             <Stack direction="row" spacing={2}>
 
                 <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
