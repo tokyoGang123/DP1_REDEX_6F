@@ -14,7 +14,7 @@ export default function Aeropuerto({ aeropuerto }) {
     //Texto a mostrar en el popup de resumen rápido
     const textoAeropuerto = (
         <div>
-            <h1>Aeropuerto de: {aeropuerto.ciudad}</h1>
+            <h1>Aeropuerto de {aeropuerto.ciudad}</h1>
             <h1>Ocupación: {aeropuerto.capacidad_ocupada} de {aeropuerto.capacidad_maxima}</h1>
         </div>
     )
