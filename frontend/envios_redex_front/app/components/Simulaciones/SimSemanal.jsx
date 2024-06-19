@@ -618,7 +618,7 @@ export default function SimSemanal() {
                         <h2>ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</h2>
                         {<Button onClick={obtenerpdf}>DESCARGAR PDF</Button>}
                     </Box>
-                    <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} />
+                    <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} ingresarAeropuertos={ingresaAeropuertoPorPlan}/>
                 </Grid>
                 <Grid item xs={3} sx={{ overflowY: 'auto', p: 2, borderLeft: '1px solid #ccc' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
