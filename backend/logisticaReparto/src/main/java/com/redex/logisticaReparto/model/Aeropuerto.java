@@ -16,7 +16,7 @@ import java.util.List;
 public class Aeropuerto {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    //@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
     private int id_aeropuerto;
 

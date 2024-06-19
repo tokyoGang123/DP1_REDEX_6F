@@ -10,3 +10,15 @@ export const getAeropuertosTodos = async () => {
     }
 }
 
+export const postAeropuertosArchivo = async (data) => {
+    try {
+        //console.log("DATA",data)
+        let res = await baseApi.post('aeropuertos/lecturaArchivo',data)
+        //console.log(res)
+        return res
+    } catch(error) {
+        console.log("Error al insertar data")
+        return null
+    }
+}
+

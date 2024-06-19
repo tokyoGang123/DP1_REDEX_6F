@@ -2,15 +2,20 @@ package com.redex.logisticaReparto.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
+@Getter
+@Setter
 @Table(name="Paquete")
 public class Paquete {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(unique = true, nullable = false)
-    private String id_paquete;
+    private long id_paquete;
     @Transient
-    private Ruta ruta;
+    private Ruta ruta = new Ruta();
     private int estado;
 
     @ManyToOne
@@ -27,13 +32,18 @@ public class Paquete {
     public Paquete() {
     }
 
-    public Paquete(String id_paquete, int estado) {
+    public Paquete(int estado) {
+        this.ruta = new Ruta();
+        this.estado = estado;
+    }
+
+    public Paquete(long id_paquete, int estado) {
         this.id_paquete = id_paquete;
         this.ruta = new Ruta();
         this.estado = estado;
     }
 
-    public void setRuta(Ruta ruta) {
+    /*public void setRuta(Ruta ruta) {
         this.ruta = ruta;
     }
 
@@ -72,5 +82,5 @@ public class Paquete {
 
     public void setAeropuerto(Aeropuerto aeropuerto) {
         this.aeropuerto = aeropuerto;
-    }
+    }*/
 }

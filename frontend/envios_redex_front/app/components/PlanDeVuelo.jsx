@@ -1,134 +1,108 @@
 'use client'
-import { Icon } from "leaflet";
-import { useEffect, useState, useRef } from "react";
+import dayjs from 'dayjs';
+import duration from 'dayjs/plugin/duration';
+import utc from 'dayjs/plugin/utc';
+import { useEffect, useState, useRef, useCallback } from "react";
 import { Marker, Popup } from "react-leaflet";
 import hallarPuntosIntermedios from "./funcionesRuta";
+import { Icon } from 'leaflet';
+import L from 'leaflet'
+
 
 const markerSize = 20
 
-export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim }) {
+const iconoRojo = new Icon({
+    iconUrl: "/planes/plane_red.svg",
+    //iconUrl: require(""),
+    iconSize: [markerSize, markerSize],
+});
 
-    //Rojo, Amarillo, Verde
-    const [colorMarcador, setColorMarcador] = useState('Verde')
-    //Lista de puntos a recorrer
-    const [listaPuntosViaje, setListaPuntosViaje] = useState([])
-    //Posicion actual en la lista
-    const [currentPositionIndex, setCurrentPositionIndex] = useState(0)
-    //Ubicacion geografica actual
-    const [posicionActual, setPosicionActual] = useState({})
-    //Indicador de si el viaje ha finalizado
-    const [viajeFin, setViajeFin] = useState(false)
+const iconoAmarillo = new Icon({
+    iconUrl: "/planes/plane_yellow.svg",
+    //iconUrl: require(""),
+    iconSize: [markerSize, markerSize],
+});
 
-    //UseRef necesario
+const iconoVerde = new Icon({
+    iconUrl: "/planes/plane_green.svg",
+    //iconUrl: require(""),
+    iconSize: [markerSize, markerSize],
+});
+
+const iconoGris = new Icon({
+    iconUrl: "/planes/plane_grey.svg",
+    //iconUrl: require(""),
+    iconSize: [markerSize, markerSize],
+});
+
+dayjs.extend(duration);
+dayjs.extend(utc);
+
+export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, intervaloMS, removerPlan }) {
+
+    const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
     const markerRef = useRef(null);
-
-    //Quitar el marcador
-    const removeMarker = () => {
-        if (markerRef.current) {
-            markerRef.current.remove();
-        }
-    }
-
-    //Colocar puntos en arreglo
-    useEffect(() => {
-        if (planDeVuelo != null) {
-            const ciudadOrigen = planDeVuelo.ciudadOrigen;
-            const ciudadDestino = planDeVuelo.ciudadDestino;
-            hallarPuntosIntermedios(
-                ciudadOrigen.latitude,
-                ciudadOrigen.longitude,
-                ciudadDestino.latitude,
-                ciudadDestino.longitude
-            )
-                .then((puntos) => {
-                    setListaPuntosViaje(puntos);
-                    //console.log("Estado actualizado:", puntos);
-                })
-                .catch((error) => {
-                    console.error("Error al obtener puntos intermedios:", error);
-                });
-        }
-    }, [planDeVuelo]);
-
-    //Cuando se actualiza el arreglo
-    /*
-    useEffect(() => {
-        //console.log("Lita")
-        //console.log(listaPuntosViaje)
-        
-        if (listaPuntosViaje.length != 0) {
-            cambiaPos();
-        }
-    },[listaPuntosViaje])
-    */
+    const [colorMarcador, setColorMarcador] = useState('Verde')
+    const [rutaCompleta, setRutaCompleta] = useState(false)
 
     useEffect(() => {
-        console.log(estadoSim)
-        if (estadoSim === 'PL') {
-            cambiaPos()
-        }
-    },[estadoSim])
-
-
-    //Cambia posicion en intervalos de tiempo. CAMBIAR PARA QUE FUNCIONE A TIEMPO COMO CRONOMETRO
-    async function cambiaPos() {
         const interval = setInterval(() => {
-            setCurrentPositionIndex(prevIndex => {
-                const newIndex = prevIndex === listaPuntosViaje.length - 1 ? 0 : prevIndex + 1;
-                if (newIndex === 0) {
-                    clearInterval(interval); // Detener el intervalo cuando se alcance el último índice
-                    setViajeFin(true);
+            setCurrentPositionIndex((prevIndex) => {
+                const nextIndex = prevIndex + 1
+                if (nextIndex < planDeVuelo.ruta.length) {
+                    return nextIndex;
+                } else {
+                    setRutaCompleta(true)
+                    clearInterval(interval);
+                    removerPlan(planDeVuelo.id_tramo)
+                    return prevIndex;
                 }
-                return newIndex;
-            });
-        }, 0.005); // Ajusta el intervalo según sea necesario
-    }
+            })
+        }, 1000)
+
+        return () => clearInterval(interval);
+
+    }, [planDeVuelo.ruta.length])
+
 
     useEffect(() => {
-        setPosicionActual(listaPuntosViaje[currentPositionIndex])
-    }, [currentPositionIndex])
+        //console.log(currentPositionIndex)
+        //console.log(planDeVuelo.ruta[currentPositionIndex])
+        if (markerRef.current && currentPositionIndex > 0 && !rutaCompleta) markerRef.current.setLanLng(planDeVuelo.ruta[currentPositionIndex])
+    }, [currentPositionIndex, planDeVuelo.ruta])
 
-    //Si el viaje culmina, desaparecer
-    useEffect(() => {
-        if (viajeFin) {
-            removeMarker()
-        }
-    }, [viajeFin])
-
-
-    const iconoRojo = new Icon({
-        iconUrl: "/planes/plane_red.png",
-        //iconUrl: require(""),
-        iconSize: [markerSize, markerSize],
-    });
-
-    const iconoAmarillo = new Icon({
-        iconUrl: "/planes/plane_yellow.png",
-        //iconUrl: require(""),
-        iconSize: [markerSize, markerSize],
-    });
-
-    const iconoVerde = new Icon({
-        iconUrl: "/planes/plane_green.png",
-        //iconUrl: require(""),
-        iconSize: [markerSize, markerSize],
-    });
 
     useEffect(() => {
-        let porcentajeOcupacion = (planDeVuelo.capacidadOcupada / planDeVuelo.capacidadMaxima) * 100;
-        if (porcentajeOcupacion < 33.33) setColorMarcador("Verde")
+        let porcentajeOcupacion = (planDeVuelo.capacidad_ocupada / planDeVuelo.capacidad_maxima) * 100;
+        if (planDeVuelo.capacidad_ocupada == 0) setColorMarcador("Gris")
+        else if (porcentajeOcupacion < 33.33) setColorMarcador("Verde")
         else if (porcentajeOcupacion < 66.66) setColorMarcador("Amarillo")
         else setColorMarcador("Rojo")
     }, [planDeVuelo])
 
     return (
         <>
-            {posicionActual && Object.keys(posicionActual).length !== 0 ?
-                <Marker position={posicionActual}
-                    icon={colorMarcador == 'Verde' ? iconoVerde : (colorMarcador == 'Amarillo' ? iconoAmarillo : iconoRojo)}
-                    ref={markerRef}>
-                    <Popup>Info vuelo</Popup>
-                </Marker> : <></>}
+            {!rutaCompleta ?
+                <Marker position={planDeVuelo.ruta[currentPositionIndex]}
+                    icon={colorMarcador == 'Verde' ? iconoVerde : (colorMarcador == 'Amarillo' ? iconoAmarillo : (colorMarcador == 'Rojo' ? iconoRojo : iconoGris))}
+                    ref={(ref) => {
+                        if (ref && ref.leafletElement) {
+                            markerRef.current = ref.leafletElement;
+                        }
+                    }}>
+                    <Popup>
+                        <h1>Info vuelo {planDeVuelo.id_tramo}</h1>
+                        <p>Paquetes asignados: </p>
+                        <p>SALE EL: {planDeVuelo.hora_origen}</p>
+                        <p>llega EL: {planDeVuelo.hora_destino}</p>
+                        <ul>
+                            {planDeVuelo.listaPaquetes.map(paq => <li>{paq}</li>).join('')}
+                        </ul>
+
+                    </Popup>
+                </Marker>
+                : <></>}
+
         </>
     )
 

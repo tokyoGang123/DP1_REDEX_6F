@@ -2,11 +2,14 @@
 import { MapContainer, Marker, TileLayer, Popup, FeatureGroup } from "react-leaflet";
 import { Icon, divIcon, point } from "leaflet";
 import { EditControl } from "react-leaflet-draw"
-import { useState, useEffect } from "react";
-import Aeropuerto from "./Aeropuerto";
-import PlanDeVuelo from "./PlanDeVuelo";
+import { useState, useEffect, use } from "react";
+import dynamic from "next/dynamic";
+const Aeropuerto = dynamic(() => import('./Aeropuerto'), {ssr: false});
+const PlanDeVuelo = dynamic(() => import('./PlanDeVuelo'), {ssr: false});
+//import Aeropuerto from "";
+//import PlanDeVuelo from "./PlanDeVuelo";
 import { Cronometro } from "./Elementos/SelectorFecha";
-
+//import 'leaflet-canvas-markers'
 
 //Temporal, reemplazada por la API de aeropuertos
 let aeropuertosTemp = [
@@ -20,22 +23,36 @@ let planesTemp = [
   {id_tramo: 3, ciudadOrigen: {latitude:39.9075, longitude: 116.39723}, ciudadDestino: {latitude: 39.074208, longitude:  21.824312}, horaOrigen: "", hora_destino: "", capacidadMaxima: 100, capacidadOcupada: 98, estado: 1},
 ]
 
-export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim}) {
+export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDeVueloBD,intervaloMS}) {
 
   //Variable para manejar los aeropuertos
-  const [aeropuertos, setAeropuertos] = useState({});
-  const [planesDeVuelo, setPlanesDeVuelo] = useState(planesTemp)
+  const [aeropuertos, setAeropuertos] = useState([]);
+  const [planesDeVuelo, setPlanesDeVuelo] = useState([])
+  //const [visiblePlanes, setVisiblePlanes] = useState({});
 
   useEffect(() => {
       setAeropuertos(aeropuertosBD)
-      console.log("aer",aeropuertos)
+      
   },[aeropuertosBD])
 
+  useEffect(() => {
+    setPlanesDeVuelo((prevPlanesDeVuelo) => [...prevPlanesDeVuelo,...planesDeVueloBD]);
+  },[planesDeVueloBD])
+
+  useEffect(() => {
+    //console.log("PLANES",planesDeVuelo)
+  },[planesDeVuelo])
+
+  const removerPlan = (id) => {
+    setPlanesDeVuelo((prevPlanes) => prevPlanes.filter(plan => plan.id_tramo !== id))
+    console.log("Removido " + id)
+  }
+
+const idsTemp = [3860]
   return (
     <>
-
       <div style={{ position: 'relative', zIndex: 0, height: '100%', width: '100%'  }}>
-        <MapContainer center={[48.8566, 2.3522]} zoom={3} style={{ height: '100%', width: '100%' }}>
+        <MapContainer center={[48.8566, 2.3522]} zoom={3} style={{ height: '100%', width: '100%' }} preferCanvas={true}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -43,9 +60,12 @@ export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim}) {
           {aeropuertos && aeropuertos.length > 0 ? aeropuertos.map((pos, index) => (
             <Aeropuerto key={index} aeropuerto={pos}></Aeropuerto>
           )) : <></>}
-          {planesDeVuelo.map((pos,index) => (
-            <PlanDeVuelo key={index} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim}></PlanDeVuelo>
-          )) }
+          {planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.map((pos,index) => (
+            <PlanDeVuelo key={pos.id_tramo} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} intervaloMS={intervaloMS} removerPlan={removerPlan}></PlanDeVuelo>
+          )) : <></>}
+          {/*planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.filter(pos => idsTemp.includes(pos.id_tramo)).map((pos,index) => (
+            <PlanDeVuelo key={index} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} intervaloMS={intervaloMS}></PlanDeVuelo>
+          )) : <></>*/}
         </MapContainer>
       </div>
 
