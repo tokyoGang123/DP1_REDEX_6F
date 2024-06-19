@@ -1,7 +1,7 @@
 import MapaSimulador from "../MapaSimulador"
 import SelectorFecha from "../Elementos/SelectorFecha"
 import { CuadroTiempo } from "../Elementos/CuadroTiempo"
-import { Stack } from "@mui/material"
+import { Stack, Grid, Box, Button } from "@mui/material"
 import BotonIniciar from "../Botones/BotonIniciar"
 import { useEffect, useRef, useState } from "react"
 import dayjs from "dayjs"
@@ -582,28 +582,33 @@ export default function SimSemanal() {
 
     //console.log("envios2Ref en SimSemanal:",envios2Ref);
 
+    const [activePanel, setActivePanel] = useState('');
+    
     return (
         <>
-            <Header title="Simulación" planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} envios2Ref={envios2Ref} />
-
-            <Stack direction="row" spacing={2}>
-
-                <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
-                <Stack>
-                    {<SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>}
-                    {/*<h1>{fechaSim.toISOString()}</h1>*/}
-                    <BotonIniciar onClick={clickBotonIniciar}></BotonIniciar>
-                    <h2>ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</h2>
-                </Stack>
-
-            </Stack>
-            <div style={{ height: 'calc(100vh - 50px)', width: '100%' }}>
-                {<MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} ingresarAeropuertos={ingresaAeropuertoPorPlan} />}
-                {/*<MapaSimuladorOL aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} setPlanesDeVuelo={setPdvMapa} estadoSim={estadoSim} fechaSim={fechaSimRef.current}></MapaSimuladorOL>*/}
-
-            </div>
+            <Header setActivePanel={setActivePanel} />
+            <Grid container sx={{ height: 'calc(100vh - 64px)' }}>
+                <Grid item xs={9}>
+                    <Box sx={{ p : 2, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                        <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
+                        <SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>
+                        <BotonIniciar onClick={clickBotonIniciar}></BotonIniciar>
+                        <h2>ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</h2>
+                    </Box>
+                    <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} />
+                </Grid>
+                <Grid item xs={3} sx={{ overflowY: 'auto', p: 2, borderLeft: '1px solid #ccc' }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        <Button variant="contained" onClick={() => setActivePanel('planes')}>Planes de Vuelo</Button>
+                        <Button variant="contained" onClick={() => setActivePanel('aeropuertos')}>Aeropuertos</Button>
+                        <Button variant="contained" onClick={() => setActivePanel('envios')}>Envíos</Button>
+                    </Box>
+                    {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} />}
+                    {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos}/>}
+                    {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref}/>}
+                </Grid>
+            </Grid>
 
         </>
-
-    )
+    );
 }
