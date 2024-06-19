@@ -10,12 +10,13 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { Box } from '@mui/material';
 
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 export default function SelectorFecha({ fechaSim, setFechaSim, estadoSim, zonaHoraria }) {
 
 
-  dayjs.extend(utc);
-  dayjs.extend(timezone);
+
   //Valor del selector de fecha, otorga la fecha actual inicialmente y cambia de acuerdo a cambios en la fecha
   //const [fecha, setFecha] = useState(fechaSim);
 
@@ -24,6 +25,7 @@ export default function SelectorFecha({ fechaSim, setFechaSim, estadoSim, zonaHo
     setFechaSim(fecha)
   },[fecha])
   */
+ 
 
   return (
     <Box

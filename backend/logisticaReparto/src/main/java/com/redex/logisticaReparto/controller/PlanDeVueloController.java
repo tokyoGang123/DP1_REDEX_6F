@@ -33,8 +33,32 @@ public class PlanDeVueloController {
     //ArrayList<PlanDeVuelo> obtenerTodosPlanesVuelos() { return planDeVueloService.obtenerPlanesVuelos();}
     ArrayList<PlanVueloResponse> obtenerTodosPlanesVuelos() { return planDeVueloService.obtenerPlanesVuelos();}
 
+
     //@GetMapping("planesVuelo/listarConLatitudLongitud")
     //ArrayList<PlanDeVuelo> obtenerPlanesConLatitudLongitud() { return planDeVueloService.obtenerPlanesLatitudLongitud();}
+
+    @GetMapping("/planesVuelo/obtenerPorFechasConLatitudLongitud/{fechaI}/{fechaF}")
+    ArrayList<PlanVueloResponse> obtenerTodosPorFechasConLatitudLongitud(@PathVariable String fechaI, @PathVariable String fechaF) {
+        int anio = Integer.parseInt(fechaI.substring(0, 4));
+        int mes = Integer.parseInt(fechaI.substring(4, 6));
+        int dia = Integer.parseInt(fechaI.substring(6, 8));
+        int hora = Integer.parseInt(fechaI.substring(9, 11));
+        int minutos = Integer.parseInt(fechaI.substring(12, 14));
+        String husoHorarioStr = fechaI.substring(15);
+        ZonedDateTime fechaInicio = ZonedDateTime.of(anio, mes, dia, hora, minutos, 0, 0, ZoneId.of(husoHorarioStr));
+        LocalDateTime fechaInicioLocal = fechaInicio.toLocalDateTime();
+
+        anio = Integer.parseInt(fechaF.substring(0, 4));
+        mes = Integer.parseInt(fechaF.substring(4, 6));
+        dia = Integer.parseInt(fechaF.substring(6, 8));
+        hora = Integer.parseInt(fechaF.substring(9, 11));
+        minutos = Integer.parseInt(fechaF.substring(12, 14));
+        husoHorarioStr = fechaF.substring(15);
+        ZonedDateTime fechaFin = ZonedDateTime.of(anio, mes, dia, hora, minutos, 0, 0, ZoneId.of(husoHorarioStr));
+        LocalDateTime fechaFinLocal = fechaFin.toLocalDateTime();
+
+        return planDeVueloService.obtenerPlanesVuelosPorFechaLatLong(fechaInicioLocal,husoHorarioStr,fechaFinLocal);
+    }
 
     @GetMapping("/planesVuelo/obtenerPorFechas/{fechaI}/{fechaF}")
     ArrayList<PlanDeVuelo> obtenerTodosPorFechas(@PathVariable String fechaI, @PathVariable String fechaF) {
