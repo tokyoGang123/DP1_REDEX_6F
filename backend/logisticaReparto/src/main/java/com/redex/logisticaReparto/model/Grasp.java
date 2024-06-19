@@ -21,10 +21,10 @@ public class Grasp {
     ArrayList<Continente> continentes;
     ArrayList<Envio> envios = new ArrayList<>();
     ArrayList<PlanDeVuelo> planes = new ArrayList<>();
-
     ArrayList<Envio> solucionSimulacion;
 
     public Grasp() {
+        
     }
 
     public ArrayList<Envio> faseConstructivaGRASP(ArrayList<Aeropuerto> aeropuertos, ArrayList<PlanDeVuelo> planes, ArrayList<Envio> enviosSolicitados) {
@@ -56,7 +56,6 @@ public class Grasp {
                 escogemos otra de la lista y asi sucesivamente.
              */
 
-
         //Para fines del algoritmo, se va a aumentar y considerar los paquetes asignados en aeropuertos y paquetes
         //ArrayList<Aeropuerto> aeropuertosTemp = new ArrayList<>(aeropuertos);
         //ArrayList<PlanDeVuelo> planesTemp = new ArrayList<>(planes);
@@ -76,9 +75,7 @@ public class Grasp {
             ArrayList<ElementoListaRestringida> listaRestringida = new ArrayList<ElementoListaRestringida>(tamRCL);
             List<PlanDeVuelo> planesVueloOrigen = planesPorAeropuertoOrigen.get(envio.getAeropuerto_origen());
 
-
             for (PlanDeVuelo planDeVuelo : planesVueloOrigen){
-
 
                 //Se asume que planes estan ordenados
                 //System.out.println(planDeVuelo.getHora_origen() + " vs " + envio.getFecha_llegada_max());
@@ -155,6 +152,7 @@ public class Grasp {
 
         return solucion;
     }
+
     public PlanDeVuelo obtenerPlanByID(ArrayList<PlanDeVuelo> planDeVuelos, Long id) {
         /*for (PlanDeVuelo plan : planDeVuelos) {
             if (plan.getId_tramo() == id) return plan;

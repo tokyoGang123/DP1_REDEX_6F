@@ -6,10 +6,10 @@ import com.redex.logisticaReparto.services.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import java.time.*;
 import java.util.ArrayList;
+import java.util.Map;
+import java.util.Optional;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -47,6 +47,79 @@ public class GraspController {
 
     //20240529T14:00-05:00
     //20240529T16:00-05:00
+
+    @PostMapping("grasp/ejecucionDiaria/cargarEnvio")
+    public ArrayList<Envio> cargarEnviosDiaria(@RequestBody Map<String, String> datos){
+
+            long startTime = System.currentTimeMillis();
+            ArrayList<Pais> paises = paisService.obtenerTodosPaises();
+            ArrayList<Envio> envios = new ArrayList<>();
+            String enviosDatos = datos.get("data");
+            String[] lineas = enviosDatos.split("\n");
+
+            for (String linea : lineas) {
+                int i= 0;
+                String data[] = linea.split("-");
+                if (data.length > 1) {
+                    Optional<Aeropuerto> aeropuertoOptionalOrig = aeropuertoService.obtenerAeropuertoPorCodigo(data[0]);
+                    //CDES:QQ
+                    String dataCdes[] = data[4].split(":");
+                    Optional<Aeropuerto> aeropuertoOptionalDest = aeropuertoService.obtenerAeropuertoPorCodigo(dataCdes[0]);
+
+                    if (aeropuertoOptionalOrig.isPresent() && aeropuertoOptionalDest.isPresent()) {
+                        Aeropuerto aeropuertoOrigen = aeropuertoOptionalOrig.get();
+                        Aeropuerto aeropuertoDest = aeropuertoOptionalDest.get();
+
+                        int ciudadOrigen = aeropuertoOrigen.getId_aeropuerto();
+                        long numero_envio_Aeropuerto = Long.parseLong(data[1]); // cambiar a numero_envio_Aeropuerto
+                        int ciudadDestino = aeropuertoDest.getId_aeropuerto();
+                        int numPaquetes = Integer.parseInt(dataCdes[1]);
+
+                        String husoCiudadOrigen = aeropuertoOrigen.getHuso_horario();
+                        String husoCiudadDestino = aeropuertoDest.getHuso_horario();
+
+                        //FORI y HORI
+                        int anho = Integer.parseInt(data[2].substring(0,4));
+                        int mes = Integer.parseInt(data[2].substring(4,6));
+                        int dia = Integer.parseInt(data[2].substring(6,8));
+
+                        String tiempoHM[] = data[3].split(":");
+                        int hora = Integer.parseInt(tiempoHM[0]);
+                        int minutos = Integer.parseInt(tiempoHM[1]);
+
+                        LocalDateTime tiempoOrigen = LocalDateTime .of(LocalDate.of(anho,mes,dia), LocalTime.of(hora,minutos,0));
+                        int numDias = envioService.tipoVuelo(ciudadOrigen, ciudadDestino, paises);
+                        LocalDateTime tiempoMax = tiempoOrigen.plusDays(numDias); //ya que en el juego de datos aun no hay del mismo pais xd ni habra :v
+                        //
+                        Envio newEnvio = new Envio(0,numero_envio_Aeropuerto,tiempoOrigen,ciudadOrigen,
+                                ciudadDestino,tiempoMax,numPaquetes,husoCiudadOrigen,husoCiudadDestino);
+                        envios.add(newEnvio);
+                    }
+
+                }
+                System.out.println(i);
+                i++;
+            }
+
+            ArrayList<Paquete> paquetes = new ArrayList<>();
+
+            for (Envio envio : envios) {
+                ArrayList<Paquete> paquetesEnvio = new ArrayList<>();
+                for (int j = 0; j < envio.getNumPaquetes(); j++) {
+                    Paquete paquete = new Paquete(0);
+                    paquete.setEnvio(envio);
+                    paquetesEnvio.add(paquete);
+                    paquetes.add(paquete);
+                }
+                envio.setPaquetes(paquetesEnvio);
+            }
+
+            grasp.setEnvios(envios);
+
+            return envios;
+    }
+
+
 
     @GetMapping("grasp/ejecutar/{fechaHora}")
     public ArrayList<Envio> ejecutarGrasp(@PathVariable String fechaHora){
@@ -87,14 +160,6 @@ public class GraspController {
         grasp.getEnvios().addAll(enviosEnRango);
         System.out.println(grasp.getEnvios().size());
         ArrayList<Envio> solucion = grasp.ejecutaGrasp(grasp.getAeropuertos(),grasp.getEnvios(),grasp.getPlanes());
-        //Implementar una funcion que busque, de solucion, aquellos envios que no tienen paquetes con rutas asignadas
-        //20 no tienen ruta
-
-        //int totalPaquetesPlanes = planDeVueloService.calcularTotalPaquetesPlanes(grasp.getPlanes());
-        //System.out.println("Total de paquetes en los planes de vuelo: " + totalPaquetesPlanes);
-
-        //int totalPaquetesEnvios = envioService.calcularTotalPaquetesEnvio(grasp.getEnvios());
-        //System.out.println("Total de paquetes en los envios: " + totalPaquetesEnvios);
 
         ArrayList<Envio> enviosSinRuta = grasp.buscarSinRuta(solucion);
         grasp.setEnvios(enviosSinRuta);
@@ -105,4 +170,7 @@ public class GraspController {
         System.out.println("Tiempo de ejecución: " + durationInSeconds + " segundos");
         return solucion;
     }
+
+
+
 }
