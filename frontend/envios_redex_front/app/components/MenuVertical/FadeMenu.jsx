@@ -1,4 +1,3 @@
-// /components/MenuVertical/FadeMenu.jsx
 import * as React from 'react';
 import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
@@ -6,12 +5,14 @@ import MenuIcon from '@mui/icons-material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import styles from './MenuStyles.module.css';
 import BusquedaPlanes from '../BusquedaPlanes/BusquedaPlanes';
+import BusquedaAeropuertos from '../BusquedaAeropuertos/BusquedaAeropuertos'; // Importa el componente de búsqueda de aeropuertos
+import BusquedaEnvios from '../BusquedaEnvios/BusquedaEnvios';
 
-const FadeMenu = ({ planesDeVueloRef }) => {
+const FadeMenu = ({ planesDeVueloRef, aeropuertos, envios2Ref }) => { // Agrega aeropuertos como un parámetro
   const [anchorEl, setAnchorEl] = React.useState(null);
   const [openBusquedaPlanes, setOpenBusquedaPlanes] = React.useState(false);
-  const open = Boolean(anchorEl);
-
+  const [openBusquedaAeropuertos, setOpenBusquedaAeropuertos] = React.useState(false);
+  const [openBusquedaEnvios, setOpenBusquedaEnvios] = React.useState(false); // Agrega estado para controlar la apertura de
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -22,7 +23,7 @@ const FadeMenu = ({ planesDeVueloRef }) => {
 
   const handleOpenBusquedaPlanes = () => {
     setOpenBusquedaPlanes(true);
-    handleClose(); // Cierra el menú al abrir el modal
+    setAnchorEl(null);
   };
 
   const handleOpenBusquedaAeropuertos = () => {
@@ -34,6 +35,18 @@ const FadeMenu = ({ planesDeVueloRef }) => {
     setOpenBusquedaEnvios(true);
     setAnchorEl(null);
   };
+
+
+  const handleOpenBusquedaAeropuertos = () => {
+    setOpenBusquedaAeropuertos(true);
+    setAnchorEl(null);
+  };
+
+  const handleOpenBusquedaEnvios = () => {
+    setOpenBusquedaEnvios(true);
+    setAnchorEl(null);
+  };
+
 
   const handleCloseBusquedaPlanes = () => {
     setOpenBusquedaPlanes(false);
@@ -48,44 +61,37 @@ const FadeMenu = ({ planesDeVueloRef }) => {
   };
 
   //console.log("envios2Ref en FadeMenu:",envios2Ref);
+
   return (
     <div>
       <IconButton
-        aria-label="menu"
-        aria-controls="menu"
+        aria-controls="fade-menu"
         aria-haspopup="true"
+        aria-expanded={openBusquedaPlanes || openBusquedaAeropuertos || openBusquedaEnvios ? 'true' : undefined}
         onClick={handleClick}
+        className={styles.menuIcon}
       >
         <MenuIcon />
       </IconButton>
       <Menu
-        id="menu"
+        id="fade-menu"
         anchorEl={anchorEl}
-        keepMounted
-        open={open}
+        open={Boolean(anchorEl)}
         onClose={handleClose}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+        MenuListProps={{
+          'aria-labelledby': 'fade-button',
+        }}
+        TransitionProps={{
+          onExited: handleClose,
+        }}
       >
-        <MenuItem onClick={handleOpenBusquedaPlanes} className={styles.menuItem}>
-          PLANES DE VUELO
-        </MenuItem>
-        <MenuItem onClick={handleClose} className={styles.menuItem}>
-          ENVIOS
-        </MenuItem>
-        <MenuItem onClick={handleClose} className={styles.menuItem}>
-          AEROPUERTOS
-        </MenuItem>
-        <MenuItem onClick={handleClose} className={styles.menuItem}>
-          CAMBIO MODO DE EJECUCION
-        </MenuItem>
+        <MenuItem onClick={handleOpenBusquedaPlanes}>Planes de Vuelo</MenuItem>
+        <MenuItem onClick={handleOpenBusquedaAeropuertos}>Aeropuertos</MenuItem>
+        <MenuItem onClick={handleOpenBusquedaEnvios}>Envios</MenuItem>
       </Menu>
-
-      <BusquedaPlanes 
-        open={openBusquedaPlanes} 
-        onClose={() => setOpenBusquedaPlanes(false)} 
-        planesDeVueloRef={planesDeVueloRef}
-      />
+      <BusquedaPlanes open={openBusquedaPlanes} onClose={handleCloseBusquedaPlanes} planesDeVueloRef={planesDeVueloRef} />
+      <BusquedaAeropuertos open={openBusquedaAeropuertos} onClose={handleCloseBusquedaAeropuertos} aeropuertos={aeropuertos} /> {/* Pasa aeropuertos como una propiedad */}
+      <BusquedaEnvios open={openBusquedaEnvios} onClose={handleCloseBusquedaEnvios} envios2Ref={envios2Ref} />
     </div>
   );
 };

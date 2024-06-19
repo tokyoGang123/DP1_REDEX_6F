@@ -6,7 +6,7 @@ const Header = ({ title, planesDeVueloRef, aeropuertos, envios2Ref}) => { // Agr
   //console.log("envios2Ref en Header:",envios2Ref);
   return (
     <header className={styles['header-proyecto']}>
-      <FadeMenu planesDeVueloRef={planesDeVueloRef}/> {/* Renderiza el componente FadeMenu */}
+      <FadeMenu planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} envios2Ref={envios2Ref} /> {/* Pasa aeropuertos como una propiedad */}
       <h1>{title}</h1>
       <h1>RedEx</h1>
     </header>
