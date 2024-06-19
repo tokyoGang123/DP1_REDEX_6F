@@ -161,11 +161,28 @@ export default function SimSemanal() {
         async function obtenerDatos() {
             isInitialMount.current = false;
             let a = await getAeropuertosTodos()
+
+            /*
+            //Agregar lista a aeropuertos
+            const handlePdvMapping = async () => {
+                // Supongo que `c` es tu array original de puntos de venta
+                const updatedA = await Promise.all(a.map(async a => {
+                    return { ...a, listaPaquetes: [] };
+                }));
+                return updatedA;
+            };    
+            // Uso de la función handlePdvMapping
+            await handlePdvMapping().then(updatedA => {
+                a = updatedA;
+                // Aquí puedes trabajar con el array actualizado `updatedC`
+            });
+            */
+
             await setAeropuertos(a);
             //let b = await cargarPlanesFecha(fechaSimRef)
             //let c = await getPlanesTodos()
             //await setPlanesDeVuelo(c);
-            console.log("DATOS LEIDOS")
+            console.log(a)
         }
         if (isInitialMount.current) obtenerDatos()
         fechaSimRef.current = fechaSim;
@@ -212,8 +229,8 @@ export default function SimSemanal() {
 
         //http://localhost:8080/api/planesVuelo/obtenerPorFechas/20240530T20:00:-05:00/20240530T21:00:-05:00
         let planInicio = transformaHora(fechaSimRef.current)
-        //let planFin = transformaHora(fechaSimRef.current.add(2, "h").add(2, "d")) //Obtener 2 dias + 2 horas para cubrir todos los posibles vuelos
         let planFin = transformaHora(fechaSimRef.current.add(7, "d").add(2,"h"))
+
         /*
         let c = await getPlanesTodos()
         await c.sort((a, b) => {
@@ -395,6 +412,19 @@ export default function SimSemanal() {
         //console.log(p)
     }
 
+    //Añadir a aeropuerto elegido todos los paquetes que ingresan al acabar un plan de vuelo
+    const ingresaAeropuertoPorPlan = (planDeVuelo, aeropuertoDest) => {
+        
+        
+        //Por cada paquete en el plan, registrar
+        for (let i = 0; i < planDeVuelo.listaPaquetes.length; i++) {
+            
+        }
+    }
+    //Quitar de aeropuertos los planes que llegan de un plan
+    const saleAeropuertoPorPlan = () => {
+
+    }
 
     //---------------------------------------------------------
     //                      CUERPO SIMULACION
