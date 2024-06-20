@@ -14,7 +14,6 @@ import { getPlanesPorIntervalo, getPlanesPorIntervaloLatLon, getPlanesTodos } fr
 import { TryOutlined } from "@mui/icons-material"
 import { useTimer } from "../usoTimer"
 import { ejecutaGRASP, iniciaGRASP } from "@/app/api/grasp.api"
-import MapaSimuladorOL from "../MapaSimuladorOL"
 import hallarPuntosIntermedios from "../funcionesRuta"
 import BusquedaPlanes from '../BusquedaPlanes/BusquedaPlanes';
 import BusquedaAeropuertos from '../BusquedaAeropuertos/BusquedaAeropuertos';
