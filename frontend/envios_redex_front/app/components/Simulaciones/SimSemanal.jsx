@@ -157,7 +157,8 @@ export default function SimSemanal() {
     //Tiempo hasta llamada de datos nueva
     const tiempoLlamaGRASP = 120;
 
-
+    //Frecuencia de movimiento de aviones
+    const freqMov = 1000; //1 segundo
 
     //---------------------------------------------------------
     //                      USE EFFECTS E INTERVALS
@@ -288,7 +289,7 @@ export default function SimSemanal() {
         const handlePdvMapping = async () => {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(c.map(async pdv => {
-                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, pdv);
+                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, pdv, intervaloMS, freqMov);
                 return { ...pdv, listaPaquetes: [], ruta: ruta };
             }));
             return updatedC;
@@ -425,7 +426,7 @@ export default function SimSemanal() {
         const handlePdvMapping = async () => {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(p.map(async pdv => {
-                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, pdv);
+                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino,intervaloMS, freqMov);
                 return { ...pdv, listaPaquetes: [], ruta: ruta };
             }));
             return updatedC;
@@ -617,7 +618,7 @@ export default function SimSemanal() {
                         <h2>ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</h2>
                         {<Button onClick={obtenerpdf}>DESCARGAR PDF</Button>}
                     </Box>
-                    <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} intervaloMS={intervaloMS} ingresarAeropuertos={ingresaAeropuertoPorPlan}/>
+                    <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan}/>
                 </Grid>
                 <Grid item xs={3} sx={{ overflowY: 'auto', p: 2, borderLeft: '1px solid #ccc' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

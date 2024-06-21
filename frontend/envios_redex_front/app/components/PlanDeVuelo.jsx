@@ -38,7 +38,7 @@ const iconoGris = new Icon({
 dayjs.extend(duration);
 dayjs.extend(utc);
 
-export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, intervaloMS, removerPlan }) {
+export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, freqMov,removerPlan }) {
 
     const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
     const markerRef = useRef(null);
@@ -47,6 +47,7 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
 
     useEffect(() => {
         const interval = setInterval(() => {
+            
             setCurrentPositionIndex((prevIndex) => {
                 const nextIndex = prevIndex + 1
                 if (nextIndex < planDeVuelo.ruta.length) {
@@ -58,7 +59,7 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
                     return prevIndex;
                 }
             })
-        }, 1000)
+        }, freqMov) //En sem, antes era 1000
 
         return () => clearInterval(interval);
 
@@ -66,8 +67,8 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
 
 
     useEffect(() => {
-        //console.log(currentPositionIndex)
-        //console.log(planDeVuelo.ruta[currentPositionIndex])
+        console.log(currentPositionIndex)
+        console.log(planDeVuelo.ruta[currentPositionIndex])
         if (markerRef.current && currentPositionIndex > 0 && !rutaCompleta) markerRef.current.setLanLng(planDeVuelo.ruta[currentPositionIndex])
     }, [currentPositionIndex, planDeVuelo.ruta])
 
