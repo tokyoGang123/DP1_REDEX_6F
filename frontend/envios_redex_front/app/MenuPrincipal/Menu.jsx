@@ -20,7 +20,9 @@ export default function Menu() {
                         <Link href='/simulacion'>
                             <Button className="seleccion" variant="contained">SIMULACION SEMANAL</Button>
                         </Link>
-
+                        <Link href='/operacionesDiarias'>
+                            <Button className="seleccion" variant="contained">OPERACIONES DIARIAS</Button>
+                        </Link>
                     </div>
                     <div className="options">
                         <Link href="/envios">

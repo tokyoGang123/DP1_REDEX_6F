@@ -607,7 +607,7 @@ export default function SimSemanal() {
 
     return (
         <>
-            <Header setActivePanel={setActivePanel} />
+            <Header title={"SIMULACION SEMANAL"} setActivePanel={setActivePanel} />
             <Grid container sx={{ height: 'calc(100vh - 64px)' }}>
                 <Grid item xs={9}>
                     <Box sx={{ p: 2, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
