@@ -323,12 +323,15 @@ export default function OperacionesDiarias() {
     const obtenerNuevosEnvios = async (fechaLlam) => {
         let tiempoEnviado = transformaHora(fechaLlam);
         let p = await ejecutaGRASP(tiempoEnviado);
-        p.sort((a, b) => {
-            let fechaA = new Date(a.zonedFechaIngreso);
-            let fechaB = new Date(b.zonedFechaIngreso);
-            return fechaA - fechaB;
-        })
-        setEnviosFuturo([...p])
+        if (p) {
+            p.sort((a, b) => {
+                let fechaA = new Date(a.zonedFechaIngreso);
+                let fechaB = new Date(b.zonedFechaIngreso);
+                return fechaA - fechaB;
+            })
+            setEnviosFuturo([...p])
+        }
+        
         //console.log("CON FECHA " + transformaHora(fechaSimRef.current))
         //console.log(p)
     }
@@ -465,31 +468,24 @@ export default function OperacionesDiarias() {
         await setEstadoSim('PL')
 
         while (1) {
-            //console.log(nF)
-            //-----------------------------------
+            
             //MANTENER TIEMPO
-            //Si estamos antes que acabe el ciclo, colocar nuevos envios
-            /*
-            if (i == ciclo - 1) {
-                //enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
-                //planesDeVueloRef.current = planesDeVueloRef.current.concat([...planesDeVueloFuturoRef.current])
-                //planesEliminarRef.current = planesEliminarRef.current.concat([...planesDeVueloFuturoRef.current])
-                //currentCiclo = currentCiclo + ciclo
-            }
+            //-----------------------------------
 
-            //Si se han llegado al momento de llamar a GRASP, realizar la llamada a nuevos pedidos
+
+            //Llamar a GRASP para planificar pedidos ingresados
             if (i == llamarAGrasp) {
-                //console.log("llamada jaja ekide")
-                fechaLlam = fechaLlam.add(ciclo, 'm')
-                obtenerNuevosPlanes(fechaLlamPlan, ciclo)
-                //fechaLlamPlan = fechaLlamPlan.add(ciclo, 'm')
-                obtenerNuevosEnvios(fechaLlam)
-                //console.log(enviosNew)
+                fechaLlam = fechaLlam.add(ciclo, 's')
+                obtenerNuevosEnvios(fechaLlam,ciclo)
                 llamarAGrasp = llamarAGrasp + ciclo
             }
-            */
-            //MANTENER TIEMPO
-            //-----------------------------------
+            //Asignar pedidos
+            if (i == currentCiclo - 1) {
+                enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
+                //planesDeVueloRef.current = planesDeVueloRef.current.concat([...planesDeVueloFuturoRef.current])
+                //planesEliminarRef.current = planesEliminarRef.current.concat([...planesDeVueloFuturoRef.current])
+                currentCiclo = currentCiclo + ciclo
+            }
 
             //-----------------------------------
             //OPERACIONES
