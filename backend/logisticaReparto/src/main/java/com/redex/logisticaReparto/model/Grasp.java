@@ -435,7 +435,7 @@ public class Grasp {
 
             ArrayList<Envio> enviosCubiertos = faseConstructivaGRASP(aeropuertos, planes, envios);
             mejorSol =enviosCubiertos;
-            imprimeSolucionEncontrada(aeropuertos,planes,enviosCubiertos);
+            //imprimeSolucionEncontrada(aeropuertos,planes,enviosCubiertos);
             //FASE DE MEJORA
             //realizamos la búsqueda local
             //ArrayList<Envio> solucion = busquedaLocalGRASP(aeropuertos, planes, enviosCubiertos);
