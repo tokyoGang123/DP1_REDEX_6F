@@ -19,6 +19,7 @@ import BusquedaPlanes from '../BusquedaPlanes/BusquedaPlanes';
 import BusquedaAeropuertos from '../BusquedaAeropuertos/BusquedaAeropuertos';
 import BusquedaEnvios from '../BusquedaEnvios/BusquedaEnvios';
 import { getPDFFinal } from "@/app/api/pdf.api"
+import { postEnvioIndividualDiario } from "@/app/api/envios.api"
 
 
 dayjs.extend(advancedFormat);
@@ -101,7 +102,7 @@ export default function OperacionesDiarias() {
     const [pdvMapa, setPdvMapa] = useState([])
 
     //Envios
-    const [envios, setEnvios] = useState({})
+    const [envios, setEnvios] = useState([])
     const enviosRef = useRef(envios)
     useEffect(() => {
         enviosRef.current = envios;
@@ -109,7 +110,7 @@ export default function OperacionesDiarias() {
 
     const envios2Ref = useRef([]);
 
-    const [enviosFuturo, setEnviosFuturo] = useState({})
+    const [enviosFuturo, setEnviosFuturo] = useState([])
     const enviosFuturoRef = useRef(enviosFuturo)
     useEffect(() => {
         enviosFuturoRef.current = enviosFuturo;
@@ -151,7 +152,9 @@ export default function OperacionesDiarias() {
             console.log(a)
 
             fechaStartRef.current = fechaSimRef.current; //fecha inicial
+            await iniciaGRASP()
             await iniciaDatos()
+            await setEstadoSim('PL')
             ejecucionSimulacion()
         }
         if (isInitialMount.current) obtenerDatos()
@@ -331,7 +334,7 @@ export default function OperacionesDiarias() {
             })
             setEnviosFuturo([...p])
         }
-        
+        else console.log("No hay envios programados en este bloque")
         //console.log("CON FECHA " + transformaHora(fechaSimRef.current))
         //console.log(p)
     }
@@ -367,7 +370,7 @@ export default function OperacionesDiarias() {
         //console.log(p)
     }
 
-    //Añadir a aeropuerto de origen cuando un vuelo llega al aeropuerto deseado
+    //Añadir a aeropuerto de origen cuando un envio llega al aeropuerto deseado (desde que el cliente lo deja)
     const ingresaAeropuertoPorInicio = async (envio) => {
 
         setAeropuertos((prevAeropuertos) => {
@@ -455,23 +458,34 @@ export default function OperacionesDiarias() {
 
     }
 
+    //insertar envio generico (de pruebas)
+
+    const insertaEnvioGenerico = async () => {
+        let codigoOrigen = 'SKBO'
+        let codigoDestino = 'SEQM'
+        let numPaquetes = 10
+
+        let res = await postEnvioIndividualDiario(codigoOrigen,codigoDestino,numPaquetes)
+        if (res) console.log("ENVIO REGISTRADO A LAS + ", fechaSim)
+        else console.log("ERROR EN EL ENVIO A LAS " + fechaSim.tz(zonaHorariaUsuario).toISOString())
+    }
+
+
     //---------------------------------------------------------
     //                      CUERPO SIMULACION
     const ejecucionSimulacion = async () => {
         let i = 0;
         let ciclo = 45;
+        let currentCiclo = 45
         let llamarAGrasp = 10;
         let nF = fechaSimRef.current;
         let fechaLlam = fechaStartRef.current //Fecha para llamar grasp
         let fechaLlamPlan = fechaStartRef.current.add(2, 'd').add(2, 'h') // 2 días + 2 horas ya se tienen leidos, se procedera a llamar bloques posteriores de 2 horas
         //console.log("LLAMADA INICIO: " + fechaLlam)
-        await setEstadoSim('PL')
+        
 
-        while (1) {
-            
-            //MANTENER TIEMPO
-            //-----------------------------------
-
+        setInterval(async () => {
+            const inicio = performance.now();
 
             //Llamar a GRASP para planificar pedidos ingresados
             if (i == llamarAGrasp) {
@@ -495,18 +509,21 @@ export default function OperacionesDiarias() {
             //console.log(enviosRef.current)
             await revisaEnvios()
             await revisaPlanes() //Ver si inicia algun plan para colocarlo en el arreglo y mostrarlo en mapa
-            setFechaSim(nF);
+            console.log(fechaSimRef.current)
+            const fin = performance.now();
+            const tiempoEjecucion = fin - inicio;
+            const tiempoEspera = Math.max(0, 1000 - tiempoEjecucion);
 
-            //agregar un minuto simulado
-            // Update fechaSim
-            nF = await new Promise((resolve) => setTimeout(() => resolve(nF.add(1, 's')), 1000));
-            
-            console.log(nF)
+            setTimeout(() => {
+                setFechaSim(nF.add(1, 's'));
+                fechaSimRef.current = nF;
+            }, tiempoEspera);
+
+            nF = nF.add(1, 's');
             fechaSimRef.current = nF;
 
-            //console.log(timeRef)
             i++;
-        }
+        }, 1000);
     }
 
     //---------------------------------------------------------
@@ -523,6 +540,7 @@ export default function OperacionesDiarias() {
                     <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'left' }}>
                         {/*<CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>*/}
                         <h1>FECHA ACTUAL: {fechaSim.format('YYYY-MM-DD HH:mm:ss [GMT]Z')}</h1>
+                        {<Button onClick={insertaEnvioGenerico}>INSERTA ENVIO PRUEBA</Button>}
                         {/*<Button onClick={obtenerpdf}>DESCARGAR PDF</Button>*/}
                     </Box>
                     <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan}/>

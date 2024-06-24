@@ -239,14 +239,17 @@ export default function SimSemanal() {
     // Al hacer click al boton de iniciar, empieza la simulacion
     const clickBotonIniciar = async () => {
 
-        //"Play"
-        fechaStartRef.current = fechaSimRef.current.second(0); //fecha inicial
-        startTimer()
-        await iniciaDatos()
+        if (estadoSim != 'PL') {
+            //"Play"
+            fechaStartRef.current = fechaSimRef.current.second(0); //fecha inicial
+            startTimer()
+            await iniciaDatos()
 
-        //envios2Ref.current = [...enviosRef.current];
+            //envios2Ref.current = [...enviosRef.current];
 
-        ejecucionSimulacion()
+            ejecucionSimulacion()
+        }
+
 
     }
 
@@ -315,6 +318,7 @@ export default function SimSemanal() {
         //Obtener envios asignados
         let tiempoEnviado = transformaHora(fechaSimRef.current);
         let p = await ejecutaGRASP(tiempoEnviado);
+        //let p = []
         await p.sort((a, b) => {
             let fechaA = new Date(a.zonedFechaIngreso);
             let fechaB = new Date(b.zonedFechaIngreso);
@@ -342,6 +346,7 @@ export default function SimSemanal() {
         for (let i = 0; i < env.paquetes.length; i++) {
             let paq = env.paquetes[i]
             let listRut = paq.ruta.listaRutas
+            if (listRut == 0) console.log("ERROR EN ENVIO: " + env.id_envio + " para paquete " + paq.id_paquete)
             for (let j = 0; j < listRut.length; j++) {
                 //console.log("Buscar", listRut[j])
                 //Encontrar plan de vuelo asignado a parte de la ruta
@@ -426,7 +431,7 @@ export default function SimSemanal() {
         const handlePdvMapping = async () => {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(p.map(async pdv => {
-                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino,intervaloMS, freqMov);
+                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, intervaloMS, freqMov);
                 return { ...pdv, listaPaquetes: [], ruta: ruta };
             }));
             return updatedC;
@@ -548,10 +553,72 @@ export default function SimSemanal() {
         //console.log("LLAMADA INICIO: " + fechaLlam)
         await setEstadoSim('PL')
 
+        const interval = setInterval(async () => {
+            const inicio = performance.now();
+
+            if (i >= llamadas_totales) {
+                setEstadoSim('FI')
+                console.log("FIN")
+                stopTimer()
+                clearInterval(interval)
+            }
+            //Si estamos antes que acabe el ciclo, colocar nuevos envios
+            if (i == currentCiclo - 1) {
+                enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
+                //planesDeVueloRef.current = planesDeVueloRef.current.concat([...planesDeVueloFuturoRef.current])
+                //planesEliminarRef.current = planesEliminarRef.current.concat([...planesDeVueloFuturoRef.current])
+                currentCiclo = currentCiclo + ciclo
+            }
+
+            //Si se han llegado al momento de llamar a GRASP, realizar la llamada a nuevos pedidos
+            if (i == llamarAGrasp) {
+                //console.log("llamada jaja ekide")
+                fechaLlam = fechaLlam.add(ciclo, 'm')
+                obtenerNuevosPlanes(fechaLlamPlan, ciclo)
+                //fechaLlamPlan = fechaLlamPlan.add(ciclo, 'm')
+                obtenerNuevosEnvios(fechaLlam)
+                //console.log(enviosNew)
+                llamarAGrasp = llamarAGrasp + ciclo
+            }
+
+
+            //MANTENER TIEMPO
+            //-----------------------------------
+
+            //-----------------------------------
+            //OPERACIONES
+
+            //Revisar envios
+
+            //console.log(enviosRef.current)
+            await revisaEnvios()
+            await revisaPlanes() //Ver si inicia algun plan para colocarlo en el arreglo y mostrarlo en mapa
+
+
+            const fin = performance.now();
+            const tiempoEjecucion = fin - inicio;
+            const tiempoEspera = Math.max(0, 200 - tiempoEjecucion);
+
+            setTimeout(() => {
+                setFechaSim(nF.add(1, 'm'));
+                fechaSimRef.current = nF;
+            }, tiempoEspera);
+
+            nF = nF.add(1, 'm');
+            fechaSimRef.current = nF;
+            console.log(nF)
+            i++;
+        }, 200)
+
+
+        /*
         while (i <= llamadas_totales) {
             //console.log(nF)
             //-----------------------------------
             //MANTENER TIEMPO
+
+            const inicio = performance.now();
+
             if (i >= llamadas_totales) {
                 break;
             }
@@ -574,7 +641,7 @@ export default function SimSemanal() {
                 llamarAGrasp = llamarAGrasp + ciclo
             }
 
-            const inicio = performance.now()
+
             //MANTENER TIEMPO
             //-----------------------------------
 
@@ -588,16 +655,21 @@ export default function SimSemanal() {
             await revisaPlanes() //Ver si inicia algun plan para colocarlo en el arreglo y mostrarlo en mapa
 
 
+            const fin = performance.now();
+            const tiempoEjecucion = fin - inicio;
+            const tiempoEspera = Math.max(0, 200 - tiempoEjecucion);
+            console.log("Tiempo Espera: ",tiempoEspera)
             //agregar un minuto simulado
             // Update fechaSim
-            nF = await new Promise((resolve) => setTimeout(() => resolve(nF.add(1, 'm')), 200));
+            nF = await new Promise((resolve) => setTimeout(() => resolve(nF.add(1, 'm')), tiempoEspera));
             setFechaSim(nF);
-            console.log(nF)
+            //console.log(nF)
             fechaSimRef.current = nF;
 
             //console.log(timeRef)
             i++;
         }
+            */
     }
 
     //---------------------------------------------------------
@@ -614,11 +686,11 @@ export default function SimSemanal() {
                     <Box sx={{ p: 2, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                         <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
                         <SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>
-                        <BotonIniciar onClick={clickBotonIniciar}></BotonIniciar>
+                        <BotonIniciar onClick={clickBotonIniciar} disabled={estadoSim == 'PL'}></BotonIniciar>
                         <h2>ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</h2>
                         {<Button onClick={obtenerpdf}>DESCARGAR PDF</Button>}
                     </Box>
-                    <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan}/>
+                    <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan} />
                 </Grid>
                 <Grid item xs={3} sx={{ overflowY: 'auto', p: 2, borderLeft: '1px solid #ccc' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

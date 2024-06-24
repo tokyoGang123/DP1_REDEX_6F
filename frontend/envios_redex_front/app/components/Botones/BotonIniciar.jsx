@@ -5,11 +5,13 @@ let height = "25"
 let widthPX = "25px"
 let heightPX = "25px"
 
-export default function BotonIniciar({ onClick }) {
+export default function BotonIniciar({ onClick,disabled }) {
 
+  console.log(disabled)
     return (
         <Button
         onClick={onClick}
+        disabled={disabled}
         style={{
           padding: 0,
           minWidth: widthPX,

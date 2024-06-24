@@ -11,17 +11,38 @@ const PlanDeVuelo = dynamic(() => import('./PlanDeVuelo'), {ssr: false});
 import { Cronometro } from "./Elementos/SelectorFecha";
 //import 'leaflet-canvas-markers'
 
-//Temporal, reemplazada por la API de aeropuertos
-let aeropuertosTemp = [
-  { id: 1, nombre: "Bogota", latitude: 4.70139, longitude: -74.14694, capacidadMax: 100, capacidadActual: 0 },
-  { id: 2, nombre: "Quito", latitude: 0.11333, longitude: -78.35861, capacidadMax: 200, capacidadActual: 0 }
-]
+const markerSize = 20
+const iconoRojo = new Icon({
+  iconUrl: "/planes/plane_red.svg",
+  //iconUrl: require(""),
+  iconSize: [markerSize, markerSize],
+});
 
-let planesTemp = [
-  {id_tramo: 1, ciudadOrigen: {latitude: 4.70139,longitude:-74.14694}, ciudadDestino: {latitude: -12.0431800, longitude:  -77.0282400}, horaOrigen: "", hora_destino: "", capacidadMaxima: 100, capacidadOcupada: 0, estado: 1 },
-  {id_tramo: 2, ciudadOrigen: {latitude: -34.78917, longitude: -56.26472}, ciudadDestino: {latitude: 55.61806,longitude:  12.65611 }, horaOrigen: "", hora_destino: "", capacidadMaxima: 100, capacidadOcupada: 45, estado: 1 },
-  {id_tramo: 3, ciudadOrigen: {latitude:39.9075, longitude: 116.39723}, ciudadDestino: {latitude: 39.074208, longitude:  21.824312}, horaOrigen: "", hora_destino: "", capacidadMaxima: 100, capacidadOcupada: 98, estado: 1},
-]
+const iconoAmarillo = new Icon({
+  iconUrl: "/planes/plane_yellow.svg",
+  //iconUrl: require(""),
+  iconSize: [markerSize, markerSize],
+});
+
+const iconoVerde = new Icon({
+  iconUrl: "/planes/plane_green.svg",
+  //iconUrl: require(""),
+  iconSize: [markerSize, markerSize],
+});
+
+const iconoGris = new Icon({
+  iconUrl: "/planes/plane_grey.svg",
+  //iconUrl: require(""),
+  iconSize: [markerSize, markerSize],
+});
+
+
+const iconos = {
+  Rojo: iconoRojo,
+  Amarillo: iconoAmarillo,
+  Verde: iconoVerde,
+  Gris: iconoGris
+}
 
 export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDeVueloBD,freqMov,ingresarAeropuertos}) {
 
@@ -61,8 +82,8 @@ const idsTemp = [3860]
           {aeropuertos && aeropuertos.length > 0 ? aeropuertos.map((pos, index) => (
             <Aeropuerto key={index} aeropuerto={pos}></Aeropuerto>
           )) : <></>}
-          {planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.map((pos,index) => (
-            <PlanDeVuelo key={pos.id_tramo} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} freqMov={freqMov} removerPlan={removerPlan} ></PlanDeVuelo>
+          {planesDeVuelo && planesDeVuelo.length > 0 && estadoSim == 'PL' ? planesDeVuelo.map((pos,index) => (
+            <PlanDeVuelo key={pos.id_tramo} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} freqMov={freqMov} removerPlan={removerPlan} iconos={iconos}></PlanDeVuelo>
           )) : <></>}
           {/*planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.filter(pos => idsTemp.includes(pos.id_tramo)).map((pos,index) => (
             <PlanDeVuelo key={index} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} intervaloMS={intervaloMS}></PlanDeVuelo>
