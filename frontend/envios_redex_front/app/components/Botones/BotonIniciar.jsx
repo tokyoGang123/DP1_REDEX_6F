@@ -7,7 +7,6 @@ let heightPX = "25px"
 
 export default function BotonIniciar({ onClick,disabled }) {
 
-  console.log(disabled)
     return (
         <Button
         onClick={onClick}

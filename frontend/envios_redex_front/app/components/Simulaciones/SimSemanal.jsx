@@ -1,7 +1,7 @@
 import MapaSimulador from "../MapaSimulador"
 import SelectorFecha from "../Elementos/SelectorFecha"
 import { CuadroTiempo } from "../Elementos/CuadroTiempo"
-import { Stack, Grid, Box, Button } from "@mui/material"
+import { Stack, Grid, Box, Button, Typography } from "@mui/material"
 import BotonIniciar from "../Botones/BotonIniciar"
 import { useEffect, useRef, useState } from "react"
 import dayjs from "dayjs"
@@ -19,6 +19,7 @@ import BusquedaPlanes from '../BusquedaPlanes/BusquedaPlanes';
 import BusquedaAeropuertos from '../BusquedaAeropuertos/BusquedaAeropuertos';
 import BusquedaEnvios from '../BusquedaEnvios/BusquedaEnvios';
 import { getPDFFinal } from "@/app/api/pdf.api"
+import HoraActual from "../horaActualSem/HoraActual"
 
 
 dayjs.extend(advancedFormat);
@@ -683,12 +684,15 @@ export default function SimSemanal() {
             <Header title={"SIMULACION SEMANAL"} setActivePanel={setActivePanel} />
             <Grid container sx={{ height: 'calc(100vh - 64px)' }}>
                 <Grid item xs={9}>
-                    <Box sx={{ p: 2, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                        <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
+                    <Box sx={{ p: 2, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                        <HoraActual></HoraActual>
+                        <Typography> ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                         <SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>
                         <BotonIniciar onClick={clickBotonIniciar} disabled={estadoSim == 'PL'}></BotonIniciar>
-                        <h2>ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</h2>
-                        {<Button onClick={obtenerpdf}>DESCARGAR PDF</Button>}
+                        {estadoSim == 'FI' ? <Button onClick={obtenerpdf}>Reporte Final</Button> : <></>}
+                        <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
                     </Box>
                     <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan} />
                 </Grid>
