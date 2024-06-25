@@ -22,3 +22,15 @@ export const postEnviosArchivo = async (data) =>{
         return null
     }
 }
+
+export const postEnvioIndividualDiario = async ({codigoOrigen, codigoDestino, numPaq}) => {
+    try {
+        let data = await baseApi.post('envios/insertarEnvio/' + codigoOrigen + "/" + codigoDestino + "/" + numPaq).then(({data}) => data)
+        console.log(data)
+        return data;
+    } catch (error) {
+        console.log('Error al buscar data:', error)
+        return null;
+    }
+
+}

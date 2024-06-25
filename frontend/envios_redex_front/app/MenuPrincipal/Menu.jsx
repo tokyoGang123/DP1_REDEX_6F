@@ -18,7 +18,10 @@ export default function Menu() {
                 <div className="container">
                     <div className="header">
                         <Link href='/simulacion'>
-                            <Button className="seleccion" variant="contained">SELECCIONAR TIPO DE EJECUCIÓN</Button>
+                            <Button className="seleccion" variant="contained">SIMULACION SEMANAL</Button>
+                        </Link>
+                        <Link href='/operacionesDiarias'>
+                            <Button className="seleccion" variant="contained">OPERACIONES DIARIAS</Button>
                         </Link>
                     </div>
                     <div className="options">
