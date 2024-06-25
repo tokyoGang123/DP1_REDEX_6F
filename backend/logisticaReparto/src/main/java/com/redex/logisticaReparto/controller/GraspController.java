@@ -160,10 +160,10 @@ public class GraspController {
 
 
         if (esPrimeraSimulacion) {
-            planesEnRango = planDeVueloService.obtenerPlanesVuelosPorFecha(fechaInicioLocal, husoHorarioStr, fechaFin.plusHours(18).toLocalDateTime());
+            planesEnRango = planDeVueloService.obtenerPlanesVuelosPorFecha(fechaInicioLocal, husoHorarioStr, fechaFin.plusHours(17).toLocalDateTime());
             grasp.setPlanes(planesEnRango);
             esPrimeraSimulacion = false;
-            ultimaFechaConsulta = fechaFin.plusHours(18);
+            ultimaFechaConsulta = fechaFin.plusHours(17);
         } else {
 
             grasp.getPlanes().removeIf(plan -> plan.getZonedHora_origen().isBefore(fechaInicio));
