@@ -55,10 +55,10 @@ export default function RegistroEnvio() {
 
     return (
         <div>
-            <header className="header-proyecto">
+            {/*<header className="header-proyecto">
                 <h1>Realizar envío</h1>
                 <h1>RedEx</h1>
-            </header>
+            </header>*/}
             <main className="main-proyecto">
                 <section className="section-proyecto">
                     <form onSubmit={handleSubmit}>
@@ -73,6 +73,8 @@ export default function RegistroEnvio() {
                                     ))}
                                 </select>
                             </div>
+                        </div>
+                        <div className="fila">
                             <div className="campo">
                                 <label htmlFor="aeropuertoDestinoCodigo">Ciudad de destino:</label>
                                 <select id="aeropuertoDestinoCodigo" name="aeropuertoDestinoCodigo" value={datosEnvio.aeropuertoDestinoCodigo} onChange={handleChange}>

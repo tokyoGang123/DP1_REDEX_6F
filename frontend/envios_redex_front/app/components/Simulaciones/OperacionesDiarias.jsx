@@ -20,6 +20,7 @@ import BusquedaAeropuertos from '../BusquedaAeropuertos/BusquedaAeropuertos';
 import BusquedaEnvios from '../BusquedaEnvios/BusquedaEnvios';
 import { getPDFFinal } from "@/app/api/pdf.api"
 import { postEnvioIndividualDiario } from "@/app/api/envios.api"
+import RegistroEnvio from "../Envios/RegistrarEnvio";
 
 
 dayjs.extend(advancedFormat);
@@ -550,10 +551,12 @@ export default function OperacionesDiarias() {
                         <Button variant="contained" onClick={() => setActivePanel('planes')}>Planes de Vuelo</Button>
                         <Button variant="contained" onClick={() => setActivePanel('aeropuertos')}>Aeropuertos</Button>
                         <Button variant="contained" onClick={() => setActivePanel('envios')}>Envíos</Button>
+                        <Button variant="contained" onClick={() => setActivePanel('registrar_envio')}>Registrar envío</Button>
                     </Box>
                     {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} />}
                     {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
                     {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} />}
+                    {activePanel === 'registrar_envio' && <RegistroEnvio active={activePanel === 'registrar_envio'} />}
                 </Grid>
             </Grid>
 
