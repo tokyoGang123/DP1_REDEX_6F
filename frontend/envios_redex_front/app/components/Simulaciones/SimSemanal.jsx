@@ -148,6 +148,7 @@ export default function SimSemanal() {
     }, [enviosFuturo])
     //Paquetes
     const [paquetes, setPaquetes] = useState({})
+    const [vuelosFin, setVuelosFin] = useState({})
 
     //TIEMPO EN EL QUE PASA 1 MINUTO REAL
     const [intervaloMS, setIntervaloMS] = useState(200)
@@ -692,7 +693,7 @@ export default function SimSemanal() {
                         <SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>
                         <BotonIniciar onClick={clickBotonIniciar} disabled={estadoSim == 'PL'}></BotonIniciar>
                         {estadoSim == 'FI' ? <Button onClick={obtenerpdf}>Reporte Final</Button> : <></>}
-                        <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
+                        {/*<CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>*/}
                     </Box>
                     <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan} />
                 </Grid>
