@@ -402,7 +402,7 @@ export default function SimSemanal() {
             if (dayjs(pc.hora_origen).tz(zonaHorariaUsuario) > fechaSimRef.current) break;
             if (pdvMapa.some(plan => plan.id_tramo == pc.id_tramo)) continue; //Si existe ya en el mapa, ignorar
             //console.log("PLAN " + pc.id_tramo + " CONFIRMADO")
-            console.log(pc)
+            //console.log(pc)
             newPlanes.push(pc)
             await saleAeropuertoPorPlan(pc)
             planesEliminarRef.current.splice(i, 1)
@@ -495,10 +495,10 @@ export default function SimSemanal() {
                 (aeropuerto) => aeropuerto.id_aeropuerto === planDeVuelo.ciudad_destino
             )
 
-            console.log("ANTES: ", planDeVuelo.listaPaquetes)
-            console.log(planDeVuelo.paquetesEnDestino)
+            //console.log("ANTES: ", planDeVuelo.listaPaquetes)
+            //console.log(planDeVuelo.paquetesEnDestino)
             planDeVuelo.listaPaquetes = planDeVuelo.listaPaquetes.filter(item => !planDeVuelo.paquetesEnDestino.includes(item))
-            console.log("DESPUES    : ", planDeVuelo.listaPaquetes)
+            //console.log("DESPUES    : ", planDeVuelo.listaPaquetes)
 
             if (index != -1) {
                 aeropuertosActualizados[index].listaPaquetes = [
