@@ -21,7 +21,8 @@ import BusquedaEnvios from '../BusquedaEnvios/BusquedaEnvios';
 import { getPDFFinal } from "@/app/api/pdf.api"
 import { postEnvioIndividualDiario } from "@/app/api/envios.api"
 import RegistroEnvio from "../Envios/RegistrarEnvio";
-
+import { getEnviosTodos, postEnviosArchivo } from '@/app/api/envios.api';
+import UploadFileIcon from '@mui/icons-material/UploadFile';
 
 dayjs.extend(advancedFormat);
 
@@ -533,6 +534,49 @@ export default function OperacionesDiarias() {
 
     const [activePanel, setActivePanel] = useState('');
 
+    const [file, setFile] = useState(null);
+
+    const handleFileChange = (event) => {
+        setFile(event.target.files[0]);
+        handleFileUpload(event.target.files[0]);
+    };
+
+    const handleFileUpload = async (file) => {
+        if (!file) {
+          alert('Por favor, seleccione un archivo primero.');
+          return;
+        }
+    
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+          const text = event.target.result;
+          const cleanText = await changeText(text);
+          const jsonData = await formatJSON(cleanText);
+    
+          console.log('JSON a enviar:', jsonData);
+    
+          async function sube() {
+            let res = await postEnviosArchivo(jsonData);
+            console.log(res);
+          }
+          sube();
+        };
+    
+        reader.readAsText(file);
+      };
+    
+      async function changeText(texto) {
+        const textoApropiado = texto.replace(/\r/g, '');
+        return textoApropiado;
+      }
+    
+      async function formatJSON(text) {
+        const json = {
+          data: text
+        };
+        return json;
+      }
+
     return (
         <>
             <Header title={"OPERACIONES DIARIAS"} setActivePanel={setActivePanel} />
@@ -541,7 +585,7 @@ export default function OperacionesDiarias() {
                     <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'left' }}>
                         {/*<CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>*/}
                         <h1>FECHA ACTUAL: {fechaSim.format('YYYY-MM-DD HH:mm:ss [GMT]Z')}</h1>
-                        {<Button onClick={insertaEnvioGenerico}>INSERTA ENVIO PRUEBA</Button>}
+                        {/*<Button onClick={insertaEnvioGenerico}>INSERTA ENVIO PRUEBA</Button>*/}
                         {/*<Button onClick={obtenerpdf}>DESCARGAR PDF</Button>*/}
                     </Box>
                     <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan}/>
@@ -552,6 +596,25 @@ export default function OperacionesDiarias() {
                         <Button variant="contained" onClick={() => setActivePanel('aeropuertos')}>Aeropuertos</Button>
                         <Button variant="contained" onClick={() => setActivePanel('envios')}>Envíos</Button>
                         <Button variant="contained" onClick={() => setActivePanel('registrar_envio')}>Registrar envío</Button>
+                        <input
+                            type="file"
+                            accept=".txt"
+                            id="upload-file"
+                            style={{ display: 'none' }}
+                            onChange={handleFileChange}
+                        />
+                        <label htmlFor="upload-file">
+                            <Button
+                            variant="contained"
+                            component="span"
+                            color="primary"
+                            startIcon={<UploadFileIcon />}
+                            className="button-right"
+                            fullWidth
+                            >
+                            + Cargar envíos
+                            </Button>
+                        </label>
                     </Box>
                     {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} />}
                     {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
