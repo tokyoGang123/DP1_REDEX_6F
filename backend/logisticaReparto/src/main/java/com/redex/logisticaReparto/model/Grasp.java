@@ -270,7 +270,7 @@ public class Grasp {
 
             //Si no estamos en el destino, buscar un camino
             for (PlanDeVuelo potencial : planesFiltrados) {
-                if (i > 3) new ArrayList<>(); //borrar si esta mal
+                if (i > 4) new ArrayList<>(); //borrar si esta mal
                 //borrar si esta mal
                 if (
                         potencial.getId_tramo() != planFinalizado.getId_tramo() &&
