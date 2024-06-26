@@ -295,7 +295,7 @@ export default function SimSemanal() {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(c.map(async pdv => {
                 let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, pdv, intervaloMS, freqMov);
-                return { ...pdv, listaPaquetes: [], ruta: ruta };
+                return { ...pdv, listaPaquetes: [], ruta: ruta, paquetesEnDestino: [] };
             }));
             return updatedC;
         };
@@ -359,6 +359,8 @@ export default function SimSemanal() {
                 pdv.capacidad_ocupada = pdv.capacidad_ocupada + 1
                 //console.log("Paquete " + paq.id_paquete + " asignado a ruta " + pdv.id_tramo)
                 //console.log(pdv)
+                //SI ES LA ULTIMA RUTA, CONFIGURAR PARA QUE SALGA DEL AEROPUERTO
+                if (j == listRut.length -1) pdv.paquetesEnDestino.push(paq.id_paquete)
             }
         }
 
@@ -400,6 +402,7 @@ export default function SimSemanal() {
             if (dayjs(pc.hora_origen).tz(zonaHorariaUsuario) > fechaSimRef.current) break;
             if (pdvMapa.some(plan => plan.id_tramo == pc.id_tramo)) continue; //Si existe ya en el mapa, ignorar
             //console.log("PLAN " + pc.id_tramo + " CONFIRMADO")
+            console.log(pc)
             newPlanes.push(pc)
             await saleAeropuertoPorPlan(pc)
             planesEliminarRef.current.splice(i, 1)
@@ -434,7 +437,7 @@ export default function SimSemanal() {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(p.map(async pdv => {
                 let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, intervaloMS, freqMov);
-                return { ...pdv, listaPaquetes: [], ruta: ruta };
+                return { ...pdv, listaPaquetes: [], ruta: ruta , paquetesEnDestino: [] };
             }));
             return updatedC;
         };
@@ -492,6 +495,11 @@ export default function SimSemanal() {
                 (aeropuerto) => aeropuerto.id_aeropuerto === planDeVuelo.ciudad_destino
             )
 
+            console.log("ANTES: ", planDeVuelo.listaPaquetes)
+            console.log(planDeVuelo.paquetesEnDestino)
+            planDeVuelo.listaPaquetes = planDeVuelo.listaPaquetes.filter(item => !planDeVuelo.paquetesEnDestino.includes(item))
+            console.log("DESPUES    : ", planDeVuelo.listaPaquetes)
+
             if (index != -1) {
                 aeropuertosActualizados[index].listaPaquetes = [
                     ...aeropuertosActualizados[index].listaPaquetes,
@@ -499,7 +507,7 @@ export default function SimSemanal() {
                 ]
             }
             //console.log("Agregados ", planDeVuelo.listaPaquetes.length)
-
+            console.log(planDeVuelo.listaPaquetes.length)
             aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada + planDeVuelo.listaPaquetes.length
 
             return aeropuertosActualizados;
