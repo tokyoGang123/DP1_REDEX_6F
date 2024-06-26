@@ -6,7 +6,7 @@ import timezone from 'dayjs/plugin/timezone'
 
 
 
-async function hallarPuntosIntermedios(la1, lo1, la2, lo2, planDeVuelo) {
+async function hallarPuntosIntermedios(la1, lo1, la2, lo2, planDeVuelo, tiempoSim, freqMov) {
     dayjs.extend(utc);
     dayjs.extend(timezone);
 
@@ -16,8 +16,9 @@ async function hallarPuntosIntermedios(la1, lo1, la2, lo2, planDeVuelo) {
     if (tiempoSimuladoMinutos < 0) return [[la1, lo1]]
     //console.log(planDeVuelo.hora_origen + " -> " + planDeVuelo.hora_destino)
     //console.log(tiempoSimuladoMinutos)
-    const tiempoRealMs = tiempoSimuladoMinutos * 215; // Ajusta según tu rango 200-230 ms
-    const steps = Math.ceil(tiempoRealMs / 1000); // Ajusta el intervalo de actualización
+    const tiempoRealMs = tiempoSimuladoMinutos * tiempoSim; // Ajusta según tu rango 200-230 ms
+    const steps = Math.ceil(tiempoRealMs / freqMov); // Ajusta el intervalo de actualización
+    //PUEDE HABER CAMBIO DEL 1000 POR freqMov SI HAY PROBLEMAS: VERIFICAR
     //console.log(steps)
 
     const origen = [la1, lo1];

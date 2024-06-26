@@ -7,10 +7,11 @@ import { Marker, Popup } from "react-leaflet";
 import hallarPuntosIntermedios from "./funcionesRuta";
 import { Icon } from 'leaflet';
 import L from 'leaflet'
-
+import React from 'react';
 
 const markerSize = 20
 
+/*
 const iconoRojo = new Icon({
     iconUrl: "/planes/plane_red.svg",
     //iconUrl: require(""),
@@ -34,19 +35,29 @@ const iconoGris = new Icon({
     //iconUrl: require(""),
     iconSize: [markerSize, markerSize],
 });
+*/
 
 dayjs.extend(duration);
 dayjs.extend(utc);
 
-export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, intervaloMS, removerPlan }) {
+function getColorMarcador (capacidad_ocupada, capacidad_maxima) {
+    let porcentajeOcupacion = (capacidad_ocupada/capacidad_maxima) * 100;
+    if (capacidad_ocupada == 0) return "Gris"
+    else if (porcentajeOcupacion < 33.33) return "Verde"
+    else if (porcentajeOcupacion < 66.66) return "Amarillo"
+    else return "Rojo"
+}
+
+const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,removerPlan, iconos }) => {
 
     const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
     const markerRef = useRef(null);
-    const [colorMarcador, setColorMarcador] = useState('Verde')
+    const [colorMarcador, setColorMarcador] = useState(getColorMarcador(planDeVuelo.capacidad_ocupada,planDeVuelo.capacidad_maxima))
     const [rutaCompleta, setRutaCompleta] = useState(false)
 
     useEffect(() => {
         const interval = setInterval(() => {
+            
             setCurrentPositionIndex((prevIndex) => {
                 const nextIndex = prevIndex + 1
                 if (nextIndex < planDeVuelo.ruta.length) {
@@ -58,7 +69,7 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
                     return prevIndex;
                 }
             })
-        }, 1000)
+        }, freqMov) //En sem, antes era 1000
 
         return () => clearInterval(interval);
 
@@ -72,19 +83,27 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
     }, [currentPositionIndex, planDeVuelo.ruta])
 
 
-    useEffect(() => {
-        let porcentajeOcupacion = (planDeVuelo.capacidad_ocupada / planDeVuelo.capacidad_maxima) * 100;
-        if (planDeVuelo.capacidad_ocupada == 0) setColorMarcador("Gris")
-        else if (porcentajeOcupacion < 33.33) setColorMarcador("Verde")
-        else if (porcentajeOcupacion < 66.66) setColorMarcador("Amarillo")
-        else setColorMarcador("Rojo")
-    }, [planDeVuelo])
-
     return (
         <>
-            {!rutaCompleta ?
+            {/*!rutaCompleta ?
                 <Marker position={planDeVuelo.ruta[currentPositionIndex]}
-                    icon={colorMarcador == 'Verde' ? iconoVerde : (colorMarcador == 'Amarillo' ? iconoAmarillo : (colorMarcador == 'Rojo' ? iconoRojo : iconoGris))}
+                    icon={colorMarcador == 'Verde' ? i : (colorMarcador == 'Amarillo' ? iconoAmarillo : (colorMarcador == 'Rojo' ? iconoRojo : iconoGris))}
+                    ref={(ref) => {
+                        if (ref && ref.leafletElement) {
+                            markerRef.current = ref.leafletElement;
+                        }
+                    }}>
+                    <Popup>
+                        <h1>Vuelo #{planDeVuelo.id_tramo}</h1>
+                        <p>Hora salida: {planDeVuelo.hora_origen}</p>
+                        <p>Hora llegada: {planDeVuelo.hora_destino}</p>
+
+                    </Popup>
+                </Marker>
+                : <></>*/}
+                {!rutaCompleta ?
+                <Marker position={planDeVuelo.ruta[currentPositionIndex]}
+                    icon={iconos[colorMarcador]}
                     ref={(ref) => {
                         if (ref && ref.leafletElement) {
                             markerRef.current = ref.leafletElement;
@@ -103,4 +122,6 @@ export default function PlanDeVuelo({ planDeVuelo, fechaSim, estadoSim, interval
     )
 
 
-}
+});
+
+export default PlanDeVuelo;

@@ -3,7 +3,7 @@ import { Box, Typography, TextField, Button, List, ListItem, ListItemText, ListI
 import { Search, Flight, LocalShipping, ArrowBack } from '@mui/icons-material';
 import dayjs from 'dayjs';
 
-export default function BusquedaEnvios({ active, envios2Ref }) {
+export default function BusquedaEnvios({ active, envios2Ref, aeropuertos }) {
   const [busqueda, setBusqueda] = useState('');
   const [enviosFiltrados, setEnviosFiltrados] = useState([]);
   const [envioSeleccionado, setEnvioSeleccionado] = useState(null);
@@ -36,6 +36,11 @@ export default function BusquedaEnvios({ active, envios2Ref }) {
     (paginaActual - 1) * enviosPorPagina,
     (paginaActual - 1) * enviosPorPagina + enviosPorPagina
   );
+
+  function obtenerNombre(id) {
+    const nom = aeropuertos.find(item => item.id_aeropuerto == id)
+    return nom ? nom.ciudad : "No identificada"
+  }
 
   return (
     <Box sx={{ display: active ? 'block' : 'none', overflowY: 'auto', height: '100%' }}>
@@ -89,10 +94,10 @@ export default function BusquedaEnvios({ active, envios2Ref }) {
             <strong>Huso Horario Origen:</strong> {envioSeleccionado.huso_horario_origen}
           </Typography>
           <Typography variant="body1">
-            <strong>Aeropuerto Origen:</strong> {envioSeleccionado.aeropuerto_origen}
+            <strong>Aeropuerto Origen:</strong> {obtenerNombre(envioSeleccionado.aeropuerto_origen)}
           </Typography>
           <Typography variant="body1">
-            <strong>Aeropuerto Destino:</strong> {envioSeleccionado.aeropuerto_destino}
+            <strong>Aeropuerto Destino:</strong> {obtenerNombre(envioSeleccionado.aeropuerto_destino)}
           </Typography>
           <Typography variant="body1">
             <strong>Fecha Máxima de Llegada:</strong> {envioSeleccionado.fecha_llegada_max ? dayjs(envioSeleccionado.fecha_llegada_max).format('DD/MM/YYYY HH:mm') : 'N/A'}
