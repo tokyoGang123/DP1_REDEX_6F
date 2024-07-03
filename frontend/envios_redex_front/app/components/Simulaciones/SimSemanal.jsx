@@ -162,6 +162,13 @@ export default function SimSemanal() {
     //Frecuencia de movimiento de aviones
     const freqMov = 1000; //1 segundo
 
+    //Mapa
+    const [muestraLineas, setMuestraLineas] = useState(true)
+    const toggleLineas = () => {
+        setMuestraLineas(!muestraLineas)
+    }
+
+
     //---------------------------------------------------------
     //                      USE EFFECTS E INTERVALS
 
@@ -263,7 +270,7 @@ export default function SimSemanal() {
 
         //http://localhost:8080/api/planesVuelo/obtenerPorFechas/20240530T20:00:-05:00/20240530T21:00:-05:00
         let planInicio = transformaHora(fechaSimRef.current)
-        let planFin = transformaHora(fechaSimRef.current.add(7, "d").add(2, "h"))
+        let planFin = transformaHora(fechaSimRef.current.add(8, "d").add(2, "h"))
 
         /*
         let c = await getPlanesTodos()
@@ -703,7 +710,10 @@ export default function SimSemanal() {
                         {estadoSim == 'FI' ? <Button onClick={obtenerpdf}>Reporte Final</Button> : <></>}
                         {/*<CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>*/}
                     </Box>
-                    <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan} />
+                    <Box>
+                    <Button onClick={toggleLineas}></Button>
+                    </Box>
+                    <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan} muestraLineas={muestraLineas} />
                 </Grid>
                 <Grid item xs={3} sx={{ overflowY: 'auto', p: 2, borderLeft: '1px solid #ccc' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

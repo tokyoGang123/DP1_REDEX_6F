@@ -16,6 +16,7 @@ const iconoRojo = new Icon({
   iconUrl: "/planes/plane_red.svg",
   //iconUrl: require(""),
   iconSize: [markerSize, markerSize],
+  
 });
 
 const iconoAmarillo = new Icon({
@@ -44,7 +45,7 @@ const iconos = {
   Gris: iconoGris
 }
 
-export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDeVueloBD,freqMov,ingresarAeropuertos}) {
+export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDeVueloBD,freqMov,ingresarAeropuertos,muestraLineas}) {
 
   //Variable para manejar los aeropuertos
   const [aeropuertos, setAeropuertos] = useState([]);
@@ -83,7 +84,7 @@ const idsTemp = [3860]
             <Aeropuerto key={index} aeropuerto={pos}></Aeropuerto>
           )) : <></>}
           {planesDeVuelo && planesDeVuelo.length > 0 && estadoSim == 'PL' ? planesDeVuelo.map((pos,index) => (
-            <PlanDeVuelo key={pos.id_tramo} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} freqMov={freqMov} removerPlan={removerPlan} iconos={iconos}></PlanDeVuelo>
+            <PlanDeVuelo key={pos.id_tramo} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} freqMov={freqMov} removerPlan={removerPlan} iconos={iconos} muestraLineas={muestraLineas}></PlanDeVuelo>
           )) : <></>}
           {/*planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.filter(pos => idsTemp.includes(pos.id_tramo)).map((pos,index) => (
             <PlanDeVuelo key={index} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} intervaloMS={intervaloMS}></PlanDeVuelo>

@@ -54,18 +54,18 @@ export default function Aeropuerto({ aeropuerto }) {
     }
 
     //Cambiar el color del aeropuerto cada vez que se actualiza la capacidad
-    useEffect( () => {
-        let porcentajeOcupacion = (aeropuerto.capacidad_ocupada/aeropuerto.capacidad_maxima)*100;
+    useEffect(() => {
+        let porcentajeOcupacion = (aeropuerto.capacidad_ocupada / aeropuerto.capacidad_maxima) * 100;
         if (porcentajeOcupacion < 33.33) setColorMarcador("Verde")
         else if (porcentajeOcupacion < 66.66) setColorMarcador("Amarillo")
         else setColorMarcador("Rojo")
-    },[aeropuerto])
+    }, [aeropuerto])
 
     return <>
-        
+
         <Marker position={[aeropuerto.latitud, aeropuerto.longitud]} icon={
             colorMarcador == 'Verde' ? iconoVerde : (colorMarcador == 'Amarillo' ? iconoAmarillo : iconoRojo)
-        }eventHandlers={{click:eventHandler}} >
+        } eventHandlers={{ click: eventHandler }} >
             <Popup>{textoAeropuerto}</Popup>
         </Marker>
 

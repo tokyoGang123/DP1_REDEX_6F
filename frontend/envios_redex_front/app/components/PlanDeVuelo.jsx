@@ -3,7 +3,7 @@ import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import utc from 'dayjs/plugin/utc';
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Marker, Popup } from "react-leaflet";
+import { Marker, Polyline, Popup } from "react-leaflet";
 import hallarPuntosIntermedios from "./funcionesRuta";
 import { Icon } from 'leaflet';
 import L from 'leaflet'
@@ -48,7 +48,7 @@ function getColorMarcador (capacidad_ocupada, capacidad_maxima) {
     else return "Rojo"
 }
 
-const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,removerPlan, iconos }) => {
+const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,removerPlan, iconos, muestraLineas }) => {
 
     const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
     const markerRef = useRef(null);
@@ -82,6 +82,7 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
         if (markerRef.current && currentPositionIndex > 0 && !rutaCompleta) markerRef.current.setLanLng(planDeVuelo.ruta[currentPositionIndex])
     }, [currentPositionIndex, planDeVuelo.ruta])
 
+    const rutaRestante = planDeVuelo.ruta.slice(currentPositionIndex);
 
     return (
         <>
@@ -108,7 +109,8 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
                         if (ref && ref.leafletElement) {
                             markerRef.current = ref.leafletElement;
                         }
-                    }}>
+                    }}
+                    >
                     <Popup>
                         <h1>Vuelo #{planDeVuelo.id_tramo}</h1>
                         <p>Hora salida: {planDeVuelo.hora_origen}</p>
@@ -117,6 +119,7 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
                     </Popup>
                 </Marker>
                 : <></>}
+                {muestraLineas && !rutaCompleta ? <Polyline dashArray="4, 4" positions={rutaRestante}></Polyline> : <></>}
 
         </>
     )
