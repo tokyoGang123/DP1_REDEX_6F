@@ -146,7 +146,7 @@ public class PlanDeVueloController {
                         //ZonedDateTime hora_inicio = fechaInicio.withHour(hI.getHour()).withMinute(hI.getMinute()).withSecond(0);
                         //ZonedDateTime hora_fin = fechaFin.withHour(hF.getHour()).withMinute(hF.getMinute()).withSecond(0);
 
-                        int capacidad = Integer.parseInt(data[4])-150;
+                        int capacidad = Integer.parseInt(data[4])-150-70;
                         //System.out.println(ciudad_origen + " " + ciudad_destino + " " + hora_inicio + " " + hora_fin + " " + capacidad);
 
                         PlanDeVuelo plan = new PlanDeVuelo(ciudad_origen,fechaInicio,husoOrigen,ciudad_destino,fechaFin,husoDestino,capacidad,1);
