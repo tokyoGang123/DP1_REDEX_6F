@@ -5,8 +5,39 @@ import utc from 'dayjs/plugin/utc'
 import timezone from 'dayjs/plugin/timezone'
 
 
+const anguloInicial = 45
 
-async function hallarPuntosIntermedios(la1, lo1, la2, lo2, planDeVuelo, tiempoSim, freqMov) {
+export const calculaAnguloRotacion = (la1,lo1,la2,lo2) => {
+    const dy = la2 - la1
+    const dx = lo2 - lo1
+    const theta = Math.atan2(dy,dx)
+    return theta * 180 / Math.PI
+}
+
+/*
+export const calculaAnguloRotacion = (la1,lo1,la2,lo2) => {
+    const aGrados = (radianes) => (radianes * 180) / Math.PI;
+    const aRadianes = (grados) => (grados* Math.PI) / 180;
+
+    const a1 = aRadianes(la1)
+    const a2 = aRadianes(la2)
+    const d1 = aRadianes(lo2 - lo1)
+
+    const y = Math.sin(d1) * Math.cos(a2)
+    const x = 
+        Math.cos(a1) * Math.sin(a2) -
+        Math.sin(a1) * Math.cos(a2) * Math.cos(d1);
+
+    const theta = Math.atan2(y,x)
+
+    let bearing = aGrados(theta)
+    bearing = (bearing / 360) % 360
+
+    return bearing + anguloInicial
+}
+*/
+
+export default async function hallarPuntosIntermedios(la1, lo1, la2, lo2, planDeVuelo, tiempoSim, freqMov) {
     dayjs.extend(utc);
     dayjs.extend(timezone);
 
@@ -97,4 +128,3 @@ function gradToRadian(grados) {
     return grados * Math.PI / 180;
 }
 
-export default hallarPuntosIntermedios;

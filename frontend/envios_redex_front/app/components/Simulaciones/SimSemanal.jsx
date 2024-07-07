@@ -1,7 +1,7 @@
 import MapaSimulador from "../MapaSimulador"
 import SelectorFecha from "../Elementos/SelectorFecha"
 import { CuadroTiempo } from "../Elementos/CuadroTiempo"
-import { Stack, Grid, Box, Button, Typography } from "@mui/material"
+import { Stack, Grid, Box, Button, Typography, Card, CardContent } from "@mui/material"
 import BotonIniciar from "../Botones/BotonIniciar"
 import { useEffect, useRef, useState } from "react"
 import dayjs from "dayjs"
@@ -20,7 +20,9 @@ import BusquedaAeropuertos from '../BusquedaAeropuertos/BusquedaAeropuertos';
 import BusquedaEnvios from '../BusquedaEnvios/BusquedaEnvios';
 import { getPDFFinal } from "@/app/api/pdf.api"
 import HoraActual from "../horaActualSem/HoraActual"
-
+import SaturacionAeropuertos from "../Elementos/SaturacionAeropuertos"
+import RouteIcon from '@mui/icons-material/Route';
+import SaturacionPlanes from "../Elementos/SaturacionPlanes"
 
 dayjs.extend(advancedFormat);
 
@@ -97,10 +99,10 @@ export default function SimSemanal() {
     const [estadoSim, setEstadoSim] = useState('NI'); //NI (No Iniciado), PL (En ejecucion), PS (en pausa)
 
     //Aeropuertos
-    const [aeropuertos, setAeropuertos] = useState({});
+    const [aeropuertos, setAeropuertos] = useState([]);
 
     //Planes de Vuelo
-    const [planesDeVuelo, setPlanesDeVuelo] = useState({})
+    const [planesDeVuelo, setPlanesDeVuelo] = useState([])
     const planesDeVueloRef = useRef(planesDeVuelo)
     useEffect(() => {
         planesDeVueloRef.current = planesDeVuelo
@@ -167,6 +169,44 @@ export default function SimSemanal() {
     const toggleLineas = () => {
         setMuestraLineas(!muestraLineas)
     }
+
+    //MEDIDOR DE SATURACION - AEROPUERTOS
+    const [contadorAeropuerto, setContadorAeropuerto] = useState({ rojo: 0, amarillo: 0, verde: 0 })
+
+
+
+    useEffect(() => {
+        const contad = { rojo: 0, amarillo: 0, verde: 0 }
+        aeropuertos.forEach(aeropuerto => {
+            const ocup = aeropuerto.capacidad_ocupada * 100 / aeropuerto.capacidad_maxima
+            if (ocup <= 33.3) contad.verde += 1;
+            else if (ocup <= 66.6) contad.amarillo += 1;
+            else contad.rojo += 1;
+        })
+        setContadorAeropuerto(contad)
+        //console.log(contad)
+    }, [aeropuertos])
+
+    //MEDIDOR DE SATURACION - PLANES DE VUELO
+    const [contadorPlanes, setContadorPlanes] = useState({ gris: 0, rojo: 0, amarillo: 0, verde: 0 })
+
+    //TEST
+    const [pdvSaturacion, setPdvSaturacion] = useState([])
+
+    //TEST
+    useEffect(() => {
+        const contad = { gris: 0, rojo: 0, amarillo: 0, verde: 0 }
+        pdvSaturacion.forEach(plan => {
+            const ocup = plan.capacidad_ocupada * 100 / plan.capacidad_maxima
+            if (plan.capacidad_ocupada == 0) contad.gris += 1
+            else if (ocup <= 33.3) contad.verde += 1;
+            else if (ocup <= 66.6) contad.amarillo += 1;
+            else contad.rojo += 1;
+        })
+        setContadorPlanes(contad)
+        //console.log("PLAN SAT", contad)
+    }, [pdvSaturacion])
+
 
 
     //---------------------------------------------------------
@@ -367,7 +407,7 @@ export default function SimSemanal() {
                 //console.log("Paquete " + paq.id_paquete + " asignado a ruta " + pdv.id_tramo)
                 //console.log(pdv)
                 //SI ES LA ULTIMA RUTA, CONFIGURAR PARA QUE SALGA DEL AEROPUERTO
-                if (j == listRut.length -1) pdv.paquetesEnDestino.push(paq.id_paquete)
+                if (j == listRut.length - 1) pdv.paquetesEnDestino.push(paq.id_paquete)
             }
         }
 
@@ -444,7 +484,7 @@ export default function SimSemanal() {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(p.map(async pdv => {
                 let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, intervaloMS, freqMov);
-                return { ...pdv, listaPaquetes: [], ruta: ruta , paquetesEnDestino: [] };
+                return { ...pdv, listaPaquetes: [], ruta: ruta, paquetesEnDestino: [] };
             }));
             return updatedC;
         };
@@ -514,7 +554,7 @@ export default function SimSemanal() {
                 ]
             }
             //console.log("Agregados ", planDeVuelo.listaPaquetes.length)
-            console.log(planDeVuelo.listaPaquetes.length)
+            //console.log(planDeVuelo.listaPaquetes.length)
             aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada + planDeVuelo.listaPaquetes.length
 
             return aeropuertosActualizados;
@@ -695,25 +735,39 @@ export default function SimSemanal() {
 
     const [activePanel, setActivePanel] = useState('');
 
+
     return (
         <>
             <Header title={"SIMULACION SEMANAL"} setActivePanel={setActivePanel} />
             <Grid container sx={{ height: 'calc(100vh - 64px)' }}>
                 <Grid item xs={9}>
-                    <Box sx={{ p: 2, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                        <HoraActual></HoraActual>
-                        <Typography> ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                        <SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>
-                        <BotonIniciar onClick={clickBotonIniciar} disabled={estadoSim == 'PL'}></BotonIniciar>
-                        {estadoSim == 'FI' ? <Button onClick={obtenerpdf}>Reporte Final</Button> : <></>}
-                        {/*<CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>*/}
-                    </Box>
-                    <Box>
-                    <Button onClick={toggleLineas}></Button>
-                    </Box>
-                    <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan} muestraLineas={muestraLineas} />
+                    <Grid sx={{ py: 1, display: 'flex', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
+                        <Grid>
+                            <Box sx={{ px: 2, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                                <HoraActual></HoraActual>
+                                <Typography> ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</Typography>
+                            </Box>
+                            <Box sx={{ px: 2, py: 1 ,display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
+                            </Box>
+                            <Box sx={{ px:1,display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                <SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>
+                                <BotonIniciar onClick={clickBotonIniciar} disabled={estadoSim == 'PL'}></BotonIniciar>
+                                {estadoSim == 'FI' ? <Button onClick={obtenerpdf}>Reporte Final</Button> : <></>}
+
+                            </Box>
+                        </Grid>
+                        <Grid>
+                            <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                                    <SaturacionPlanes contadorPlanes={contadorPlanes}></SaturacionPlanes>
+                                    <SaturacionAeropuertos contadorAeropuerto={contadorAeropuerto}></SaturacionAeropuertos>
+                                </Box>
+                                <Button variant="outlined" onClick={toggleLineas} startIcon={<RouteIcon />}>{muestraLineas ? "MOSTRAR RUTA" : "OCULTAR RUTA"}</Button>
+                            </Box>
+                        </Grid>
+                    </Grid>
+                    <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan} muestraLineas={muestraLineas} setSaturacion={setPdvSaturacion} />
                 </Grid>
                 <Grid item xs={3} sx={{ overflowY: 'auto', p: 2, borderLeft: '1px solid #ccc' }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -723,7 +777,7 @@ export default function SimSemanal() {
                     </Box>
                     {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} />}
                     {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
-                    {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} aeropuertos={aeropuertos}/>}
+                    {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} aeropuertos={aeropuertos} />}
                 </Grid>
             </Grid>
 

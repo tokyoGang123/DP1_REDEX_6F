@@ -37,6 +37,13 @@ const iconoGris = new Icon({
 });
 */
 
+export const calculaAnguloRotacion = (la1,lo1,la2,lo2) => {
+    const dy = la2 - la1
+    const dx = lo2 - lo1
+    const theta = Math.atan2(dy,dx)
+    return theta * 180 / Math.PI
+}
+
 dayjs.extend(duration);
 dayjs.extend(utc);
 
@@ -112,7 +119,7 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
                     }}
                     >
                     <Popup>
-                        <h1>Vuelo #{planDeVuelo.id_tramo}</h1>
+                        <h1>Vuelo #{planDeVuelo.id_tramo} - {planDeVuelo.capacidad_ocupada}/{planDeVuelo.capacidad_maxima}</h1>
                         <p>Hora salida: {planDeVuelo.hora_origen}</p>
                         <p>Hora llegada: {planDeVuelo.hora_destino}</p>
 
