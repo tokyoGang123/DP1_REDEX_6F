@@ -37,25 +37,25 @@ export default function SaturacionPlanes({ contadorPlanes }) {
                     {/* AEROPUERTOS GRIS */}
                     <Box sx={{ backgroundColor: 'gray', padding: 1, borderRadius: 1, display: 'flex', alignItems: 'center' }}>
                         <Typography variant="body1" component="div" color="black">
-                            {porcentajes.gris ? porcentajes.gris : 0}
+                            {porcentajes.gris ? porcentajes.gris.toFixed(2) + '%' : "00.00%"}
                         </Typography>
                     </Box>
                     {/* AEROPUERTOS ROJOS */}
                     <Box sx={{ backgroundColor: '#b21010', padding: 1, borderRadius: 1, display: 'flex', alignItems: 'center' }}>
                         <Typography variant="body1" component="div" color="white">
-                            {porcentajes.rojo ? porcentajes.rojo : 0}
+                            {porcentajes.rojo ? porcentajes.rojo.toFixed(2) + '%': "00.00%"}
                         </Typography>
                     </Box>
                     {/* AEROPUERTOS AMARILLOS */}
                     <Box sx={{ backgroundColor: '#eebe11', padding: 1, borderRadius: 1, display: 'flex', alignItems: 'center' }}>
                         <Typography variant="body1" component="div" color="black">
-                            {porcentajes.amarillo ? porcentajes.amarillo : 0}
+                            {porcentajes.amarillo ? porcentajes.amarillo.toFixed(2) + '%': "00.00%"}
                         </Typography>
                     </Box>
                     {/* AEROPUERTOS VERDES */}
                     <Box sx={{ backgroundColor: '#5dbe0e', padding: 1, borderRadius: 1, display: 'flex', alignItems: 'center' }}>
                         <Typography variant="body1" component="div" color="white">
-                            {porcentajes.verde ? porcentajes.verde : 0}
+                            {porcentajes.verde ? porcentajes.verde.toFixed(2) + '%': "00.00%"}
                         </Typography>
                     </Box>
 

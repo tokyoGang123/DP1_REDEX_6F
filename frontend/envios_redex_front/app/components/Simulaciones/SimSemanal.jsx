@@ -165,7 +165,7 @@ export default function SimSemanal() {
     const freqMov = 1000; //1 segundo
 
     //Mapa
-    const [muestraLineas, setMuestraLineas] = useState(true)
+    const [muestraLineas, setMuestraLineas] = useState(false)
     const toggleLineas = () => {
         setMuestraLineas(!muestraLineas)
     }
@@ -466,6 +466,7 @@ export default function SimSemanal() {
             let fechaB = new Date(b.zonedFechaIngreso);
             return fechaA - fechaB;
         })
+        if (p) console.log("NUEVOS LEIDO",p)
         setEnviosFuturo([...p])
         //console.log("CON FECHA " + transformaHora(fechaSimRef.current))
         //console.log(p)
@@ -602,7 +603,7 @@ export default function SimSemanal() {
         let llamadas_totales = 10080;
         let ciclo = 120
         let currentCiclo = 120
-        let llamarAGrasp = 10;
+        let llamarAGrasp = 1;
         let tiempoMax = 1;
         let nF = fechaSimRef.current;
         let fechaLlam = fechaStartRef.current //Fecha para llamar grasp
@@ -621,6 +622,7 @@ export default function SimSemanal() {
             }
             //Si estamos antes que acabe el ciclo, colocar nuevos envios
             if (i == currentCiclo - 1) {
+                if (enviosRef.current) console.log("NUEVOS AGREGADO",enviosRef.current)
                 enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
                 //planesDeVueloRef.current = planesDeVueloRef.current.concat([...planesDeVueloFuturoRef.current])
                 //planesEliminarRef.current = planesEliminarRef.current.concat([...planesDeVueloFuturoRef.current])
@@ -629,7 +631,7 @@ export default function SimSemanal() {
 
             //Si se han llegado al momento de llamar a GRASP, realizar la llamada a nuevos pedidos
             if (i == llamarAGrasp) {
-                //console.log("llamada jaja ekide")
+                console.log("llamada A GRASP")
                 fechaLlam = fechaLlam.add(ciclo, 'm')
                 obtenerNuevosPlanes(fechaLlamPlan, ciclo)
                 //fechaLlamPlan = fechaLlamPlan.add(ciclo, 'm')
@@ -763,7 +765,7 @@ export default function SimSemanal() {
                                     <SaturacionPlanes contadorPlanes={contadorPlanes}></SaturacionPlanes>
                                     <SaturacionAeropuertos contadorAeropuerto={contadorAeropuerto}></SaturacionAeropuertos>
                                 </Box>
-                                <Button variant="outlined" onClick={toggleLineas} startIcon={<RouteIcon />}>{muestraLineas ? "MOSTRAR RUTA" : "OCULTAR RUTA"}</Button>
+                                <Button variant="outlined" onClick={toggleLineas} startIcon={<RouteIcon />}>{muestraLineas ? "OCULTAR RUTA" : "MOSTRAR RUTA"}</Button>
                             </Box>
                         </Grid>
                     </Grid>

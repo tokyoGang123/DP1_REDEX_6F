@@ -8,6 +8,7 @@ import hallarPuntosIntermedios from "./funcionesRuta";
 import { Icon } from 'leaflet';
 import L from 'leaflet'
 import React from 'react';
+import 'leaflet-rotatedmarker'
 
 const markerSize = 20
 
@@ -38,10 +39,21 @@ const iconoGris = new Icon({
 */
 
 export const calculaAnguloRotacion = (la1,lo1,la2,lo2) => {
+
+
+    
     const dy = la2 - la1
     const dx = lo2 - lo1
     const theta = Math.atan2(dy,dx)
-    return theta * 180 / Math.PI
+    let ang = (theta * 180 / Math.PI)
+    //if (ang < 0) ang += 360; // Asegúrate de que el ángulo esté en el rango 0-360
+    ang = 360 - ang
+    if (ang >= 360) ang -= 360; // Asegúrate de que el ángulo esté en el rango 0-360
+    //Dependiendo del angulo, agregar
+    
+
+
+    return ang
 }
 
 dayjs.extend(duration);
@@ -89,7 +101,22 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
         if (markerRef.current && currentPositionIndex > 0 && !rutaCompleta) markerRef.current.setLanLng(planDeVuelo.ruta[currentPositionIndex])
     }, [currentPositionIndex, planDeVuelo.ruta])
 
-    const rutaRestante = planDeVuelo.ruta.slice(currentPositionIndex);
+    const rutaRestante = planDeVuelo.ruta.slice(currentPositionIndex)
+    const siguientePunto = currentPositionIndex < planDeVuelo.ruta.length - 1
+        ? planDeVuelo.ruta[currentPositionIndex + 1]
+        : planDeVuelo.ruta[currentPositionIndex];
+    const anguloRotacion = calculaAnguloRotacion(
+        planDeVuelo.ruta[currentPositionIndex][0],
+        planDeVuelo.ruta[currentPositionIndex][1],
+        siguientePunto[0],
+        siguientePunto[1]
+    );
+    
+    
+    
+    //const anguloRotacion = calculaAnguloRotacion(planDeVuelo.latitud_origen,planDeVuelo.longitud_origen, planDeVuelo.latitud_destino,planDeVuelo.longitud_destino);
+    //const anguloRotacion = calculaAnguloRotacion(planDeVuelo.ruta[currentPositionIndex][0],planDeVuelo.ruta[currentPositionIndex][1], planDeVuelo.latitud_destino,planDeVuelo.longitud_destino);
+    //console.log(anguloRotacion)
 
     return (
         <>
@@ -117,9 +144,11 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
                             markerRef.current = ref.leafletElement;
                         }
                     }}
+                    rotationAngle={anguloRotacion}
+                    rotationOrigin='center center'
                     >
                     <Popup>
-                        <h1>Vuelo #{planDeVuelo.id_tramo} - {planDeVuelo.capacidad_ocupada}/{planDeVuelo.capacidad_maxima}</h1>
+                        <h1>Vuelo #{planDeVuelo.id_tramo} + {anguloRotacion} + {planDeVuelo.latitud_origen} - {planDeVuelo.longitud_origen} / {planDeVuelo.latitud_destino} - {planDeVuelo.longitud_destino}</h1>
                         <p>Hora salida: {planDeVuelo.hora_origen}</p>
                         <p>Hora llegada: {planDeVuelo.hora_destino}</p>
 
@@ -135,3 +164,5 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
 });
 
 export default PlanDeVuelo;
+
+{/* - {planDeVuelo.capacidad_ocupada}/{planDeVuelo.capacidad_maxima} */}
