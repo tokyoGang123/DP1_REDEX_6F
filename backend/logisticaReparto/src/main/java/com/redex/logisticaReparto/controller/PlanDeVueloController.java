@@ -135,7 +135,7 @@ public class PlanDeVueloController {
 
                         //Segun la hora de inicio y final, podemos determinar si el vuelo acaba
                         //en el mismo o diferente dia
-                        if (planDeVueloService.planAcabaElSiguienteDia(data[2], data[3])) {
+                        if (planDeVueloService.planAcabaElSiguienteDia(data[2], data[3],husoOrigen,husoDestino,aa,mm,dd)) {
                             fechaFin = LocalDateTime.of(aa, mm, dd, hF.getHour(), hF.getMinute(), 0).plusDays(1);
                         } else {
                             fechaFin = LocalDateTime.of(aa, mm, dd, hF.getHour(), hF.getMinute(), 0);

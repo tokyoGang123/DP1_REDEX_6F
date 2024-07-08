@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -47,9 +50,10 @@ public class PlanDeVueloService {
         return totalPaquetes;
     }
 
-    public boolean planAcabaElSiguienteDia(String tInicio, String tFin) {
-
-        String dataInicio[] = tInicio.split(":");
+    //public boolean planAcabaElSiguienteDia(String tInicio, String tFin) {
+    public boolean planAcabaElSiguienteDia(String tInicio, String tFin,String husoOrigen, String husoDestino,
+                                           int aa, int mm, int dd) {
+        /*String dataInicio[] = tInicio.split(":");
         int hI = Integer.parseInt(dataInicio[0]);
         int mI = Integer.parseInt(dataInicio[1]);
         String dataFin[] = tFin.split(":");
@@ -61,7 +65,20 @@ public class PlanDeVueloService {
             if (mI >= mF) return true;
             else return false;
         } else if (hI > hF) return true;
-        else return false;
+        else return false;*/
 
+        LocalTime horaInicio = LocalTime.parse(tInicio);
+        LocalTime horaFin = LocalTime.parse(tFin);
+
+        ZonedDateTime zonedHoraInicio = ZonedDateTime.of(aa, mm, dd, horaInicio.getHour(), horaInicio.getMinute(), 0, 0, ZoneId.of(husoOrigen));
+        ZonedDateTime zonedHoraFin = ZonedDateTime.of(aa, mm, dd, horaFin.getHour(), horaFin.getMinute(), 0, 0, ZoneId.of(husoDestino));
+
+        ZonedDateTime convertedHoraInicio = zonedHoraInicio.withZoneSameInstant(ZoneId.of(husoDestino));
+
+        if (!convertedHoraInicio.toLocalDate().isEqual(zonedHoraInicio.toLocalDate())) {
+            return true; // El plan acaba al día siguiente
+        }
+
+        return convertedHoraInicio.toLocalTime().isAfter(horaFin);
     }
 }

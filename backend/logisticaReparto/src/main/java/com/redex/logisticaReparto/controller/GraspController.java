@@ -58,6 +58,8 @@ public class GraspController {
         grasp.setAeropuertos(aeropuertos);
         grasp.setContinentes(continentes);
         grasp.setPaises(paises);
+        grasp.setPlanes(new ArrayList<>());
+        grasp.setEnvios(new ArrayList<>());
         this.esPrimeraSimulacion = true;
         return "Se inicio la simulacion";
     }
@@ -131,7 +133,7 @@ public class GraspController {
                 envio.setPaquetes(paquetesEnvio);
             }
 
-            grasp.setEnvios(envios);
+            grasp.getEnvios().addAll(envios);
 
             return envios;
     }
@@ -163,7 +165,7 @@ public class GraspController {
             planesEnRango = planDeVueloService.obtenerPlanesVuelosPorFecha(fechaInicioLocal, husoHorarioStr, fechaFin.plusHours(17).toLocalDateTime());
             grasp.setPlanes(planesEnRango);
             esPrimeraSimulacion = false;
-            ultimaFechaConsulta = fechaFin.plusHours(17);
+            ultimaFechaConsulta = fechaFin.plusHours(15);
         } else {
 
             grasp.getPlanes().removeIf(plan -> plan.getZonedHora_origen().isBefore(fechaInicio));
@@ -196,7 +198,5 @@ public class GraspController {
         }
         return solucion;
     }
-
-
 
 }
