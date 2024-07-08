@@ -3,11 +3,12 @@ import dayjs from 'dayjs';
 import duration from 'dayjs/plugin/duration';
 import utc from 'dayjs/plugin/utc';
 import { useEffect, useState, useRef, useCallback } from "react";
-import { Marker, Popup } from "react-leaflet";
+import { Marker, Polyline, Popup } from "react-leaflet";
 import hallarPuntosIntermedios from "./funcionesRuta";
 import { Icon } from 'leaflet';
 import L from 'leaflet'
 import React from 'react';
+import 'leaflet-rotatedmarker'
 
 const markerSize = 20
 
@@ -37,6 +38,24 @@ const iconoGris = new Icon({
 });
 */
 
+export const calculaAnguloRotacion = (la1,lo1,la2,lo2) => {
+
+
+    
+    const dy = la2 - la1
+    const dx = lo2 - lo1
+    const theta = Math.atan2(dy,dx)
+    let ang = (theta * 180 / Math.PI)
+    //if (ang < 0) ang += 360; // Asegúrate de que el ángulo esté en el rango 0-360
+    ang = 360 - ang
+    if (ang >= 360) ang -= 360; // Asegúrate de que el ángulo esté en el rango 0-360
+    //Dependiendo del angulo, agregar
+    
+
+
+    return ang
+}
+
 dayjs.extend(duration);
 dayjs.extend(utc);
 
@@ -48,7 +67,7 @@ function getColorMarcador (capacidad_ocupada, capacidad_maxima) {
     else return "Rojo"
 }
 
-const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,removerPlan, iconos }) => {
+const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,removerPlan, iconos, muestraLineas }) => {
 
     const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
     const markerRef = useRef(null);
@@ -82,6 +101,29 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
         if (markerRef.current && currentPositionIndex > 0 && !rutaCompleta) markerRef.current.setLanLng(planDeVuelo.ruta[currentPositionIndex])
     }, [currentPositionIndex, planDeVuelo.ruta])
 
+    const rutaRestante = planDeVuelo.ruta.slice(currentPositionIndex)
+    const siguientePunto = currentPositionIndex < planDeVuelo.ruta.length - 1
+        ? planDeVuelo.ruta[currentPositionIndex + 1]
+        : planDeVuelo.ruta[currentPositionIndex];
+    const anguloRotacion = calculaAnguloRotacion(
+        planDeVuelo.ruta[currentPositionIndex][0],
+        planDeVuelo.ruta[currentPositionIndex][1],
+        siguientePunto[0],
+        siguientePunto[1]
+    );
+    
+    if (planDeVuelo.ruta.length < 3) {
+        /*
+        console.log(colorMarcador ," -> ", planDeVuelo.latitud_origen, planDeVuelo.longitud_origen, planDeVuelo.latitud_destino, planDeVuelo.longitud_destino)
+        console.log(planDeVuelo.hora_origen, planDeVuelo.hora_destino)
+        console.log(planDeVuelo.ruta)
+        */
+    }
+    
+    
+    //const anguloRotacion = calculaAnguloRotacion(planDeVuelo.latitud_origen,planDeVuelo.longitud_origen, planDeVuelo.latitud_destino,planDeVuelo.longitud_destino);
+    //const anguloRotacion = calculaAnguloRotacion(planDeVuelo.ruta[currentPositionIndex][0],planDeVuelo.ruta[currentPositionIndex][1], planDeVuelo.latitud_destino,planDeVuelo.longitud_destino);
+    //console.log(anguloRotacion)
 
     return (
         <>
@@ -108,7 +150,10 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
                         if (ref && ref.leafletElement) {
                             markerRef.current = ref.leafletElement;
                         }
-                    }}>
+                    }}
+                    rotationAngle={anguloRotacion}
+                    rotationOrigin='center center'
+                    >
                     <Popup>
                         <h1>Vuelo #{planDeVuelo.id_tramo}</h1>
                         <p>Hora salida: {planDeVuelo.hora_origen}</p>
@@ -117,6 +162,7 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
                     </Popup>
                 </Marker>
                 : <></>}
+                {muestraLineas && !rutaCompleta ? <Polyline dashArray="4, 4" positions={rutaRestante}></Polyline> : <></>}
 
         </>
     )
@@ -125,3 +171,5 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
 });
 
 export default PlanDeVuelo;
+
+{/* - {planDeVuelo.capacidad_ocupada}/{planDeVuelo.capacidad_maxima} */}

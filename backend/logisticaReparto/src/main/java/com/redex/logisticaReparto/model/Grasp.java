@@ -44,23 +44,7 @@ public class Grasp {
         //Tamanho de lista restringida
         int tamRCL = 2;
 
-            /*
 
-            1. Elegimos un envio
-            2. Cada vuelo que sale de su aeropuerto de origen será el inicio de un elemento posible para la
-                lista restringida
-            3. Por cada vuelo, encontramos una ruta posible que cumpla con los requisitos
-                (llega a tiempo, entra a vuelos con espacio)
-            4. Elegimos las rutas que llegan en menor tiempo para la lista restringida y elegimos una al azar
-            5. Asignamos la ruta a tantos paquetes sea posible. En caso no se puedan mandar todos por dicha ruta,
-                escogemos otra de la lista y asi sucesivamente.
-             */
-
-        //Para fines del algoritmo, se va a aumentar y considerar los paquetes asignados en aeropuertos y paquetes
-        //ArrayList<Aeropuerto> aeropuertosTemp = new ArrayList<>(aeropuertos);
-        //ArrayList<PlanDeVuelo> planesTemp = new ArrayList<>(planes);
-
-        // Agrupar planes por aeropuerto de origen
         Map<Integer, List<PlanDeVuelo>> planesPorAeropuertoOrigen = planes.stream()
                 .collect(Collectors.groupingBy(PlanDeVuelo::getCiudad_origen));
 
@@ -70,10 +54,14 @@ public class Grasp {
         //Encontrar la solucion por cada pedido
         for (Envio envio : enviosSolicitados) {
             //Quitar envios sin destino de la lista
-            System.out.println(envio.getId_envio());
+
 
             ArrayList<ElementoListaRestringida> listaRestringida = new ArrayList<ElementoListaRestringida>(tamRCL);
             List<PlanDeVuelo> planesVueloOrigen = planesPorAeropuertoOrigen.get(envio.getAeropuerto_origen());
+            planesVueloOrigen.sort(Comparator.comparing(PlanDeVuelo::getZonedHora_origen));
+
+            //System.out.println("Para envio:" + envio.getId_envio());
+            //System.out.println("Cant Vuelos:" + planesVueloOrigen.size());
 
             for (PlanDeVuelo planDeVuelo : planesVueloOrigen){
 
@@ -82,9 +70,52 @@ public class Grasp {
                 if (planDeVuelo.getZonedHora_origen().isAfter(envio.getZonedFechaLlegadaMax())) break; //no creo que suceda con 24h de planes
                 //if (envio.getAeropuerto_origen() == planDeVuelo.getCiudad_origen()) {
                 int i = 0;
+
+                //int[] recursionCounter = new int[1];
+
                 ArrayList<Long> listaObtenida = generaRutaVuelo(aeropuertos, planesPorAeropuertoOrigen, planDeVuelo, envio, i);
 
+                //System.out.println("Recursiones realizadas: " + recursionCounter[0]);
+
+                //StringBuilder resultado = new StringBuilder();
+                //boolean firstGroup = true;
+
+                /*if(listaObtenida.size() > 0){
+                    System.out.println("Cantidad Rutas:"+listaObtenida.size());
+                }
+
+
+
+                for (Long k : listaObtenida) {
+                    PlanDeVuelo planVueloPrueba = obtenerPlanByID(planes, k);
+                    String ciudadOrigen = aeropuertoByID(aeropuertos, planVueloPrueba.getCiudad_origen()).getCiudad();
+                    String ciudadDestino = aeropuertoByID(aeropuertos, planVueloPrueba.getCiudad_destino()).getCiudad();
+
+                    // Verificar que ni ciudadOrigen ni ciudadDestino sean nulos o vacíos
+                    if (ciudadOrigen != null && !ciudadOrigen.isEmpty() && ciudadDestino != null && !ciudadDestino.isEmpty()) {
+                        if (!firstGroup) {
+                            resultado.append(", ");
+                        }
+                        resultado.append("[")
+                                .append(ciudadOrigen)
+                                .append(", ")
+                                .append(ciudadDestino)
+                                .append("]");
+                        firstGroup = false;
+                    }
+                }
+
+// Envolver el resultado en corchetes solo si hay contenido
+                if (resultado.length() > 0) {
+                    resultado.insert(0, "[");
+                    resultado.append("]");
+                }
+                */
+                //System.out.println(resultado.toString());
+
+
                 //Si hay una ruta encontrada, la colocaremos en nuestra lista restringida
+
                 if (!listaObtenida.isEmpty()) {
                     ArrayList<Long> listaCaminos = new ArrayList<>();
                     listaCaminos.addAll(listaObtenida);
@@ -143,9 +174,11 @@ public class Grasp {
             }
             //imprimePlanesDeVueloAhora(planesTemp);
 
-            for (ElementoListaRestringida elem : listaRestringida) {
+            /*for (ElementoListaRestringida elem : listaRestringida) {
                 //imprimePlanesAsignadosBeta(planesTemp,elem.getListaElementos(),envio);
             }
+
+             */
             solucion.add(envio);
         }
 
@@ -206,11 +239,16 @@ public class Grasp {
 
     public ArrayList<Long> generaRutaVuelo(ArrayList<Aeropuerto> aeropuertos, Map<Integer, List<PlanDeVuelo>> planes, PlanDeVuelo planFinalizado, Envio envio, int i) {
 
-        //Arraylist para almacenar datos
+        //Contador Recursion
+        //recursionCounter[0]++;
+
+
         ArrayList<Long> listaEnConstruccion = new ArrayList<>();
 
         //Identificamos el aeropuerto en el que nos encontramos
         int aeropuertoActual = planFinalizado.getCiudad_destino();
+
+        //System.out.println("Origen: "+ planFinalizado.getCiudad_origen()+" -  Destino: "+planFinalizado.getCiudad_destino());
 
         //Añadimos a esta lista
         //Si ya estamos en el destino, lo logramos y devolvemos el id de este plan
@@ -253,6 +291,8 @@ public class Grasp {
 
                     //Buscamos nuevas rutas basadas en esta
                     ArrayList<Long> nuevasRutas = generaRutaVuelo(aeropuertos, planes, potencial, envio, i);
+
+
                     //Si tenemos una lista no vacia, agregamos y devolvemos
                     if (!nuevasRutas.isEmpty()) {
                         //if (i != 1) {listaEnConstruccion.add(potencial.getId_tramo());}
@@ -286,6 +326,7 @@ public class Grasp {
         PlanDeVuelo ultimoPlan = obtenerPlanByID(planes, ultimoPlanId);
         return ultimoPlan.getCiudad_destino();
     }
+
     private boolean esRutaValida(Ruta ruta, ArrayList<PlanDeVuelo> planes, Envio envio, Paquete paquete) {
         Long ultimoPlanId = ruta.getListaRutas().get(ruta.getListaRutas().size() - 1);
         PlanDeVuelo ultimoPlan = obtenerPlanByID(planes, ultimoPlanId);
@@ -435,7 +476,7 @@ public class Grasp {
 
             ArrayList<Envio> enviosCubiertos = faseConstructivaGRASP(aeropuertos, planes, envios);
             mejorSol =enviosCubiertos;
-            imprimeSolucionEncontrada(aeropuertos,planes,enviosCubiertos);
+            //imprimeSolucionEncontrada(aeropuertos,planes,enviosCubiertos);
             //FASE DE MEJORA
             //realizamos la búsqueda local
             //ArrayList<Envio> solucion = busquedaLocalGRASP(aeropuertos, planes, enviosCubiertos);

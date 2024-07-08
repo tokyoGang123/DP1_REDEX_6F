@@ -57,7 +57,7 @@ public class PdfService extends AbstractPdfView {
 
         Font fuentetitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD,16, Color.white);
         Font fuentesubtitulo = FontFactory.getFont(FontFactory.HELVETICA_BOLD,14, Color.BLACK);
-        Font fuenteTituloColumnas = FontFactory.getFont(FontFactory.HELVETICA_BOLD,12,Color.white);
+        Font fuenteTituloColumnas = FontFactory.getFont(FontFactory.HELVETICA_BOLD,10,Color.white);
         Font fuenteDataCeldas = FontFactory.getFont(FontFactory.COURIER,10,Color.BLACK);
         Font fuenteResaltado = FontFactory.getFont(FontFactory.COURIER_BOLD,10,Color.BLACK);
         PdfPTable tablaTitulo = new PdfPTable(1);
@@ -74,18 +74,19 @@ public class PdfService extends AbstractPdfView {
         tablaTitulo.setSpacingAfter(10);
 
         PdfPTable tablaSubTitulo = new PdfPTable(1);
-        celda = new PdfPCell(new Phrase("RESUMEN DE ULTIMA PLANIFICACION ",fuentesubtitulo));
+        celda = new PdfPCell(new Phrase("RESUMEN DE ULTIMA PLANIFICACION PAQUETES:",fuentesubtitulo));
         celda.setBorder(0);
         celda.setHorizontalAlignment(Element.ALIGN_LEFT);
         celda.setVerticalAlignment(Element.ALIGN_LEFT);
-        celda.setPadding(30);
+        celda.setPadding(20);
+        celda.setPaddingLeft(0);
 
         tablaSubTitulo.addCell(celda);
         tablaSubTitulo.setSpacingAfter(10);
 
 
-        PdfPTable tablaRutasEntregados = new PdfPTable(5);
-        tablaRutasEntregados.setWidths(new float[]{0.5f,1f,1f,1f,1.5f});
+        PdfPTable tablaRutasEntregados = new PdfPTable(7);
+        tablaRutasEntregados.setWidths(new float[]{0.75f,0.75f,1.2f,1.2f,1f,1f,1f});
 
         celda = new PdfPCell(new Phrase("N# ENVIO",fuenteTituloColumnas));
         celda.setBackgroundColor(Color.DARK_GRAY);
@@ -95,6 +96,20 @@ public class PdfService extends AbstractPdfView {
         tablaRutasEntregados.addCell(celda);
 
         celda = new PdfPCell(new Phrase("ID PAQUETE",fuenteTituloColumnas));
+        celda.setBackgroundColor(Color.DARK_GRAY);
+        celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+        celda.setVerticalAlignment(Element.ALIGN_CENTER);
+        celda.setPadding(10);
+        tablaRutasEntregados.addCell(celda);
+
+        celda = new PdfPCell(new Phrase("HORA SALIDA",fuenteTituloColumnas));
+        celda.setBackgroundColor(Color.DARK_GRAY);
+        celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+        celda.setVerticalAlignment(Element.ALIGN_CENTER);
+        celda.setPadding(10);
+        tablaRutasEntregados.addCell(celda);
+
+        celda = new PdfPCell(new Phrase("HORA LLEGADA",fuenteTituloColumnas));
         celda.setBackgroundColor(Color.DARK_GRAY);
         celda.setHorizontalAlignment(Element.ALIGN_CENTER);
         celda.setVerticalAlignment(Element.ALIGN_CENTER);
@@ -115,7 +130,7 @@ public class PdfService extends AbstractPdfView {
         celda.setPadding(10);
         tablaRutasEntregados.addCell(celda);
 
-        celda = new PdfPCell(new Phrase("HORA LLEGADA",fuenteTituloColumnas));
+        celda = new PdfPCell(new Phrase("ESTADO",fuenteTituloColumnas));
         celda.setBackgroundColor(Color.DARK_GRAY);
         celda.setHorizontalAlignment(Element.ALIGN_CENTER);
         celda.setVerticalAlignment(Element.ALIGN_CENTER);
@@ -158,53 +173,87 @@ public class PdfService extends AbstractPdfView {
         cities.put(30L, "Manila");
 
 
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
 
         final int[] j = {1};
+        Color lightGray = new Color(211, 211, 211);
+        Color white = new Color(255, 255, 255);
+        int rowCounter = 0; // Contador de filas
+
         for(Envio envio: envios){
-                for (Paquete paquete : envio.getPaquetes()) {
-                    if(paquete.getRuta()!=null) {
-                        for (Long ruta : paquete.getRuta().getListaRutas()) {
 
-                            celda = new PdfPCell(new Phrase(String.valueOf(j[0]), fuenteDataCeldas));
-                            celda.setPadding(5);
-                            celda.setHorizontalAlignment(Element.ALIGN_CENTER);
-                            celda.setVerticalAlignment(Element.ALIGN_CENTER);
-                            tablaRutasEntregados.addCell(celda);
+            for (Paquete paquete : envio.getPaquetes()) {
+
+                if(paquete.getRuta()!=null) {
+                    for (Long ruta : paquete.getRuta().getListaRutas()) {
+
+                        Color backgroundColor = (rowCounter % 2 == 0) ? lightGray : white;
+
+                        celda = new PdfPCell(new Phrase(String.valueOf(envio.getId_envio()), fuenteDataCeldas));
+                        celda.setPadding(5);
+                        celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        celda.setVerticalAlignment(Element.ALIGN_CENTER);
+                        //celda.setBackgroundColor(backgroundColor);
+                        tablaRutasEntregados.addCell(celda);
+
+                        celda = new PdfPCell(new Phrase(String.valueOf(paquete.getId_paquete()), fuenteDataCeldas));
+                        celda.setPadding(5);
+                        celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        celda.setVerticalAlignment(Element.ALIGN_CENTER);
+                        //celda.setBackgroundColor(backgroundColor);
+                        tablaRutasEntregados.addCell(celda);
+
+                        LocalDateTime horaHorigen=planDeVueloService.obtenerPlanVueloPorId(ruta).get().getHora_origen();
+                        String fechaIngresoFormateada = horaHorigen.format(formatter);
+
+                        LocalDateTime horaDestino=planDeVueloService.obtenerPlanVueloPorId(ruta).get().getHora_destino();
+                        String fechaLlegadaFormateada = horaDestino.format(formatter);
+
+                        celda = new PdfPCell(new Phrase(fechaIngresoFormateada, fuenteDataCeldas));
+                        celda.setPadding(5);
+                        celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        celda.setVerticalAlignment(Element.ALIGN_CENTER);
+                        //celda.setBackgroundColor(backgroundColor);
+                        tablaRutasEntregados.addCell(celda);
+
+                        celda = new PdfPCell(new Phrase(fechaLlegadaFormateada, fuenteDataCeldas));
+                        celda.setPadding(5);
+                        celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        celda.setVerticalAlignment(Element.ALIGN_CENTER);
+                        //celda.setBackgroundColor(backgroundColor);
+                        tablaRutasEntregados.addCell(celda);
+
+                        long idCiudadOrigen=planDeVueloService.obtenerPlanVueloPorId(ruta).get().getCiudad_origen();
+                        long idCiudadDestino=planDeVueloService.obtenerPlanVueloPorId(ruta).get().getCiudad_destino();
+                        String ciudadOrigen = cities.get(idCiudadOrigen);
+                        String ciudadDestino = cities.get(idCiudadDestino);
 
 
-                            long idCiudadOrigen=planDeVueloService.obtenerPlanVueloPorId(ruta).get().getCiudad_origen();
-                            long idCiudadDestino=planDeVueloService.obtenerPlanVueloPorId(ruta).get().getCiudad_destino();
-                            String ciudadOrigen = cities.get(idCiudadOrigen);
-                            String ciudadDestino = cities.get(idCiudadDestino);
+                        celda = new PdfPCell(new Phrase(ciudadOrigen, fuenteDataCeldas));
+                        celda.setPadding(5);
+                        celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        celda.setVerticalAlignment(Element.ALIGN_CENTER);
+                        //celda.setBackgroundColor(backgroundColor);
+                        tablaRutasEntregados.addCell(celda);
 
-                            celda = new PdfPCell(new Phrase(String.valueOf(paquete.getId_paquete()), fuenteDataCeldas));
-                            celda.setPadding(5);
-                            celda.setHorizontalAlignment(Element.ALIGN_CENTER);
-                            celda.setVerticalAlignment(Element.ALIGN_CENTER);
-                            tablaRutasEntregados.addCell(celda);
+                        celda = new PdfPCell(new Phrase(ciudadDestino, fuenteDataCeldas));
+                        celda.setPadding(5);
+                        celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        celda.setVerticalAlignment(Element.ALIGN_CENTER);
+                        //celda.setBackgroundColor(backgroundColor);
+                        tablaRutasEntregados.addCell(celda);
 
+                        celda = new PdfPCell(new Phrase("PLANIFICADO", fuenteResaltado));
+                        celda.setPadding(5);
+                        celda.setHorizontalAlignment(Element.ALIGN_CENTER);
+                        celda.setVerticalAlignment(Element.ALIGN_CENTER);
+                        //celda.setBackgroundColor(backgroundColor);
+                        tablaRutasEntregados.addCell(celda);
 
-                            celda = new PdfPCell(new Phrase(ciudadOrigen, fuenteDataCeldas));
-                            celda.setPadding(5);
-                            celda.setHorizontalAlignment(Element.ALIGN_CENTER);
-                            celda.setVerticalAlignment(Element.ALIGN_CENTER);
-                            tablaRutasEntregados.addCell(celda);
-
-                            celda = new PdfPCell(new Phrase(ciudadDestino, fuenteDataCeldas));
-                            celda.setPadding(5);
-                            celda.setHorizontalAlignment(Element.ALIGN_CENTER);
-                            celda.setVerticalAlignment(Element.ALIGN_CENTER);
-                            tablaRutasEntregados.addCell(celda);
-
-                            celda = new PdfPCell(new Phrase("ENTREGADO", fuenteResaltado));
-                            celda.setPadding(5);
-                            celda.setHorizontalAlignment(Element.ALIGN_CENTER);
-                            celda.setVerticalAlignment(Element.ALIGN_CENTER);
-                            tablaRutasEntregados.addCell(celda);
-
-                            j[0]++;
-                        }
+                        rowCounter++;
+                        j[0]++;
                     }
+                }
             }
         }
 
@@ -343,6 +392,7 @@ class FooterEvent extends PdfPageEventHelper {
         }
     }
 }
+
 class BackgroundImage extends PdfPageEventHelper {
     private String imagePath;
 

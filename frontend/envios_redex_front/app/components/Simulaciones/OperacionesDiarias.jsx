@@ -594,7 +594,7 @@ export default function OperacionesDiarias() {
                     <Box sx={{ p: 2, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
                         {/*<CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>*/}
                         <h1>FECHA ACTUAL: {fechaSim.format('YYYY-MM-DD HH:mm:ss [GMT]Z')}</h1>
-                        {<Button onClick={insertaEnvioGenerico}>INSERTA ENVIO PRUEBA</Button>}
+                        {/*<Button onClick={insertaEnvioGenerico}>INSERTA ENVIO PRUEBA</Button>*/}
                         {/*<Button onClick={obtenerpdf}>DESCARGAR PDF</Button>*/}
                     </Box>
                     <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan}/>

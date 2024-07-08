@@ -1,6 +1,7 @@
 'use client'
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
+import { Typography } from '@mui/material';
 import { useEffect } from 'react';
 
 // horas.toString().padStart(2, '0') + ":" + minutos.toString().padStart(2, '0') + ":" + segundos.toString().padStart(2, '0')
@@ -12,22 +13,30 @@ const formatTime = (seconds) => {
   return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 };
 
-export function CuadroTiempo({horas, minutos, segundos,tiempo}) {
+export function CuadroTiempo({ horas, minutos, segundos, tiempo }) {
 
-    return (
-        <Box
-          component="form"
-          sx={{
-            '& > :not(style)': { m: 1, width: '25ch' },
-            
-          }}
-          noValidate
-          autoComplete="off"
-        >
-          <TextField id="outlined-basic" label="Tiempo Transcurrido" variant="outlined" disabled 
-        value={ formatTime(tiempo)
-         }
-          />
-        </Box>
-      );
+  return (
+
+        <Typography> Tiempo transcurrido: {formatTime(tiempo)}</Typography>
+
+
+  );
 }
+
+      {/*
+        <Box
+        component="form"
+        sx={{
+          '& > :not(style)': { m: 1, width: '25ch' },
+          
+        }}
+        noValidate
+        autoComplete="off"
+      >
+        <TextField id="outlined-basic" label="Tiempo Transcurrido" variant="outlined" disabled 
+      value={ formatTime(tiempo)
+       }
+        />
+      </Box>
+        */
+    }

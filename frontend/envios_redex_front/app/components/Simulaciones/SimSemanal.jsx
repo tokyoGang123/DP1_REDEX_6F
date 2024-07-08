@@ -1,7 +1,7 @@
 import MapaSimulador from "../MapaSimulador"
 import SelectorFecha from "../Elementos/SelectorFecha"
 import { CuadroTiempo } from "../Elementos/CuadroTiempo"
-import { Stack, Grid, Box, Button, Typography } from "@mui/material"
+import { Stack, Grid, Box, Button, Typography, Card, CardContent } from "@mui/material"
 import BotonIniciar from "../Botones/BotonIniciar"
 import { useEffect, useRef, useState } from "react"
 import dayjs from "dayjs"
@@ -20,7 +20,9 @@ import BusquedaAeropuertos from '../BusquedaAeropuertos/BusquedaAeropuertos';
 import BusquedaEnvios from '../BusquedaEnvios/BusquedaEnvios';
 import { getPDFFinal } from "@/app/api/pdf.api"
 import HoraActual from "../horaActualSem/HoraActual"
-
+import SaturacionAeropuertos from "../Elementos/SaturacionAeropuertos"
+import RouteIcon from '@mui/icons-material/Route';
+import SaturacionPlanes from "../Elementos/SaturacionPlanes"
 
 dayjs.extend(advancedFormat);
 
@@ -97,10 +99,10 @@ export default function SimSemanal() {
     const [estadoSim, setEstadoSim] = useState('NI'); //NI (No Iniciado), PL (En ejecucion), PS (en pausa)
 
     //Aeropuertos
-    const [aeropuertos, setAeropuertos] = useState({});
+    const [aeropuertos, setAeropuertos] = useState([]);
 
     //Planes de Vuelo
-    const [planesDeVuelo, setPlanesDeVuelo] = useState({})
+    const [planesDeVuelo, setPlanesDeVuelo] = useState([])
     const planesDeVueloRef = useRef(planesDeVuelo)
     useEffect(() => {
         planesDeVueloRef.current = planesDeVuelo
@@ -148,6 +150,7 @@ export default function SimSemanal() {
     }, [enviosFuturo])
     //Paquetes
     const [paquetes, setPaquetes] = useState({})
+    const [vuelosFin, setVuelosFin] = useState({})
 
     //TIEMPO EN EL QUE PASA 1 MINUTO REAL
     const [intervaloMS, setIntervaloMS] = useState(200)
@@ -160,6 +163,51 @@ export default function SimSemanal() {
 
     //Frecuencia de movimiento de aviones
     const freqMov = 1000; //1 segundo
+
+    //Mapa
+    const [muestraLineas, setMuestraLineas] = useState(false)
+    const toggleLineas = () => {
+        setMuestraLineas(!muestraLineas)
+    }
+
+    //MEDIDOR DE SATURACION - AEROPUERTOS
+    const [contadorAeropuerto, setContadorAeropuerto] = useState({ rojo: 0, amarillo: 0, verde: 0 })
+
+
+
+    useEffect(() => {
+        const contad = { rojo: 0, amarillo: 0, verde: 0 }
+        aeropuertos.forEach(aeropuerto => {
+            const ocup = aeropuerto.capacidad_ocupada * 100 / aeropuerto.capacidad_maxima
+            if (ocup <= 33.3) contad.verde += 1;
+            else if (ocup <= 66.6) contad.amarillo += 1;
+            else contad.rojo += 1;
+        })
+        setContadorAeropuerto(contad)
+        //console.log(contad)
+    }, [aeropuertos])
+
+    //MEDIDOR DE SATURACION - PLANES DE VUELO
+    const [contadorPlanes, setContadorPlanes] = useState({ gris: 0, rojo: 0, amarillo: 0, verde: 0 })
+
+    //TEST
+    const [pdvSaturacion, setPdvSaturacion] = useState([])
+
+    //TEST
+    useEffect(() => {
+        const contad = { gris: 0, rojo: 0, amarillo: 0, verde: 0 }
+        pdvSaturacion.forEach(plan => {
+            const ocup = plan.capacidad_ocupada * 100 / plan.capacidad_maxima
+            if (plan.capacidad_ocupada == 0) contad.gris += 1
+            else if (ocup <= 33.3) contad.verde += 1;
+            else if (ocup <= 66.6) contad.amarillo += 1;
+            else contad.rojo += 1;
+        })
+        setContadorPlanes(contad)
+        //console.log("PLAN SAT", contad)
+    }, [pdvSaturacion])
+
+
 
     //---------------------------------------------------------
     //                      USE EFFECTS E INTERVALS
@@ -262,7 +310,7 @@ export default function SimSemanal() {
 
         //http://localhost:8080/api/planesVuelo/obtenerPorFechas/20240530T20:00:-05:00/20240530T21:00:-05:00
         let planInicio = transformaHora(fechaSimRef.current)
-        let planFin = transformaHora(fechaSimRef.current.add(7, "d").add(2, "h"))
+        let planFin = transformaHora(fechaSimRef.current.add(8, "d").add(2, "h"))
 
         /*
         let c = await getPlanesTodos()
@@ -294,7 +342,7 @@ export default function SimSemanal() {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(c.map(async pdv => {
                 let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, pdv, intervaloMS, freqMov);
-                return { ...pdv, listaPaquetes: [], ruta: ruta };
+                return { ...pdv, listaPaquetes: [], ruta: ruta, paquetesEnDestino: [] };
             }));
             return updatedC;
         };
@@ -358,6 +406,8 @@ export default function SimSemanal() {
                 pdv.capacidad_ocupada = pdv.capacidad_ocupada + 1
                 //console.log("Paquete " + paq.id_paquete + " asignado a ruta " + pdv.id_tramo)
                 //console.log(pdv)
+                //SI ES LA ULTIMA RUTA, CONFIGURAR PARA QUE SALGA DEL AEROPUERTO
+                if (j == listRut.length - 1) pdv.paquetesEnDestino.push(paq.id_paquete)
             }
         }
 
@@ -399,6 +449,7 @@ export default function SimSemanal() {
             if (dayjs(pc.hora_origen).tz(zonaHorariaUsuario) > fechaSimRef.current) break;
             if (pdvMapa.some(plan => plan.id_tramo == pc.id_tramo)) continue; //Si existe ya en el mapa, ignorar
             //console.log("PLAN " + pc.id_tramo + " CONFIRMADO")
+            //console.log(pc)
             newPlanes.push(pc)
             await saleAeropuertoPorPlan(pc)
             planesEliminarRef.current.splice(i, 1)
@@ -415,6 +466,7 @@ export default function SimSemanal() {
             let fechaB = new Date(b.zonedFechaIngreso);
             return fechaA - fechaB;
         })
+        if (p) console.log("NUEVOS LEIDO",p)
         setEnviosFuturo([...p])
         //console.log("CON FECHA " + transformaHora(fechaSimRef.current))
         //console.log(p)
@@ -433,7 +485,7 @@ export default function SimSemanal() {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(p.map(async pdv => {
                 let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, intervaloMS, freqMov);
-                return { ...pdv, listaPaquetes: [], ruta: ruta };
+                return { ...pdv, listaPaquetes: [], ruta: ruta, paquetesEnDestino: [] };
             }));
             return updatedC;
         };
@@ -491,6 +543,11 @@ export default function SimSemanal() {
                 (aeropuerto) => aeropuerto.id_aeropuerto === planDeVuelo.ciudad_destino
             )
 
+            //console.log("ANTES: ", planDeVuelo.listaPaquetes)
+            //console.log(planDeVuelo.paquetesEnDestino)
+            planDeVuelo.listaPaquetes = planDeVuelo.listaPaquetes.filter(item => !planDeVuelo.paquetesEnDestino.includes(item))
+            //console.log("DESPUES    : ", planDeVuelo.listaPaquetes)
+
             if (index != -1) {
                 aeropuertosActualizados[index].listaPaquetes = [
                     ...aeropuertosActualizados[index].listaPaquetes,
@@ -498,7 +555,7 @@ export default function SimSemanal() {
                 ]
             }
             //console.log("Agregados ", planDeVuelo.listaPaquetes.length)
-
+            //console.log(planDeVuelo.listaPaquetes.length)
             aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada + planDeVuelo.listaPaquetes.length
 
             return aeropuertosActualizados;
@@ -546,7 +603,7 @@ export default function SimSemanal() {
         let llamadas_totales = 10080;
         let ciclo = 120
         let currentCiclo = 120
-        let llamarAGrasp = 10;
+        let llamarAGrasp = 1;
         let tiempoMax = 1;
         let nF = fechaSimRef.current;
         let fechaLlam = fechaStartRef.current //Fecha para llamar grasp
@@ -565,6 +622,7 @@ export default function SimSemanal() {
             }
             //Si estamos antes que acabe el ciclo, colocar nuevos envios
             if (i == currentCiclo - 1) {
+                if (enviosRef.current) console.log("NUEVOS AGREGADO",enviosRef.current)
                 enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
                 //planesDeVueloRef.current = planesDeVueloRef.current.concat([...planesDeVueloFuturoRef.current])
                 //planesEliminarRef.current = planesEliminarRef.current.concat([...planesDeVueloFuturoRef.current])
@@ -573,7 +631,7 @@ export default function SimSemanal() {
 
             //Si se han llegado al momento de llamar a GRASP, realizar la llamada a nuevos pedidos
             if (i == llamarAGrasp) {
-                //console.log("llamada jaja ekide")
+                console.log("llamada A GRASP")
                 fechaLlam = fechaLlam.add(ciclo, 'm')
                 obtenerNuevosPlanes(fechaLlamPlan, ciclo)
                 //fechaLlamPlan = fechaLlamPlan.add(ciclo, 'm')
@@ -679,6 +737,7 @@ export default function SimSemanal() {
 
     const [activePanel, setActivePanel] = useState('');
 
+
     const [panelVisible, setPanelVisible] = useState(true);
 
     const togglePanel = () => {
@@ -688,22 +747,39 @@ export default function SimSemanal() {
       }, 300);  // Alineado con la duración de cualquier animación de CSS
     };
 
+
     return (
         <>
             <Header title={"SIMULACION SEMANAL"} togglePanel={togglePanel} />
             <Grid container sx={{ height: 'calc(100vh - 64px)' }}>
-                <Grid item xs={panelVisible ? 9 : 12}>
-                    <Box sx={{ p: 2, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                        <HoraActual></HoraActual>
-                        <Typography> ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</Typography>
-                    </Box>
-                    <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                        <SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>
-                        <BotonIniciar onClick={clickBotonIniciar} disabled={estadoSim === 'PL'}></BotonIniciar>
-                        {estadoSim === 'FI' && <Button onClick={obtenerpdf}>Reporte Final</Button>}
-                        <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time}></CuadroTiempo>
-                    </Box>
-                    <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan} />
+                <Grid item xs={9}>
+                    <Grid sx={{ py: 1, display: 'flex', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
+                        <Grid>
+                            <Box sx={{ px: 2, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                                <HoraActual></HoraActual>
+                                <Typography> ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</Typography>
+                            </Box>
+                            <Box sx={{ px: 2, py: 1 ,display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
+                            </Box>
+                            <Box sx={{ px:1,display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                <SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>
+                                <BotonIniciar onClick={clickBotonIniciar} disabled={estadoSim == 'PL'}></BotonIniciar>
+                                {estadoSim == 'FI' ? <Button onClick={obtenerpdf}>Reporte Final</Button> : <></>}
+
+                            </Box>
+                        </Grid>
+                        <Grid>
+                            <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                                <Box sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
+                                    <SaturacionPlanes contadorPlanes={contadorPlanes}></SaturacionPlanes>
+                                    <SaturacionAeropuertos contadorAeropuerto={contadorAeropuerto}></SaturacionAeropuertos>
+                                </Box>
+                                <Button variant="outlined" onClick={toggleLineas} startIcon={<RouteIcon />}>{muestraLineas ? "OCULTAR RUTA" : "MOSTRAR RUTA"}</Button>
+                            </Box>
+                        </Grid>
+                    </Grid>
+                    <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan} muestraLineas={muestraLineas} setSaturacion={setPdvSaturacion} />
                 </Grid>
                 {panelVisible && (
                     <Grid item xs={3} sx={{ overflowY: 'auto', height: 'calc(100vh - 64px)',p: 2, borderLeft: '1px solid #ccc' }}>

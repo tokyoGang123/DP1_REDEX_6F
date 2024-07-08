@@ -48,7 +48,6 @@ public class GraspController {
     }
 
 
-
     @GetMapping("/grasp/iniciar")
     public String iniciarGrasp(){
         ArrayList<Aeropuerto> aeropuertos = aeropuertoService.obtenerTodosAeropuertos();
@@ -159,11 +158,12 @@ public class GraspController {
         //Busqueda de planes en el rango de 12 horas (por ahora) -> se actualizo a 24 horas
         ArrayList<PlanDeVuelo> planesEnRango;
 
+
         if (esPrimeraSimulacion) {
-            planesEnRango = planDeVueloService.obtenerPlanesVuelosPorFecha(fechaInicioLocal, husoHorarioStr, fechaFin.plusHours(24).toLocalDateTime());
+            planesEnRango = planDeVueloService.obtenerPlanesVuelosPorFecha(fechaInicioLocal, husoHorarioStr, fechaFin.plusHours(17).toLocalDateTime());
             grasp.setPlanes(planesEnRango);
             esPrimeraSimulacion = false;
-            ultimaFechaConsulta = fechaFin.plusHours(24);
+            ultimaFechaConsulta = fechaFin.plusHours(17);
         } else {
 
             grasp.getPlanes().removeIf(plan -> plan.getZonedHora_origen().isBefore(fechaInicio));
@@ -176,10 +176,10 @@ public class GraspController {
 
         //450
         grasp.getEnvios().addAll(enviosEnRango);
-        System.out.println(grasp.getEnvios().size());
+        System.out.println("Cantidad Envios: "+grasp.getEnvios().size());
+        System.out.println("Cantidad Planes Antes GRASP:"+grasp.getPlanes().size());
+
         ArrayList<Envio> solucion = grasp.ejecutaGrasp(grasp.getAeropuertos(),grasp.getEnvios(),grasp.getPlanes());
-
-
 
 
         ArrayList<Envio> enviosSinRuta = grasp.buscarSinRuta(solucion);
@@ -191,7 +191,7 @@ public class GraspController {
         System.out.println("Tiempo de ejecución: " + durationInSeconds + " segundos");
 
         num_ejecu_semanal++;
-        if(num_ejecu_semanal >= 80){
+        if(num_ejecu_semanal >= 1){
             ultimoEnvioSemanal=solucion;
         }
         return solucion;

@@ -10,7 +10,7 @@ const styleDetalles = {
   borderRadius: 2,
 };
 
-export default function BusquedaPlanes({ active, planesDeVueloRef }) {
+export default function BusquedaPlanes({ active, planesDeVueloRef,aeropuertos }) {
   const [busqueda, setBusqueda] = useState('');
   const [planesFiltrados, setPlanesFiltrados] = useState([]);
   const [vueloSeleccionado, setVueloSeleccionado] = useState(null);
@@ -36,6 +36,11 @@ export default function BusquedaPlanes({ active, planesDeVueloRef }) {
     setMostrarDetalles(false);
     setVueloSeleccionado(null);
   };
+
+  function obtenerNombre(id) {
+      const nom = aeropuertos.find(item => item.id_aeropuerto == id)
+      return nom ? nom.ciudad : "No identificada"
+  }
 
   return (
     <Box sx={{ display: active ? 'block' : 'none', overflowY: 'auto', height: '100%' }}>
@@ -69,7 +74,7 @@ export default function BusquedaPlanes({ active, planesDeVueloRef }) {
                   <ListItemIcon><Flight /></ListItemIcon>
                   <ListItemText
                     primary={plan.id_tramo}
-                    secondary={`${plan.ciudad_origen || 'Origen'} → ${plan.ciudad_destino || 'Destino'}`}
+                    secondary={`${obtenerNombre(plan.ciudad_origen) || 'Origen'} → ${obtenerNombre(plan.ciudad_destino) || 'Destino'}`}
                   />
                 </ListItem>
                 <Divider />
@@ -88,10 +93,10 @@ export default function BusquedaPlanes({ active, planesDeVueloRef }) {
             Detalles del Vuelo: {vueloSeleccionado.id_tramo}
           </Typography>
           <Typography variant="body1">
-            Origen: {vueloSeleccionado.ciudad_origen || 'No especificado'}
+            Origen: {obtenerNombre(vueloSeleccionado.ciudad_origen) || 'No especificado'}
           </Typography>
           <Typography variant="body1">
-            Destino: {vueloSeleccionado.ciudad_destino || 'No especificado'}
+            Destino: {obtenerNombre(vueloSeleccionado.ciudad_destino) || 'No especificado'}
           </Typography>
           <Typography variant="body1">
             Capacidad Ocupada: {vueloSeleccionado.capacidad_ocupada || 0}

@@ -3,6 +3,7 @@ import { Box, Typography, TextField, Button, List, ListItem, ListItemText, ListI
 import { Search, Flight, LocalShipping, ArrowBack } from '@mui/icons-material';
 import dayjs from 'dayjs';
 
+
 export default function BusquedaEnvios({ active, envios2Ref, planesDeVueloRef, aeropuertos}) {
   const [busqueda, setBusqueda] = useState('');
   const [enviosFiltrados, setEnviosFiltrados] = useState([]);
@@ -36,6 +37,11 @@ export default function BusquedaEnvios({ active, envios2Ref, planesDeVueloRef, a
     (paginaActual - 1) * enviosPorPagina,
     (paginaActual - 1) * enviosPorPagina + enviosPorPagina
   );
+
+  function obtenerNombre(id) {
+    const nom = aeropuertos.find(item => item.id_aeropuerto == id)
+    return nom ? nom.ciudad : "No identificada"
+  }
 
   return (
     <Box sx={{ display: active ? 'block' : 'none', overflowY: 'auto', height: '100%' }}>
