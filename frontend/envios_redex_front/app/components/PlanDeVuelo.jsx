@@ -155,7 +155,7 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
                     rotationOrigin='center center'
                     >
                     <Popup>
-                        <h1>Vuelo #{planDeVuelo.id_tramo}</h1>
+                        <h1>Vuelo #{planDeVuelo.id_tramo} - {planDeVuelo.capacidad_ocupada}/{planDeVuelo.capacidad_maxima} </h1>
                         <p>Hora salida: {planDeVuelo.hora_origen}</p>
                         <p>Hora llegada: {planDeVuelo.hora_destino}</p>
 
@@ -172,4 +172,4 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
 
 export default PlanDeVuelo;
 
-{/* - {planDeVuelo.capacidad_ocupada}/{planDeVuelo.capacidad_maxima} */}
+{/*  */}
