@@ -492,7 +492,7 @@ export default function OperacionesDiarias() {
             //Llamar a GRASP para planificar pedidos ingresados
             if (i == llamarAGrasp) {
                 fechaLlam = fechaLlam.add(ciclo, 's')
-                obtenerNuevosEnvios(fechaLlam,ciclo)
+                //obtenerNuevosEnvios(fechaLlam,ciclo)
                 llamarAGrasp = llamarAGrasp + ciclo
             }
             //Asignar pedidos
@@ -577,12 +577,21 @@ export default function OperacionesDiarias() {
         return json;
       }
 
+      const [panelVisible, setPanelVisible] = useState(true);
+
+      const togglePanel = () => {
+        setPanelVisible(!panelVisible);
+        setTimeout(() => {
+          window.dispatchEvent(new Event('resize'));  // Forza el redimensionamiento del mapa
+        }, 300);  // Alineado con la duración de cualquier animación de CSS
+      };
+      
     return (
         <>
-            <Header title={"OPERACIONES DIARIAS"} setActivePanel={setActivePanel} />
+            <Header title={"OPERACIONES DIARIAS"} togglePanel={togglePanel} />
             <Grid container sx={{ height: 'calc(100vh - 64px)' }}>
-                <Grid item xs={9}>
-                    <Box sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'left' }}>
+                <Grid item xs={panelVisible ? 9 : 12}>
+                    <Box sx={{ p: 2, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
                         {/*<CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>*/}
                         <h1>FECHA ACTUAL: {fechaSim.format('YYYY-MM-DD HH:mm:ss [GMT]Z')}</h1>
                         {<Button onClick={insertaEnvioGenerico}>INSERTA ENVIO PRUEBA</Button>}
@@ -590,37 +599,39 @@ export default function OperacionesDiarias() {
                     </Box>
                     <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan}/>
                 </Grid>
-                <Grid item xs={3} sx={{ overflowY: 'auto', p: 2, borderLeft: '1px solid #ccc' }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <Button variant="contained" onClick={() => setActivePanel('planes')}>Planes de Vuelo</Button>
-                        <Button variant="contained" onClick={() => setActivePanel('aeropuertos')}>Aeropuertos</Button>
-                        <Button variant="contained" onClick={() => setActivePanel('envios')}>Envíos</Button>
-                        <Button variant="contained" onClick={() => setActivePanel('registrar_envio')}>Registrar envío</Button>
-                        <input
-                            type="file"
-                            accept=".txt"
-                            id="upload-file"
-                            style={{ display: 'none' }}
-                            onChange={handleFileChange}
-                        />
-                        <label htmlFor="upload-file">
-                            <Button
-                            variant="contained"
-                            component="span"
-                            color="primary"
-                            startIcon={<UploadFileIcon />}
-                            className="button-right"
-                            fullWidth
-                            >
-                            + Cargar envíos
-                            </Button>
-                        </label>
-                    </Box>
-                    {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} />}
-                    {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
-                    {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} />}
-                    {activePanel === 'registrar_envio' && <RegistroEnvio active={activePanel === 'registrar_envio'} />}
-                </Grid>
+                {panelVisible && (
+                    <Grid item xs={3} sx={{ overflowY: 'auto', height: 'calc(100vh - 64px)',p: 2, borderLeft: '1px solid #ccc' }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Button variant="contained" onClick={() => setActivePanel('planes')}>Planes de Vuelo</Button>
+                            <Button variant="contained" onClick={() => setActivePanel('aeropuertos')}>Aeropuertos</Button>
+                            <Button variant="contained" onClick={() => setActivePanel('envios')}>Envíos</Button>
+                            <Button variant="contained" onClick={() => setActivePanel('registrar_envio')}>Registrar envío</Button>
+                            <input
+                                type="file"
+                                accept=".txt"
+                                id="upload-file"
+                                style={{ display: 'none' }}
+                                onChange={handleFileChange}
+                            />
+                            <label htmlFor="upload-file">
+                                <Button
+                                variant="contained"
+                                component="span"
+                                color="primary"
+                                startIcon={<UploadFileIcon />}
+                                className="button-right"
+                                fullWidth
+                                >
+                                + Cargar envíos
+                                </Button>
+                            </label>
+                        </Box>
+                        {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} />}
+                        {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
+                        {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} />}
+                        {activePanel === 'registrar_envio' && <RegistroEnvio active={activePanel === 'registrar_envio'} />}
+                    </Grid>
+                )}
             </Grid>
 
         </>
