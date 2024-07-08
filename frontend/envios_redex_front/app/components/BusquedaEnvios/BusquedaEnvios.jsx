@@ -3,7 +3,8 @@ import { Box, Typography, TextField, Button, List, ListItem, ListItemText, ListI
 import { Search, Flight, LocalShipping, ArrowBack } from '@mui/icons-material';
 import dayjs from 'dayjs';
 
-export default function BusquedaEnvios({ active, envios2Ref, aeropuertos }) {
+
+export default function BusquedaEnvios({ active, envios2Ref, planesDeVueloRef, aeropuertos}) {
   const [busqueda, setBusqueda] = useState('');
   const [enviosFiltrados, setEnviosFiltrados] = useState([]);
   const [envioSeleccionado, setEnvioSeleccionado] = useState(null);
@@ -94,10 +95,14 @@ export default function BusquedaEnvios({ active, envios2Ref, aeropuertos }) {
             <strong>Huso Horario Origen:</strong> {envioSeleccionado.huso_horario_origen}
           </Typography>
           <Typography variant="body1">
-            <strong>Aeropuerto Origen:</strong> {obtenerNombre(envioSeleccionado.aeropuerto_origen)}
+            <strong>Aeropuerto Origen:</strong> {
+              aeropuertos.find(a => a.id_aeropuerto === envioSeleccionado.aeropuerto_origen)?.ciudad || "Desconocido"
+            }
           </Typography>
           <Typography variant="body1">
-            <strong>Aeropuerto Destino:</strong> {obtenerNombre(envioSeleccionado.aeropuerto_destino)}
+            <strong>Aeropuerto Destino:</strong> {
+              aeropuertos.find(a => a.id_aeropuerto === envioSeleccionado.aeropuerto_destino)?.ciudad || "Desconocido"
+            }
           </Typography>
           <Typography variant="body1">
             <strong>Fecha Máxima de Llegada:</strong> {envioSeleccionado.fecha_llegada_max ? dayjs(envioSeleccionado.fecha_llegada_max).format('DD/MM/YYYY HH:mm') : 'N/A'}
@@ -113,7 +118,22 @@ export default function BusquedaEnvios({ active, envios2Ref, aeropuertos }) {
             <List>
               {envioSeleccionado.paquetes.map(paq => (
                 <ListItem key={paq.id_paquete}>
-                  <ListItemText primary={`Paquete ID: ${paq.id_paquete}`} />
+                  <ListItemText 
+                    primary={`Paquete ID: ${paq.id_paquete}`} 
+                    secondary={`Ruta: ${paq.ruta.listaRutas.map(planId => {
+                      const plan = planesDeVueloRef.current.find(p => p.id_tramo === planId);
+                      if (plan) {
+                        // Buscar nombres de los aeropuertos por sus IDs
+                        const origen = aeropuertos.find(a => a.id_aeropuerto === plan.ciudad_origen);
+                        const destino = aeropuertos.find(a => a.id_aeropuerto === plan.ciudad_destino);
+                        const nombreOrigen = origen ? origen.ciudad : "Desconocido";
+                        const nombreDestino = destino ? destino.ciudad : "Desconocido";
+                        return `${planId} (${nombreOrigen} - ${nombreDestino})`;
+                      } else {
+                        return `${planId} (Detalles no disponibles)`;
+                      }
+                    }).join(' -> ')}`}
+                  />
                 </ListItem>
               ))}
             </List>

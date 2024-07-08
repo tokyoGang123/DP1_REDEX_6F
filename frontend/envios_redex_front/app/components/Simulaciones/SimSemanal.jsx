@@ -738,9 +738,19 @@ export default function SimSemanal() {
     const [activePanel, setActivePanel] = useState('');
 
 
+    const [panelVisible, setPanelVisible] = useState(true);
+
+    const togglePanel = () => {
+      setPanelVisible(!panelVisible);
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));  // Forza el redimensionamiento del mapa
+      }, 300);  // Alineado con la duración de cualquier animación de CSS
+    };
+
+
     return (
         <>
-            <Header title={"SIMULACION SEMANAL"} setActivePanel={setActivePanel} />
+            <Header title={"SIMULACION SEMANAL"} togglePanel={togglePanel} />
             <Grid container sx={{ height: 'calc(100vh - 64px)' }}>
                 <Grid item xs={9}>
                     <Grid sx={{ py: 1, display: 'flex', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
@@ -771,18 +781,19 @@ export default function SimSemanal() {
                     </Grid>
                     <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan} muestraLineas={muestraLineas} setSaturacion={setPdvSaturacion} />
                 </Grid>
-                <Grid item xs={3} sx={{ overflowY: 'auto', p: 2, borderLeft: '1px solid #ccc' }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                        <Button variant="contained" onClick={() => setActivePanel('planes')}>Planes de Vuelo</Button>
-                        <Button variant="contained" onClick={() => setActivePanel('aeropuertos')}>Aeropuertos</Button>
-                        <Button variant="contained" onClick={() => setActivePanel('envios')}>Envíos</Button>
-                    </Box>
-                    {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} />}
-                    {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
-                    {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} aeropuertos={aeropuertos} />}
-                </Grid>
+                {panelVisible && (
+                    <Grid item xs={3} sx={{ overflowY: 'auto', height: 'calc(100vh - 64px)',p: 2, borderLeft: '1px solid #ccc' }}>
+                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            <Button variant="contained" onClick={() => setActivePanel('planes')}>Planes de Vuelo</Button>
+                            <Button variant="contained" onClick={() => setActivePanel('aeropuertos')}>Aeropuertos</Button>
+                            <Button variant="contained" onClick={() => setActivePanel('envios')}>Envíos</Button>
+                        </Box>
+                        {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} />}
+                        {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
+                        {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos}/>}
+                    </Grid>
+                )}
             </Grid>
-
         </>
     );
 }
