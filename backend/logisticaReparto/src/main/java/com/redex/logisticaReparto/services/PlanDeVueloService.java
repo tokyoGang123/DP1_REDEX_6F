@@ -51,7 +51,7 @@ public class PlanDeVueloService {
     }
 
     //public boolean planAcabaElSiguienteDia(String tInicio, String tFin) {
-    public int planAcabaElSiguienteDia(String tInicio, String tFin,String husoOrigen, String husoDestino,
+    public boolean planAcabaElSiguienteDia(String tInicio, String tFin,String husoOrigen, String husoDestino,
                                            int aa, int mm, int dd) {
         /*String dataInicio[] = tInicio.split(":");
         int hI = Integer.parseInt(dataInicio[0]);
@@ -66,7 +66,7 @@ public class PlanDeVueloService {
             else return false;
         } else if (hI > hF) return true;
         else return false;*/
-        int cantidad = 0;
+
         LocalTime horaInicio = LocalTime.parse(tInicio);
         LocalTime horaFin = LocalTime.parse(tFin);
 
@@ -75,13 +75,10 @@ public class PlanDeVueloService {
 
         ZonedDateTime convertedHoraInicio = zonedHoraInicio.withZoneSameInstant(ZoneId.of(husoDestino));
 
-        if (!convertedHoraInicio.toLocalDate().isEqual(zonedHoraInicio.toLocalDate())) { //dia distinto, dia siguiente conversion
-            cantidad++;
+        if (!convertedHoraInicio.toLocalDate().isEqual(zonedHoraInicio.toLocalDate())) {
+            return true; // El plan acaba al día siguiente
         }
 
-        if (convertedHoraInicio.toLocalTime().isAfter(horaFin)) cantidad++; //hora de origen despues de hora destino
-
-        return cantidad;
-        //return convertedHoraInicio.toLocalTime().isAfter(horaFin);
+        return convertedHoraInicio.toLocalTime().isAfter(horaFin);
     }
 }
