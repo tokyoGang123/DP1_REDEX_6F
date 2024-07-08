@@ -112,6 +112,13 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
         siguientePunto[1]
     );
     
+    if (planDeVuelo.ruta.length < 3) {
+        /*
+        console.log(colorMarcador ," -> ", planDeVuelo.latitud_origen, planDeVuelo.longitud_origen, planDeVuelo.latitud_destino, planDeVuelo.longitud_destino)
+        console.log(planDeVuelo.hora_origen, planDeVuelo.hora_destino)
+        console.log(planDeVuelo.ruta)
+        */
+    }
     
     
     //const anguloRotacion = calculaAnguloRotacion(planDeVuelo.latitud_origen,planDeVuelo.longitud_origen, planDeVuelo.latitud_destino,planDeVuelo.longitud_destino);
@@ -148,7 +155,7 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
                     rotationOrigin='center center'
                     >
                     <Popup>
-                        <h1>Vuelo #{planDeVuelo.id_tramo} + {anguloRotacion} + {planDeVuelo.latitud_origen} - {planDeVuelo.longitud_origen} / {planDeVuelo.latitud_destino} - {planDeVuelo.longitud_destino}</h1>
+                        <h1>Vuelo #{planDeVuelo.id_tramo}</h1>
                         <p>Hora salida: {planDeVuelo.hora_origen}</p>
                         <p>Hora llegada: {planDeVuelo.hora_destino}</p>
 
