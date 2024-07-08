@@ -162,7 +162,7 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
                     </Popup>
                 </Marker>
                 : <></>}
-                {muestraLineas && !rutaCompleta ? <Polyline dashArray="4, 4" positions={rutaRestante}></Polyline> : <></>}
+                {muestraLineas && !rutaCompleta ? <Polyline dashArray="4, 4" positions={rutaRestante} weight={1} color='black'></Polyline> : <></>}
 
         </>
     )
