@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from 'next/link';
 import "./RegistrarEnvio.css";
+import { getAeropuertosTodos } from "@/app/api/aeropuetos.api";
 
 export default function RegistroEnvio() {
     const [datosEnvio, setDatosEnvio] = useState({
@@ -13,16 +14,7 @@ export default function RegistroEnvio() {
 
     useEffect(() => {
         const cargarAeropuertos = async () => {
-            try {
-                const response = await fetch('http://localhost:8080/api/aeropuertos/obtenerTodos');
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                const data = await response.json();
-                setAeropuertos(data);
-            } catch (error) {
-                console.error('Error al obtener los aeropuertos:', error);
-            }
+            await getAeropuertosTodos()
         };
         cargarAeropuertos();
     }, []);

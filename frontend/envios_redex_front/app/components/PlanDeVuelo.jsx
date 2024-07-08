@@ -113,11 +113,11 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
     );
     
     if (planDeVuelo.ruta.length < 3) {
-        /*
+        
         console.log(colorMarcador ," -> ", planDeVuelo.latitud_origen, planDeVuelo.longitud_origen, planDeVuelo.latitud_destino, planDeVuelo.longitud_destino)
         console.log(planDeVuelo.hora_origen, planDeVuelo.hora_destino)
         console.log(planDeVuelo.ruta)
-        */
+        
     }
     
     
