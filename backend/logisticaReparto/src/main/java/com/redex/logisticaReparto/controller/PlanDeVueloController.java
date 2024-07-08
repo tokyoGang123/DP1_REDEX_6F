@@ -135,18 +135,20 @@ public class PlanDeVueloController {
 
                         //Segun la hora de inicio y final, podemos determinar si el vuelo acaba
                         //en el mismo o diferente dia
-                        if (planDeVueloService.planAcabaElSiguienteDia(data[2], data[3],husoOrigen,husoDestino,aa,mm,dd)) {
+                        int cantDias = planDeVueloService.planAcabaElSiguienteDia(data[2], data[3],husoOrigen,husoDestino,aa,mm,dd);
+                        fechaFin = LocalDateTime.of(aa, mm, dd, hF.getHour(), hF.getMinute(), 0).plusDays(cantDias);
+                        /*if (planDeVueloService.planAcabaElSiguienteDia(data[2], data[3],husoOrigen,husoDestino,aa,mm,dd)) {
                             fechaFin = LocalDateTime.of(aa, mm, dd, hF.getHour(), hF.getMinute(), 0).plusDays(1);
                         } else {
                             fechaFin = LocalDateTime.of(aa, mm, dd, hF.getHour(), hF.getMinute(), 0);
-                        }
+                        }*/
 
                         ZonedDateTime zonedHoraInicio = fechaInicio.atZone(ZoneId.of(husoOrigen));
                         ZonedDateTime zonedHoraFin = fechaFin.atZone(ZoneId.of(husoDestino));
                         //ZonedDateTime hora_inicio = fechaInicio.withHour(hI.getHour()).withMinute(hI.getMinute()).withSecond(0);
                         //ZonedDateTime hora_fin = fechaFin.withHour(hF.getHour()).withMinute(hF.getMinute()).withSecond(0);
-
-                        int capacidad = Integer.parseInt(data[4])-150-70;
+                        int capacidad = 180;
+                        //int capacidad = Integer.parseInt(data[4])-150-70;
                         //System.out.println(ciudad_origen + " " + ciudad_destino + " " + hora_inicio + " " + hora_fin + " " + capacidad);
 
                         PlanDeVuelo plan = new PlanDeVuelo(ciudad_origen,fechaInicio,husoOrigen,ciudad_destino,fechaFin,husoDestino,capacidad,1);
