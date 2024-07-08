@@ -16,6 +16,7 @@ const iconoRojo = new Icon({
   iconUrl: "/planes/plane_red.svg",
   //iconUrl: require(""),
   iconSize: [markerSize, markerSize],
+  
 });
 
 const iconoAmarillo = new Icon({
@@ -44,7 +45,7 @@ const iconos = {
   Gris: iconoGris
 }
 
-export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDeVueloBD,freqMov,ingresarAeropuertos}) {
+export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDeVueloBD,freqMov,ingresarAeropuertos,muestraLineas,setSaturacion}) {
 
   //Variable para manejar los aeropuertos
   const [aeropuertos, setAeropuertos] = useState([]);
@@ -58,6 +59,7 @@ export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDe
 
   useEffect(() => {
     setPlanesDeVuelo((prevPlanesDeVuelo) => [...prevPlanesDeVuelo,...planesDeVueloBD]);
+    setSaturacion((prevPlanesDeVuelo) => [...prevPlanesDeVuelo,...planesDeVueloBD])
   },[planesDeVueloBD])
 
   useEffect(() => {
@@ -74,7 +76,7 @@ const idsTemp = [3860]
   return (
     <>
       <div style={{ position: 'relative', zIndex: 0, height: '100%', width: '100%'  }}>
-        <MapContainer center={[48.8566, 2.3522]} zoom={3} style={{ height: '100%', width: '100%' }} preferCanvas={true}>
+        <MapContainer center={[0,-30]} zoom={3} style={{ height: '100%', width: '100%' }} preferCanvas={true}>
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -83,7 +85,7 @@ const idsTemp = [3860]
             <Aeropuerto key={index} aeropuerto={pos}></Aeropuerto>
           )) : <></>}
           {planesDeVuelo && planesDeVuelo.length > 0 && estadoSim == 'PL' ? planesDeVuelo.map((pos,index) => (
-            <PlanDeVuelo key={pos.id_tramo} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} freqMov={freqMov} removerPlan={removerPlan} iconos={iconos}></PlanDeVuelo>
+            <PlanDeVuelo key={pos.id_tramo} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} freqMov={freqMov} removerPlan={removerPlan} iconos={iconos} muestraLineas={muestraLineas}></PlanDeVuelo>
           )) : <></>}
           {/*planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.filter(pos => idsTemp.includes(pos.id_tramo)).map((pos,index) => (
             <PlanDeVuelo key={index} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} intervaloMS={intervaloMS}></PlanDeVuelo>

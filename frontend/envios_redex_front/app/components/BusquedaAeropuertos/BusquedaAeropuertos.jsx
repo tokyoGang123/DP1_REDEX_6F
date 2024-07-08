@@ -20,7 +20,7 @@ export default function BusquedaAeropuertos({ active, aeropuertos }) {
     const resultados = aeropuertos.filter(aeropuerto =>
       aeropuerto.ciudad.toLowerCase().includes(busqueda.toLowerCase())
     );
-    setAeropuertosFiltrados(resultados);
+    setAeropuertosFiltrados(resultados)
   };
 
   const handleSelectAeropuerto = (aeropuerto) => {
@@ -107,6 +107,7 @@ export default function BusquedaAeropuertos({ active, aeropuertos }) {
           <Typography variant="body1">
             <strong>Diminutivo:</strong> {aeropuertoSeleccionado.diminutivo}
           </Typography>
+          
           <Button
             variant="contained"
             sx={{ mt: 2 }}
@@ -122,6 +123,6 @@ export default function BusquedaAeropuertos({ active, aeropuertos }) {
 }
 
 
-
+//
 
 

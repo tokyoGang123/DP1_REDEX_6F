@@ -101,6 +101,9 @@ export default function BusquedaPlanes({ active, planesDeVueloRef,aeropuertos })
           <Typography variant="body1">
             Capacidad Ocupada: {vueloSeleccionado.capacidad_ocupada || 0}
           </Typography>
+          <Typography variant="body1">
+            Capacidad Máxima: {vueloSeleccionado.capacidad_maxima || 0}
+          </Typography>
           <Typography variant="h6">
             Paquetes Asignados:
           </Typography>
@@ -136,3 +139,4 @@ export default function BusquedaPlanes({ active, planesDeVueloRef,aeropuertos })
 
 
 
+//
