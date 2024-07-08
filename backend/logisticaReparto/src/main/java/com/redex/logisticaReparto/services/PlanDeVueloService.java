@@ -51,34 +51,24 @@ public class PlanDeVueloService {
     }
 
     //public boolean planAcabaElSiguienteDia(String tInicio, String tFin) {
-    public boolean planAcabaElSiguienteDia(String tInicio, String tFin,String husoOrigen, String husoDestino,
-                                           int aa, int mm, int dd) {
-        /*String dataInicio[] = tInicio.split(":");
-        int hI = Integer.parseInt(dataInicio[0]);
-        int mI = Integer.parseInt(dataInicio[1]);
-        String dataFin[] = tFin.split(":");
-        int hF = Integer.parseInt(dataFin[0]);
-        int mF = Integer.parseInt(dataFin[1]);
+    public int planAcabaElSiguienteDia(String tInicio, String tFin,String husoOrigen, String husoDestino,
+                                       int aa, int mm, int dd) {
 
-        //Si tiene las mismas horas, los minutos determinan si es del mismo dia
-        if (hI == hF) {
-            if (mI >= mF) return true;
-            else return false;
-        } else if (hI > hF) return true;
-        else return false;*/
-
+        int cantidad = 0;
         LocalTime horaInicio = LocalTime.parse(tInicio);
         LocalTime horaFin = LocalTime.parse(tFin);
 
         ZonedDateTime zonedHoraInicio = ZonedDateTime.of(aa, mm, dd, horaInicio.getHour(), horaInicio.getMinute(), 0, 0, ZoneId.of(husoOrigen));
-        ZonedDateTime zonedHoraFin = ZonedDateTime.of(aa, mm, dd, horaFin.getHour(), horaFin.getMinute(), 0, 0, ZoneId.of(husoDestino));
 
         ZonedDateTime convertedHoraInicio = zonedHoraInicio.withZoneSameInstant(ZoneId.of(husoDestino));
 
-        if (!convertedHoraInicio.toLocalDate().isEqual(zonedHoraInicio.toLocalDate())) {
-            return true; // El plan acaba al día siguiente
+        if (!convertedHoraInicio.toLocalDate().isEqual(zonedHoraInicio.toLocalDate())) { //dia distinto, dia siguiente conversion
+            cantidad++;
         }
 
-        return convertedHoraInicio.toLocalTime().isAfter(horaFin);
+        if (convertedHoraInicio.toLocalTime().isAfter(horaFin)) cantidad++; //hora de origen despues de hora destino
+
+        return cantidad;
+        //return convertedHoraInicio.toLocalTime().isAfter(horaFin);
     }
 }
