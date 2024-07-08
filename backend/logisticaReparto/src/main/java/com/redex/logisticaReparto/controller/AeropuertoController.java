@@ -158,7 +158,7 @@ public class AeropuertoController {
                 String zonaHoraria= data[6];
 
                 //Capacidad Aumentada en 1000
-                int capacidad= Integer.parseInt(data[7])+1000;
+                int capacidad= 1350;
                 double latitud= Double.parseDouble(data[8]);
                 double longitud= Double.parseDouble(data[9]);
 
