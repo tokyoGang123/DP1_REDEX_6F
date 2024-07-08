@@ -752,7 +752,7 @@ export default function SimSemanal() {
         <>
             <Header title={"SIMULACION SEMANAL"} togglePanel={togglePanel} />
             <Grid container sx={{ height: 'calc(100vh - 64px)' }}>
-                <Grid item xs={9}>
+                <Grid item xs={panelVisible ? 9 : 12}>
                     <Grid sx={{ py: 1, display: 'flex', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
                         <Grid>
                             <Box sx={{ px: 2, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
@@ -788,7 +788,7 @@ export default function SimSemanal() {
                             <Button variant="contained" onClick={() => setActivePanel('aeropuertos')}>Aeropuertos</Button>
                             <Button variant="contained" onClick={() => setActivePanel('envios')}>Envíos</Button>
                         </Box>
-                        {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} />}
+                        {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos}/>}
                         {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
                         {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos}/>}
                     </Grid>
