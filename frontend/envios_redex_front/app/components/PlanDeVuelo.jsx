@@ -113,11 +113,11 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
     );
     
     if (planDeVuelo.ruta.length < 3) {
-        /*
+        
         console.log(colorMarcador ," -> ", planDeVuelo.latitud_origen, planDeVuelo.longitud_origen, planDeVuelo.latitud_destino, planDeVuelo.longitud_destino)
         console.log(planDeVuelo.hora_origen, planDeVuelo.hora_destino)
         console.log(planDeVuelo.ruta)
-        */
+        
     }
     
     
@@ -155,14 +155,14 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
                     rotationOrigin='center center'
                     >
                     <Popup>
-                        <h1>Vuelo #{planDeVuelo.id_tramo}</h1>
+                        <h1>Vuelo #{planDeVuelo.id_tramo} - {planDeVuelo.capacidad_ocupada}/{planDeVuelo.capacidad_maxima} </h1>
                         <p>Hora salida: {planDeVuelo.hora_origen}</p>
                         <p>Hora llegada: {planDeVuelo.hora_destino}</p>
 
                     </Popup>
                 </Marker>
                 : <></>}
-                {muestraLineas && !rutaCompleta ? <Polyline dashArray="4, 4" positions={rutaRestante}></Polyline> : <></>}
+                {muestraLineas && !rutaCompleta ? <Polyline dashArray="4, 4" positions={rutaRestante} weight={1} color='black'></Polyline> : <></>}
 
         </>
     )
@@ -172,4 +172,4 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
 
 export default PlanDeVuelo;
 
-{/* - {planDeVuelo.capacidad_ocupada}/{planDeVuelo.capacidad_maxima} */}
+{/*  */}
