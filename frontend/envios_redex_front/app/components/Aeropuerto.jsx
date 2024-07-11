@@ -59,7 +59,7 @@ export default function Aeropuerto({ aeropuerto }) {
         if (porcentajeOcupacion < 33.33) setColorMarcador("Verde")
         else if (porcentajeOcupacion < 66.66) setColorMarcador("Amarillo")
         else setColorMarcador("Rojo")
-    }, [aeropuerto])
+    }, [aeropuerto.capacidad_ocupada])
 
     return <>
 

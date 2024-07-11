@@ -67,13 +67,14 @@ function getColorMarcador (capacidad_ocupada, capacidad_maxima) {
     else return "Rojo"
 }
 
-const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,removerPlan, iconos, muestraLineas }) => {
+const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,removerPlan, iconos, muestraLineas, showGris,aeropuertos }) => {
 
     const [currentPositionIndex, setCurrentPositionIndex] = useState(0);
     const markerRef = useRef(null);
     const [colorMarcador, setColorMarcador] = useState(getColorMarcador(planDeVuelo.capacidad_ocupada,planDeVuelo.capacidad_maxima))
     const [rutaCompleta, setRutaCompleta] = useState(false)
-
+    let aeropInicio = aeropuertos.find(item => item.id_aeropuerto === planDeVuelo.ciudad_origen).ciudad;
+    let aeropDestino = aeropuertos.find(item => item.id_aeropuerto === planDeVuelo.ciudad_destino).ciudad;
     useEffect(() => {
         const interval = setInterval(() => {
             
@@ -120,7 +121,6 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
         
     }
     
-    
     //const anguloRotacion = calculaAnguloRotacion(planDeVuelo.latitud_origen,planDeVuelo.longitud_origen, planDeVuelo.latitud_destino,planDeVuelo.longitud_destino);
     //const anguloRotacion = calculaAnguloRotacion(planDeVuelo.ruta[currentPositionIndex][0],planDeVuelo.ruta[currentPositionIndex][1], planDeVuelo.latitud_destino,planDeVuelo.longitud_destino);
     //console.log(anguloRotacion)
@@ -143,7 +143,7 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
                     </Popup>
                 </Marker>
                 : <></>*/}
-                {!rutaCompleta ?
+                {!rutaCompleta && ((colorMarcador == 'Gris' && showGris) || colorMarcador != 'Gris') ?
                 <Marker position={planDeVuelo.ruta[currentPositionIndex]}
                     icon={iconos[colorMarcador]}
                     ref={(ref) => {
@@ -156,13 +156,14 @@ const PlanDeVuelo = React.memo(({ planDeVuelo, fechaSim, estadoSim, freqMov,remo
                     >
                     <Popup>
                         <h1>Vuelo #{planDeVuelo.id_tramo} - {planDeVuelo.capacidad_ocupada}/{planDeVuelo.capacidad_maxima} </h1>
-                        <p>Hora salida: {planDeVuelo.hora_origen}</p>
-                        <p>Hora llegada: {planDeVuelo.hora_destino}</p>
+                        <p>{aeropInicio} - {aeropDestino}</p>
+                        <p>Salida: {planDeVuelo.hora_origen}</p>
+                        <p>Llegada: {planDeVuelo.hora_destino}</p>
 
                     </Popup>
                 </Marker>
                 : <></>}
-                {muestraLineas && !rutaCompleta ? <Polyline dashArray="4, 4" positions={rutaRestante} weight={1} color='black'></Polyline> : <></>}
+                {muestraLineas && !rutaCompleta && ((colorMarcador == 'Gris' && showGris) || colorMarcador != 'Gris') ? <Polyline dashArray="4, 4" positions={rutaRestante} weight={1} color='black'></Polyline> : <></>}
 
         </>
     )
