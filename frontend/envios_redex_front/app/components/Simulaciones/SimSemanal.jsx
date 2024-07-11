@@ -788,7 +788,7 @@ export default function SimSemanal() {
                             <Button variant="contained" onClick={() => setActivePanel('aeropuertos')}>Aeropuertos</Button>
                             <Button variant="contained" onClick={() => setActivePanel('envios')}>Envíos</Button>
                         </Box>
-                        {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos}/>}
+                        {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} envios2Ref={envios2Ref}/>}
                         {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
                         {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos}/>}
                     </Grid>
