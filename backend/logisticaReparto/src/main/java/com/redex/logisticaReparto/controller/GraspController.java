@@ -40,6 +40,10 @@ public class GraspController {
     private int num_ejecu_semanal;
     private ArrayList<Envio> ultimoEnvioSemanal;
 
+    private ZonedDateTime horaInicioDiaria;
+    private ZonedDateTime horaSimulacionDiaria;
+    private String husoHorarioDiaria;
+
     @GetMapping(value = "/PDF/generar",produces =  MediaType.APPLICATION_PDF_VALUE)
     public ModelAndView generarPDF(){
         Map<String, Object> model = new HashMap<>();
@@ -196,6 +200,63 @@ public class GraspController {
         if(num_ejecu_semanal >= 1){
             ultimoEnvioSemanal=solucion;
         }
+        return solucion;
+    }
+
+    @GetMapping("/grasp/iniciarDiaria/{fechaHora}")
+    public String iniciarGraspDiaria(@PathVariable String fechaHora){
+        ArrayList<Aeropuerto> aeropuertos = aeropuertoService.obtenerTodosAeropuertos();
+        ArrayList<Continente> continentes = continenteService.obtenerTodosContinentes();
+        ArrayList<Pais> paises = paisService.obtenerTodosPaises();
+        grasp.setAeropuertos(aeropuertos);
+        grasp.setContinentes(continentes);
+        grasp.setPaises(paises);
+        grasp.setEnvios(new ArrayList<>());
+        grasp.setPlanes(new ArrayList<>());
+        int anio = Integer.parseInt(fechaHora.substring(0, 4));
+        int mes = Integer.parseInt(fechaHora.substring(4, 6));
+        int dia = Integer.parseInt(fechaHora.substring(6, 8));
+        int hora = Integer.parseInt(fechaHora.substring(9, 11));
+        int minutos = Integer.parseInt(fechaHora.substring(12, 14));
+        husoHorarioDiaria = fechaHora.substring(15);
+        horaInicioDiaria = ZonedDateTime.of(anio, mes, dia, hora, minutos, 0, 0, ZoneId.of(husoHorarioDiaria));
+        horaSimulacionDiaria = horaInicioDiaria;
+        //Busqueda de planes en el rango de 17 horas
+        ArrayList<PlanDeVuelo> planesEnRango;
+        LocalDateTime fechaInicioLocal = horaInicioDiaria.toLocalDateTime();
+        planesEnRango = planDeVueloService.obtenerPlanesVuelosPorFecha(fechaInicioLocal, husoHorarioDiaria, horaInicioDiaria.plusHours(17).toLocalDateTime());
+        grasp.setPlanes(planesEnRango);
+        return "Se inicio las operaciones dia a dia";
+    }
+
+    @GetMapping("grasp/ejecutarDiaria")
+    public ArrayList<Envio> ejecutarGraspDiaria(){
+        long startTime = System.currentTimeMillis();
+        ZonedDateTime fechaFin = horaSimulacionDiaria.plusSeconds(30);
+        LocalDateTime fechaInicioLocal = horaSimulacionDiaria.toLocalDateTime();
+        LocalDateTime fechaFinLocal = fechaFin.toLocalDateTime();
+
+        //Busqueda de envios en el rango de 30 segundos
+        ArrayList<Envio> enviosEnRango = envioService.obtenerEnviosPorFecha(fechaInicioLocal, husoHorarioDiaria, fechaFinLocal);
+
+        grasp.getPlanes().removeIf(plan -> plan.getZonedHora_origen().isBefore(horaSimulacionDiaria));
+
+        grasp.getEnvios().addAll(enviosEnRango);
+        System.out.println("Cantidad Envios: "+grasp.getEnvios().size());
+        System.out.println("Cantidad Planes Antes GRASP:"+grasp.getPlanes().size());
+
+        ArrayList<Envio> solucion = grasp.ejecutaGrasp(grasp.getAeropuertos(),grasp.getEnvios(),grasp.getPlanes());
+
+        ArrayList<Envio> enviosSinRuta = grasp.buscarSinRuta(solucion);
+        grasp.setEnvios(enviosSinRuta);
+
+        long endTime = System.currentTimeMillis();
+        long durationInMillis = endTime - startTime;
+        double durationInSeconds = durationInMillis / 1000.0;
+        System.out.println("Tiempo de ejecución: " + durationInSeconds + " segundos");
+
+        horaSimulacionDiaria = fechaFin;
+
         return solucion;
     }
 

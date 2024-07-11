@@ -5,6 +5,7 @@ import com.redex.logisticaReparto.model.Pais;
 import com.redex.logisticaReparto.repository.EnvioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -34,6 +35,7 @@ public class EnvioService {
     /*public ArrayList<Envio> obtenerEnviosPorFecha(ZonedDateTime fechaInicio, String husoHorarioInicio, ZonedDateTime fechaFin){
         return envioRepository.findByFechaIngresoInRange(fechaInicio, husoHorarioInicio, fechaFin);
     }*/
+    @Transactional
     public ArrayList<Envio> obtenerEnviosPorFecha(LocalDateTime  fechaInicio, String husoHorario, LocalDateTime fechaFin){
         return envioRepository.findByFechaIngresoInRange(fechaInicio, husoHorario, fechaFin);
     }
