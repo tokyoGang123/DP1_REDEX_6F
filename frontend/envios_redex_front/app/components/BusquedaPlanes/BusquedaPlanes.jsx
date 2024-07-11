@@ -10,7 +10,7 @@ const styleDetalles = {
   borderRadius: 2,
 };
 
-export default function BusquedaPlanes({ active, planesDeVueloRef,aeropuertos }) {
+export default function BusquedaPlanes({ active, planesDeVueloRef, aeropuertos, envios2Ref }) {
   const [busqueda, setBusqueda] = useState('');
   const [planesFiltrados, setPlanesFiltrados] = useState([]);
   const [vueloSeleccionado, setVueloSeleccionado] = useState(null);
@@ -38,8 +38,26 @@ export default function BusquedaPlanes({ active, planesDeVueloRef,aeropuertos })
   };
 
   function obtenerNombre(id) {
-      const nom = aeropuertos.find(item => item.id_aeropuerto == id)
-      return nom ? nom.ciudad : "No identificada"
+    const nom = aeropuertos.find(item => item.id_aeropuerto === id);
+    return nom ? nom.ciudad : "No identificada";
+  }
+
+  function buscarPaquetesYRutas(paquetes) {
+    return paquetes.map(idPaquete => {
+      const envio = envios2Ref.current.find(env => env.paquetes.some(paq => paq.id_paquete === idPaquete));
+      const paquete = envio ? envio.paquetes.find(paq => paq.id_paquete === idPaquete) : null;
+      return {
+        idPaquete,
+        ruta: paquete ? paquete.ruta.listaRutas.map(idTramo => {
+          const plan = planesDeVueloRef.current.find(p => p.id_tramo === idTramo);
+          return plan ? {
+            tramoId: idTramo,
+            origen: obtenerNombre(plan.ciudad_origen),
+            destino: obtenerNombre(plan.ciudad_destino)
+          } : null;
+        }) : []
+      };
+    });
   }
 
   return (
@@ -74,17 +92,12 @@ export default function BusquedaPlanes({ active, planesDeVueloRef,aeropuertos })
                   <ListItemIcon><Flight /></ListItemIcon>
                   <ListItemText
                     primary={plan.id_tramo}
-                    secondary={`${obtenerNombre(plan.ciudad_origen) || 'Origen'} → ${obtenerNombre(plan.ciudad_destino) || 'Destino'}`}
+                    secondary={`${obtenerNombre(plan.ciudad_origen)} → ${obtenerNombre(plan.ciudad_destino)}`}
                   />
                 </ListItem>
                 <Divider />
               </React.Fragment>
             ))}
-            {planesFiltrados.length === 0 && (
-              <Typography variant="body1" color="textSecondary" align="center" sx={{ mt: 2 }}>
-                No se encontraron resultados.
-              </Typography>
-            )}
           </List>
         </>
       ) : (
@@ -93,32 +106,30 @@ export default function BusquedaPlanes({ active, planesDeVueloRef,aeropuertos })
             Detalles del Vuelo: {vueloSeleccionado.id_tramo}
           </Typography>
           <Typography variant="body1">
-            Origen: {obtenerNombre(vueloSeleccionado.ciudad_origen) || 'No especificado'}
+            <strong>Origen:</strong> {obtenerNombre(vueloSeleccionado.ciudad_origen)}
           </Typography>
           <Typography variant="body1">
-            Destino: {obtenerNombre(vueloSeleccionado.ciudad_destino) || 'No especificado'}
+            <strong>Destino:</strong> {obtenerNombre(vueloSeleccionado.ciudad_destino)}
           </Typography>
           <Typography variant="body1">
-            Capacidad Ocupada: {vueloSeleccionado.capacidad_ocupada || 0}
+            <strong>Capacidad Ocupada:</strong> {vueloSeleccionado.capacidad_ocupada}
           </Typography>
           <Typography variant="body1">
-            Capacidad Máxima: {vueloSeleccionado.capacidad_maxima || 0}
+            <strong>Capacidad Máxima:</strong> {vueloSeleccionado.capacidad_maxima}
           </Typography>
           <Typography variant="h6">
-            Paquetes Asignados:
+            <strong>Paquetes Asignados:</strong>
           </Typography>
           <List dense>
-            {(vueloSeleccionado.listaPaquetes || []).map((paquete, index) => (
-              <ListItem key={index}>
+            {buscarPaquetesYRutas(vueloSeleccionado.listaPaquetes || []).map(({ idPaquete, ruta }) => (
+              <ListItem key={idPaquete}>
                 <ListItemIcon><LocalShipping /></ListItemIcon>
-                <ListItemText primary={`Paquete ID: ${paquete}`} />
+                <ListItemText
+                  primary={`Paquete ID: ${idPaquete}`}
+                  secondary={`Ruta: ${ruta.map(r => r ? `${r.tramoId} (${r.origen} - ${r.destino})` : 'Detalles no disponibles').join(' -> ')}`}
+                />
               </ListItem>
             ))}
-            {(!vueloSeleccionado.listaPaquetes || vueloSeleccionado.listaPaquetes.length === 0) && (
-              <Typography variant="body2" color="textSecondary" align="center">
-                No hay paquetes asignados aún.
-              </Typography>
-            )}
           </List>
           <Button
             variant="contained"
@@ -133,6 +144,7 @@ export default function BusquedaPlanes({ active, planesDeVueloRef,aeropuertos })
     </Box>
   );
 }
+
 
 
 

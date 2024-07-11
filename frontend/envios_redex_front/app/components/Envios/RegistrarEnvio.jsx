@@ -2,7 +2,8 @@
 import React, { useState, useEffect } from "react";
 import Link from 'next/link';
 import "./RegistrarEnvio.css";
-import { getAeropuertosTodos } from "@/app/api/aeropuetos.api";
+import { getAeropuertosTodos } from '@/app/api/aeropuetos.api';
+import { postEnvioIndividualDiario } from '@/app/api/envios.api';
 
 export default function RegistroEnvio() {
     const [datosEnvio, setDatosEnvio] = useState({
@@ -12,19 +13,27 @@ export default function RegistroEnvio() {
     });
     const [aeropuertos, setAeropuertos] = useState([]);
 
-    useEffect(() => {
+    /*useEffect(() => {
         const cargarAeropuertos = async () => {
             await getAeropuertosTodos()
         };
         cargarAeropuertos();
-    }, []);
+    }, []);*/
+
+    useEffect(() => {
+        async function carga() {
+          let a = await getAeropuertosTodos();
+          setAeropuertos(a);
+        }
+        carga();
+      }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setDatosEnvio(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = async (e) => {
+    /*const handleSubmit = async (e) => {
         e.preventDefault();
         const { aeropuertoOrigenCodigo, aeropuertoDestinoCodigo, cantidadPaquetes } = datosEnvio;
         try {
@@ -43,7 +52,24 @@ export default function RegistroEnvio() {
         } catch (error) {
             console.error('Error al registrar el envío:', error);
         }
+    };*/
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const { aeropuertoOrigenCodigo, aeropuertoDestinoCodigo, cantidadPaquetes } = datosEnvio;
+        try {
+            // Asegúrate de que los nombres de las propiedades coincidan con lo esperado por la función de la API.
+            const res = await postEnvioIndividualDiario({
+                codigoOrigen: aeropuertoOrigenCodigo,
+                codigoDestino: aeropuertoDestinoCodigo,
+                numPaq: cantidadPaquetes
+            });
+            console.log('Envío registrado con éxito:', res);
+        } catch (error) {
+            console.error('Error al registrar el envío:', error);
+        }
     };
+    
 
     return (
         <div>

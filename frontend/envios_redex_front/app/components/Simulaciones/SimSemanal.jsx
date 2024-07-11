@@ -1,7 +1,7 @@
 import MapaSimulador from "../MapaSimulador"
 import SelectorFecha from "../Elementos/SelectorFecha"
 import { CuadroTiempo } from "../Elementos/CuadroTiempo"
-import { Stack, Grid, Box, Button, Typography, Card, CardContent } from "@mui/material"
+import { Stack, Grid, Box, Button, Typography, Card, CardContent, IconButton } from "@mui/material"
 import BotonIniciar from "../Botones/BotonIniciar"
 import { useEffect, useRef, useState } from "react"
 import dayjs from "dayjs"
@@ -23,6 +23,9 @@ import HoraActual from "../horaActualSem/HoraActual"
 import SaturacionAeropuertos from "../Elementos/SaturacionAeropuertos"
 import RouteIcon from '@mui/icons-material/Route';
 import SaturacionPlanes from "../Elementos/SaturacionPlanes"
+import CapacidadesAeropuertos from "../Elementos/CapacidadesAeropuerto"
+import CapacidadesPlanes from "../Elementos/CapacidadesPlanes"
+import AirplanemodeActiveIcon from '@mui/icons-material/AirplanemodeActive';
 
 dayjs.extend(advancedFormat);
 
@@ -207,6 +210,11 @@ export default function SimSemanal() {
         //console.log("PLAN SAT", contad)
     }, [pdvSaturacion])
 
+    const [showGris, setShowGris] = useState(true)
+
+    const changeGrises = () => {
+        setShowGris(!showGris)
+    }
 
 
     //---------------------------------------------------------
@@ -765,6 +773,8 @@ export default function SimSemanal() {
                             <Box sx={{ px:1,display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                                 <SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>
                                 <BotonIniciar onClick={clickBotonIniciar} disabled={estadoSim == 'PL'}></BotonIniciar>
+                                <IconButton onClick={changeGrises}><AirplanemodeActiveIcon/></IconButton>
+                                <IconButton onClick={toggleLineas}><RouteIcon /></IconButton>
                                 {estadoSim == 'FI' ? <Button onClick={obtenerpdf}>Reporte Final</Button> : <></>}
 
                             </Box>
@@ -775,11 +785,13 @@ export default function SimSemanal() {
                                     <SaturacionPlanes contadorPlanes={contadorPlanes}></SaturacionPlanes>
                                     <SaturacionAeropuertos contadorAeropuerto={contadorAeropuerto}></SaturacionAeropuertos>
                                 </Box>
-                                <Button variant="outlined" onClick={toggleLineas} startIcon={<RouteIcon />}>{muestraLineas ? "OCULTAR RUTA" : "MOSTRAR RUTA"}</Button>
+                                <CapacidadesAeropuertos aeropuertos={aeropuertos}></CapacidadesAeropuertos>
+                                <CapacidadesPlanes planes={pdvSaturacion}></CapacidadesPlanes>
+                                {/**/}
                             </Box>
                         </Grid>
                     </Grid>
-                    <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan} muestraLineas={muestraLineas} setSaturacion={setPdvSaturacion} />
+                    <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan} muestraLineas={muestraLineas} setSaturacion={setPdvSaturacion} showGris={showGris} />
                 </Grid>
                 {panelVisible && (
                     <Grid item xs={3} sx={{ overflowY: 'auto', height: 'calc(100vh - 64px)',p: 2, borderLeft: '1px solid #ccc' }}>
@@ -788,7 +800,7 @@ export default function SimSemanal() {
                             <Button variant="contained" onClick={() => setActivePanel('aeropuertos')}>Aeropuertos</Button>
                             <Button variant="contained" onClick={() => setActivePanel('envios')}>Envíos</Button>
                         </Box>
-                        {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos}/>}
+                        {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} envios2Ref={envios2Ref}/>}
                         {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
                         {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos}/>}
                     </Grid>

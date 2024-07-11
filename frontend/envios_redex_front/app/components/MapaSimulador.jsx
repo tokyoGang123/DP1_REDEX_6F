@@ -45,7 +45,7 @@ const iconos = {
   Gris: iconoGris
 }
 
-export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDeVueloBD,freqMov,ingresarAeropuertos,muestraLineas,setSaturacion}) {
+export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDeVueloBD,freqMov,ingresarAeropuertos,muestraLineas,setSaturacion,showGris}) {
 
   //Variable para manejar los aeropuertos
   const [aeropuertos, setAeropuertos] = useState([]);
@@ -69,6 +69,8 @@ export default function MapaSimulador({aeropuertosBD,fechaSim,estadoSim,planesDe
   const removerPlan = (planDeVuelo,id) => {
     ingresarAeropuertos(planDeVuelo)
     setPlanesDeVuelo((prevPlanes) => prevPlanes.filter(plan => plan.id_tramo !== id))
+    //Ver si esta bien
+    setSaturacion((prevPlanes) => prevPlanes.filter(plan => plan.id_tramo !== id))
     //console.log("Removido " + id)
   }
 
@@ -85,7 +87,7 @@ const idsTemp = [3860]
             <Aeropuerto key={index} aeropuerto={pos}></Aeropuerto>
           )) : <></>}
           {planesDeVuelo && planesDeVuelo.length > 0 && estadoSim == 'PL' ? planesDeVuelo.map((pos,index) => (
-            <PlanDeVuelo key={pos.id_tramo} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} freqMov={freqMov} removerPlan={removerPlan} iconos={iconos} muestraLineas={muestraLineas}></PlanDeVuelo>
+            <PlanDeVuelo key={pos.id_tramo} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} freqMov={freqMov} removerPlan={removerPlan} iconos={iconos} muestraLineas={muestraLineas} showGris={showGris} aeropuertos={aeropuertos}></PlanDeVuelo>
           )) : <></>}
           {/*planesDeVuelo && planesDeVuelo.length > 0 ? planesDeVuelo.filter(pos => idsTemp.includes(pos.id_tramo)).map((pos,index) => (
             <PlanDeVuelo key={index} planDeVuelo={pos} fechaSim={fechaSim} estadoSim={estadoSim} intervaloMS={intervaloMS}></PlanDeVuelo>
