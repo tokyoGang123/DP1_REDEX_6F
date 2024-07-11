@@ -32,7 +32,7 @@ public interface EnvioRepository extends CrudRepository<Envio, Long> {
     ArrayList<Envio> findByFechaIngresoInRange(@Param("fechaInicioUTC") LocalDateTime fechaInicioUTC,
                                           @Param("fechaFinUTC") LocalDateTime fechaFinUTC);*/
 
-    @Query("SELECT e FROM Envio e " +
+    @Query("SELECT e FROM Envio e LEFT JOIN FETCH e.paquetes " +
             "WHERE e.fecha_ingreso BETWEEN " +
             "FUNCTION('CONVERT_TZ', :fechaInicio, :husoHorarioInicio, e.huso_horario_origen) " +
             "AND " +

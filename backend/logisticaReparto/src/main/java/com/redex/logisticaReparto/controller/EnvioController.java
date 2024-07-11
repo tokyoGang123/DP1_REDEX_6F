@@ -262,7 +262,13 @@ public class EnvioController {
         System.out.println("Huso Destino:  "+husoHorarioDestino);
         System.out.println("Tiempo Max:  "+tiempoMax);
 
-
+        ArrayList<Paquete> paquetesEnvio = new ArrayList<>();
+        for (int i= 0; i < envio.getNumPaquetes(); i++) {
+            Paquete paquete = new Paquete(0);
+            paquete.setEnvio(envio);
+            paquetesEnvio.add(paquete);
+        }
+        envio.setPaquetes(paquetesEnvio);
         envioService.insertarEnvio(envio);
 
         return envio;

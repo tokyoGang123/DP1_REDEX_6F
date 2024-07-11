@@ -35,7 +35,7 @@ public class Envio {
     @Transient
     private ZonedDateTime zonedFechaLlegadaMax;
 
-    @OneToMany(mappedBy = "envio", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "envio", cascade = CascadeType.ALL,fetch = FetchType.EAGER)
     //@JsonIgnore
     private List<Paquete> paquetes =new ArrayList<>();
 
@@ -59,7 +59,8 @@ public class Envio {
     @PostLoad
     private void cargarZonedDateTime() {
         this.zonedFechaIngreso = fecha_ingreso.atZone(ZoneId.of(huso_horario_origen));
-        this.zonedFechaLlegadaMax = fecha_llegada_max.atZone(ZoneId.of(huso_horario_destino));
+        this.zonedFechaLlegadaMax = fecha_llegada_max.atZone(ZoneId.of(huso_horario_origen));
+        //this.zonedFechaLlegadaMax = fecha_llegada_max.atZone(ZoneId.of(huso_horario_destino));
     }
     /*public Envio(int estado, long numero_envio_Aeropuerto, ZonedDateTime fecha_ingreso,
                  int aeropuerto_origen, int aeropuerto_destino, ZonedDateTime fecha_llegada_max, int numPaquetes) {
