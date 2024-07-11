@@ -636,7 +636,7 @@ export default function OperacionesDiarias() {
             }
             //Asignar pedidos
             if (i == currentCiclo - 1) {
-                enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
+                if (enviosRef.current) enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
                 //planesDeVueloRef.current = planesDeVueloRef.current.concat([...planesDeVueloFuturoRef.current])
                 //planesEliminarRef.current = planesEliminarRef.current.concat([...planesDeVueloFuturoRef.current])
                 currentCiclo = currentCiclo + ciclo
