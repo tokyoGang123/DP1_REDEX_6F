@@ -13,8 +13,8 @@ import Header from '../Header/Header'
 import { getPlanesPorIntervalo, getPlanesPorIntervaloLatLon, getPlanesTodos } from "@/app/api/planesDeVuelo.api"
 import { TryOutlined } from "@mui/icons-material"
 import { useTimer } from "../usoTimer"
-import { ejecutaGRASP, iniciaGRASP } from "@/app/api/grasp.api"
-import hallarPuntosIntermedios from "../funcionesRuta"
+import { ejecutaGRASP, ejecutaGRASPDiaria, iniciaGRASP, iniciaGRASPDiaria } from "@/app/api/grasp.api"
+import { hallarPuntosIntermediosDiaria } from "../funcionesRuta"
 import BusquedaPlanes from '../BusquedaPlanes/BusquedaPlanes';
 import BusquedaAeropuertos from '../BusquedaAeropuertos/BusquedaAeropuertos';
 import BusquedaEnvios from '../BusquedaEnvios/BusquedaEnvios';
@@ -60,6 +60,13 @@ const transformaHora = (fecha) => {
 
 }
 
+const transformaHoraS = (fecha) => {
+    const formattedDate = fecha.format('YYYYMMDDTHH:mm:ss:Z');
+    //const customFormattedDate = formattedDate.replace(/([-+]\d{2}):(\d{2})/, '$1:$2');
+    return formattedDate;
+
+}
+
 export default function OperacionesDiarias() {
 
     dayjs.extend(utc);
@@ -73,7 +80,7 @@ export default function OperacionesDiarias() {
     const zonaHorariaUsuario = dayjs.tz.guess();
 
     //TIEMPO SELECCIONADO PARA EJECUTAR LA SIMULACION
-    const [fechaSim, setFechaSim] = useState(dayjs().tz(zonaHorariaUsuario));
+    const [fechaSim, setFechaSim] = useState(dayjs('2024-07-22T05:45:00').tz(zonaHorariaUsuario));
     //const [fechaSim, setFechaSim] = useState(dayjs("2024-05-30T00:00:00Z").tz(zonaHorariaUsuario));
 
     //useRef de fechaSim
@@ -107,6 +114,7 @@ export default function OperacionesDiarias() {
 
     //Aeropuertos
     const [aeropuertos, setAeropuertos] = useState([]);
+    const [aeropList, setAeropList] = useState([])
 
     //Planes de Vuelo
     const [planesDeVuelo, setPlanesDeVuelo] = useState([])
@@ -142,7 +150,7 @@ export default function OperacionesDiarias() {
     }, [])*/
 
     //Envios
-    const [envios, setEnvios] = useState({})
+    const [envios, setEnvios] = useState([])
     const enviosRef = useRef(envios)
     useEffect(() => {
         enviosRef.current = envios;
@@ -245,11 +253,14 @@ export default function OperacionesDiarias() {
             });
 
             await setAeropuertos(a);
+            await setAeropList(a)
             console.log(a)
 
             fechaStartRef.current = fechaSimRef.current; //fecha inicial
-            await iniciaGRASP()
-            await iniciaDatos()
+
+            let fechaI = transformaHora(fechaStartRef.current)
+            await iniciaGRASPDiaria(fechaI)
+            await iniciaDatos() //obtener planes
             await setEstadoSim('PL')
             ejecucionSimulacion()
         }
@@ -356,7 +367,7 @@ export default function OperacionesDiarias() {
         const handlePdvMapping = async () => {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(c.map(async pdv => {
-                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, pdv, intervaloMS, freqMov);
+                let ruta = await hallarPuntosIntermediosDiaria(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, pdv, intervaloMS, 60000);
                 return { ...pdv, listaPaquetes: [], ruta: ruta, paquetesEnDestino: [] };
             }));
             return updatedC;
@@ -467,7 +478,7 @@ export default function OperacionesDiarias() {
             //console.log("PLAN " + pc.id_tramo + " CONFIRMADO")
             //console.log(pc)
             newPlanes.push(pc)
-            await saleAeropuertoPorPlan(pc)
+            if (pc.capacidad_ocupada > 0) await saleAeropuertoPorPlan(pc)
             planesEliminarRef.current.splice(i, 1)
         }
         //console.log(newPlanes)
@@ -475,8 +486,8 @@ export default function OperacionesDiarias() {
     }
 
     const obtenerNuevosEnvios = async (fechaLlam) => {
-        let tiempoEnviado = transformaHora(fechaLlam);
-        let p = await ejecutaGRASP(tiempoEnviado);
+        let tiempoEnviado = transformaHoraS(fechaLlam);
+        let p = await ejecutaGRASPDiaria(tiempoEnviado);
         p.sort((a, b) => {
             let fechaA = new Date(a.zonedFechaIngreso);
             let fechaB = new Date(b.zonedFechaIngreso);
@@ -500,7 +511,7 @@ export default function OperacionesDiarias() {
         const handlePdvMapping = async () => {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(p.map(async pdv => {
-                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, intervaloMS, freqMov);
+                let ruta = await hallarPuntosIntermediosDiaria(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, intervaloMS, freqMov);
                 return { ...pdv, listaPaquetes: [], ruta: ruta, paquetesEnDestino: [] };
             }));
             return updatedC;
@@ -532,13 +543,15 @@ export default function OperacionesDiarias() {
             )
 
             if (index != -1) {
-                aeropuertosActualizados[index].listaPaquetes = [
-                    ...aeropuertosActualizados[index].listaPaquetes,
-                    ...envio.paquetes
-                ]
+                aeropuertosActualizados[index] = {
+                    ...aeropuertosActualizados[index],
+                    listaPaquetes: aeropuertosActualizados[index].listaPaquetes = [
+                        ...aeropuertosActualizados[index].listaPaquetes,
+                        ...envio.paquetes
+                    ], 
+                    capacidad_ocupada: aeropuertosActualizados[index].capacidad_ocupada + envio.paquetes.length
+                }   
             }
-
-            aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada + envio.paquetes.length
 
             return aeropuertosActualizados;
 
@@ -561,18 +574,19 @@ export default function OperacionesDiarias() {
 
             //console.log("ANTES: ", planDeVuelo.listaPaquetes)
             //console.log(planDeVuelo.paquetesEnDestino)
-            planDeVuelo.listaPaquetes = planDeVuelo.listaPaquetes.filter(item => !planDeVuelo.paquetesEnDestino.includes(item))
+            let plan = planDeVuelo.listaPaquetes.filter(item => !planDeVuelo.paquetesEnDestino.includes(item))
             //console.log("DESPUES    : ", planDeVuelo.listaPaquetes)
 
             if (index != -1) {
-                aeropuertosActualizados[index].listaPaquetes = [
-                    ...aeropuertosActualizados[index].listaPaquetes,
-                    ...planDeVuelo.listaPaquetes
-                ]
+                aeropuertosActualizados[index] = {
+                    ...aeropuertosActualizados[index],
+                    listaPaquetes: aeropuertosActualizados[index].listaPaquetes = [
+                        ...aeropuertosActualizados[index].listaPaquetes,
+                        ...plan
+                    ], 
+                    capacidad_ocupada: aeropuertosActualizados[index].capacidad_ocupada + plan.length
+                }   
             }
-            //console.log("Agregados ", planDeVuelo.listaPaquetes.length)
-            //console.log(planDeVuelo.listaPaquetes.length)
-            aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada + planDeVuelo.listaPaquetes.length
 
             return aeropuertosActualizados;
 
@@ -596,15 +610,18 @@ export default function OperacionesDiarias() {
             )
 
             if (index != -1) {
-                aeropuertosActualizados[index].listaPaquetes = aeropuertosActualizados[index].listaPaquetes.filter(
-                    (paquete) => !planDeVuelo.listaPaquetes.includes(paquete)
-                )
+                aeropuertosActualizados[index] = {
+                    ...aeropuertosActualizados[index],
+                    listaPaquetes: aeropuertosActualizados[index].listaPaquetes.filter(
+                        (paquete) => !planDeVuelo.listaPaquetes.includes(paquete)
+                    ),
+                    capacidad_ocupada: aeropuertosActualizados[index].capacidad_ocupada - planDeVuelo.listaPaquetes.length
+                }
+
+                aeropuertosActualizados[index].listaPaquetes = aeropuertosActualizados[index].capacidad_ocupada - planDeVuelo.listaPaquetes.length
             }
 
             //console.log("Quitados ", planDeVuelo.listaPaquetes.length)
-
-            aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada - planDeVuelo.listaPaquetes.length
-
             return aeropuertosActualizados;
 
 
@@ -616,9 +633,9 @@ export default function OperacionesDiarias() {
     //                      CUERPO SIMULACION
     const ejecucionSimulacion = async () => {
         let i = 0;
-        let ciclo = 45;
-        let currentCiclo = 45
-        let llamarAGrasp = 10;
+        let ciclo = 30;
+        let currentCiclo = 30
+        let llamarAGrasp = 1;
         let nF = fechaSimRef.current;
         let fechaLlam = fechaStartRef.current //Fecha para llamar grasp
         let fechaLlamPlan = fechaStartRef.current.add(2, 'd').add(2, 'h') // 2 días + 2 horas ya se tienen leidos, se procedera a llamar bloques posteriores de 2 horas
@@ -631,12 +648,12 @@ export default function OperacionesDiarias() {
             //Llamar a GRASP para planificar pedidos ingresados
             if (i == llamarAGrasp) {
                 fechaLlam = fechaLlam.add(ciclo, 's')
-                //obtenerNuevosEnvios(fechaLlam,ciclo)
+                obtenerNuevosEnvios(fechaLlam, ciclo)
                 llamarAGrasp = llamarAGrasp + ciclo
             }
             //Asignar pedidos
             if (i == currentCiclo - 1) {
-                if (enviosRef.current) enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
+                if (enviosFuturoRef.current.length > 0) enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
                 //planesDeVueloRef.current = planesDeVueloRef.current.concat([...planesDeVueloFuturoRef.current])
                 //planesEliminarRef.current = planesEliminarRef.current.concat([...planesDeVueloFuturoRef.current])
                 currentCiclo = currentCiclo + ciclo
@@ -736,7 +753,9 @@ export default function OperacionesDiarias() {
                     <Grid sx={{ py: 1, display: 'flex', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
                         <Grid>
                             <Box sx={{ px: 2, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                                <HoraActual></HoraActual>
+                                <Typography>
+                                    {fechaSimRef.current.format('DD/MM/YYYY HH:mm:ss')}
+                                </Typography>
                                 <Typography> ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</Typography>
                             </Box>
                             <Box sx={{ px: 1, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
@@ -776,21 +795,21 @@ export default function OperacionesDiarias() {
                             />
                             <label htmlFor="upload-file">
                                 <Button
-                                variant="contained"
-                                component="span"
-                                color="primary"
-                                startIcon={<UploadFileIcon />}
-                                className="button-right"
-                                fullWidth
+                                    variant="contained"
+                                    component="span"
+                                    color="primary"
+                                    startIcon={<UploadFileIcon />}
+                                    className="button-right"
+                                    fullWidth
                                 >
-                                + Cargar envíos
+                                    + Cargar envíos
                                 </Button>
                             </label>
                         </Box>
-                        {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} envios2Ref={envios2Ref} />}
+                        {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropList} envios2Ref={envios2Ref} />}
                         {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
-                        {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} />}
-                        {activePanel === 'registrar_envio' && <RegistroEnvio active={activePanel === 'registrar_envio'} />}
+                        {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropList} />}
+                        {activePanel === 'registrar_envio' && <RegistroEnvio active={activePanel === 'registrar_envio'} fechaSim={fechaSimRef}/>}
                     </Grid>
                 )}
             </Grid>

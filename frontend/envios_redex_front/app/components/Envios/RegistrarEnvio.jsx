@@ -5,7 +5,15 @@ import "./RegistrarEnvio.css";
 import { getAeropuertosTodos } from '@/app/api/aeropuetos.api';
 import { postEnvioIndividualDiario } from '@/app/api/envios.api';
 
-export default function RegistroEnvio() {
+const transformaHora = (fecha) => {
+    const formattedDate = fecha.format('YYYYMMDDTHH:mm:ss:Z');
+    console.log(formattedDate)
+    //const customFormattedDate = formattedDate.replace(/([-+]\d{2}):(\d{2})/, '$1:$2');
+    return formattedDate;
+
+}
+
+export default function RegistroEnvio({fechaSim}) {
     const [datosEnvio, setDatosEnvio] = useState({
         aeropuertoOrigenCodigo: '',
         aeropuertoDestinoCodigo: '',
@@ -57,12 +65,14 @@ export default function RegistroEnvio() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const { aeropuertoOrigenCodigo, aeropuertoDestinoCodigo, cantidadPaquetes } = datosEnvio;
+        let fechaReg = transformaHora(fechaSim.current)
         try {
             // Asegúrate de que los nombres de las propiedades coincidan con lo esperado por la función de la API.
             const res = await postEnvioIndividualDiario({
                 codigoOrigen: aeropuertoOrigenCodigo,
                 codigoDestino: aeropuertoDestinoCodigo,
-                numPaq: cantidadPaquetes
+                numPaq: cantidadPaquetes,
+                fechaHora: fechaReg
             });
             console.log('Envío registrado con éxito:', res);
         } catch (error) {
