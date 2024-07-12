@@ -142,7 +142,7 @@ export default function OperacionesDiarias() {
     }, [])*/
 
     //Envios
-    const [envios, setEnvios] = useState({})
+    const [envios, setEnvios] = useState([])
     const enviosRef = useRef(envios)
     useEffect(() => {
         enviosRef.current = envios;
@@ -534,13 +534,15 @@ export default function OperacionesDiarias() {
             )
 
             if (index != -1) {
-                aeropuertosActualizados[index].listaPaquetes = [
-                    ...aeropuertosActualizados[index].listaPaquetes,
-                    ...envio.paquetes
-                ]
+                aeropuertosActualizados[index] = {
+                    ...aeropuertosActualizados[index],
+                    listaPaquetes: aeropuertosActualizados[index].listaPaquetes = [
+                        ...aeropuertosActualizados[index].listaPaquetes,
+                        ...envio.paquetes
+                    ], 
+                    capacidad_ocupada: aeropuertosActualizados[index].capacidad_ocupada + envio.paquetes.length
+                }   
             }
-
-            aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada + envio.paquetes.length
 
             return aeropuertosActualizados;
 
@@ -618,9 +620,9 @@ export default function OperacionesDiarias() {
     //                      CUERPO SIMULACION
     const ejecucionSimulacion = async () => {
         let i = 0;
-        let ciclo = 45;
-        let currentCiclo = 45
-        let llamarAGrasp = 10;
+        let ciclo = 30;
+        let currentCiclo = 30
+        let llamarAGrasp = 1;
         let nF = fechaSimRef.current;
         let fechaLlam = fechaStartRef.current //Fecha para llamar grasp
         let fechaLlamPlan = fechaStartRef.current.add(2, 'd').add(2, 'h') // 2 días + 2 horas ya se tienen leidos, se procedera a llamar bloques posteriores de 2 horas
@@ -638,7 +640,7 @@ export default function OperacionesDiarias() {
             }
             //Asignar pedidos
             if (i == currentCiclo - 1) {
-                if (enviosRef.current.length > 0) enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
+                if (enviosFuturoRef.current.length > 0) enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
                 //planesDeVueloRef.current = planesDeVueloRef.current.concat([...planesDeVueloFuturoRef.current])
                 //planesEliminarRef.current = planesEliminarRef.current.concat([...planesDeVueloFuturoRef.current])
                 currentCiclo = currentCiclo + ciclo
