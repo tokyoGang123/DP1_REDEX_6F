@@ -14,7 +14,7 @@ import { getPlanesPorIntervalo, getPlanesPorIntervaloLatLon, getPlanesTodos } fr
 import { TryOutlined } from "@mui/icons-material"
 import { useTimer } from "../usoTimer"
 import { ejecutaGRASP, ejecutaGRASPDiaria, iniciaGRASP, iniciaGRASPDiaria } from "@/app/api/grasp.api"
-import {hallarPuntosIntermediosDiaria} from "../funcionesRuta"
+import { hallarPuntosIntermediosDiaria } from "../funcionesRuta"
 import BusquedaPlanes from '../BusquedaPlanes/BusquedaPlanes';
 import BusquedaAeropuertos from '../BusquedaAeropuertos/BusquedaAeropuertos';
 import BusquedaEnvios from '../BusquedaEnvios/BusquedaEnvios';
@@ -73,7 +73,7 @@ export default function OperacionesDiarias() {
     const zonaHorariaUsuario = dayjs.tz.guess();
 
     //TIEMPO SELECCIONADO PARA EJECUTAR LA SIMULACION
-    const [fechaSim, setFechaSim] = useState(dayjs().tz(zonaHorariaUsuario));
+    const [fechaSim, setFechaSim] = useState(dayjs('2024-07-22T05:45:00').tz(zonaHorariaUsuario));
     //const [fechaSim, setFechaSim] = useState(dayjs("2024-05-30T00:00:00Z").tz(zonaHorariaUsuario));
 
     //useRef de fechaSim
@@ -633,7 +633,7 @@ export default function OperacionesDiarias() {
             //Llamar a GRASP para planificar pedidos ingresados
             if (i == llamarAGrasp) {
                 fechaLlam = fechaLlam.add(ciclo, 's')
-                obtenerNuevosEnvios(fechaLlam,ciclo)
+                obtenerNuevosEnvios(fechaLlam, ciclo)
                 llamarAGrasp = llamarAGrasp + ciclo
             }
             //Asignar pedidos
@@ -738,7 +738,9 @@ export default function OperacionesDiarias() {
                     <Grid sx={{ py: 1, display: 'flex', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
                         <Grid>
                             <Box sx={{ px: 2, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                                <HoraActual></HoraActual>
+                                <Typography>
+                                    {fechaSimRef.current.format('DD/MM/YYYY HH:mm:ss')}
+                                </Typography>
                                 <Typography> ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</Typography>
                             </Box>
                             <Box sx={{ px: 1, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
@@ -778,14 +780,14 @@ export default function OperacionesDiarias() {
                             />
                             <label htmlFor="upload-file">
                                 <Button
-                                variant="contained"
-                                component="span"
-                                color="primary"
-                                startIcon={<UploadFileIcon />}
-                                className="button-right"
-                                fullWidth
+                                    variant="contained"
+                                    component="span"
+                                    color="primary"
+                                    startIcon={<UploadFileIcon />}
+                                    className="button-right"
+                                    fullWidth
                                 >
-                                + Cargar envíos
+                                    + Cargar envíos
                                 </Button>
                             </label>
                         </Box>

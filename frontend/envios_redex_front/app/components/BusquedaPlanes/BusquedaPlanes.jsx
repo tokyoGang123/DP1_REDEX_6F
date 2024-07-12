@@ -117,6 +117,12 @@ export default function BusquedaPlanes({ active, planesDeVueloRef, aeropuertos, 
           <Typography variant="body1">
             <strong>Capacidad Máxima:</strong> {vueloSeleccionado.capacidad_maxima}
           </Typography>
+          <Typography variant="body1">
+            <strong>Sale:</strong> {vueloSeleccionado.hora_origen}
+          </Typography>
+          <Typography variant="body1">
+            <strong>Llega:</strong> {vueloSeleccionado.hora_destino}
+          </Typography>
           <Typography variant="h6">
             <strong>Paquetes Asignados:</strong>
           </Typography>
