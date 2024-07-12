@@ -114,6 +114,7 @@ export default function OperacionesDiarias() {
 
     //Aeropuertos
     const [aeropuertos, setAeropuertos] = useState([]);
+    const [aeropList, setAeropList] = useState([])
 
     //Planes de Vuelo
     const [planesDeVuelo, setPlanesDeVuelo] = useState([])
@@ -252,6 +253,7 @@ export default function OperacionesDiarias() {
             });
 
             await setAeropuertos(a);
+            await setAeropList(a)
             console.log(a)
 
             fechaStartRef.current = fechaSimRef.current; //fecha inicial
@@ -456,7 +458,7 @@ export default function OperacionesDiarias() {
             //console.log(env.id_envio)
 
             await asignarAPlanes(env)
-            //await ingresaAeropuertoPorInicio(env)
+            await ingresaAeropuertoPorInicio(env)
             envios2Ref.current.push(env);
 
             //Quitar envio de la lista
@@ -804,9 +806,9 @@ export default function OperacionesDiarias() {
                                 </Button>
                             </label>
                         </Box>
-                        {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} envios2Ref={envios2Ref} />}
+                        {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropList} envios2Ref={envios2Ref} />}
                         {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
-                        {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} />}
+                        {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropList} />}
                         {activePanel === 'registrar_envio' && <RegistroEnvio active={activePanel === 'registrar_envio'} fechaSim={fechaSimRef}/>}
                     </Grid>
                 )}
