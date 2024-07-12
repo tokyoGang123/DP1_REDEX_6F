@@ -229,17 +229,24 @@ public class GraspController {
         return "Se inicio las operaciones dia a dia";
     }
 
-    @GetMapping("grasp/ejecutarDiaria")
-    public ArrayList<Envio> ejecutarGraspDiaria(){
+    @GetMapping("grasp/ejecutarDiaria/{fechaHora}")
+    public ArrayList<Envio> ejecutarGraspDiaria(@PathVariable String fechaHora){
         long startTime = System.currentTimeMillis();
-        ZonedDateTime fechaFin = horaSimulacionDiaria.plusSeconds(30);
-        LocalDateTime fechaInicioLocal = horaSimulacionDiaria.toLocalDateTime();
+        int anio = Integer.parseInt(fechaHora.substring(0, 4));
+        int mes = Integer.parseInt(fechaHora.substring(4, 6));
+        int dia = Integer.parseInt(fechaHora.substring(6, 8));
+        int hora = Integer.parseInt(fechaHora.substring(9, 11));
+        int minutos = Integer.parseInt(fechaHora.substring(12, 14));
+
+        ZonedDateTime fechaInicio = ZonedDateTime.of(anio, mes, dia, hora, minutos, 0, 0, ZoneId.of(husoHorarioDiaria));
+        ZonedDateTime fechaFin = fechaInicio.plusSeconds(30);
+        LocalDateTime fechaInicioLocal = fechaInicio.toLocalDateTime();
         LocalDateTime fechaFinLocal = fechaFin.toLocalDateTime();
 
         //Busqueda de envios en el rango de 30 segundos
         ArrayList<Envio> enviosEnRango = envioService.obtenerEnviosPorFecha(fechaInicioLocal, husoHorarioDiaria, fechaFinLocal);
 
-        grasp.getPlanes().removeIf(plan -> plan.getZonedHora_origen().isBefore(horaSimulacionDiaria));
+        grasp.getPlanes().removeIf(plan -> plan.getZonedHora_origen().isBefore(fechaInicio));
 
         grasp.getEnvios().addAll(enviosEnRango);
         System.out.println("Cantidad Envios: "+grasp.getEnvios().size());

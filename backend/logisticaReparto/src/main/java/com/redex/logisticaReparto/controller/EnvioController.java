@@ -211,14 +211,22 @@ public class EnvioController {
 
     }
 
-    @PostMapping("/envios/insertarEnvio/{codigoOrigen}/{codigoDestino}/{paquetes}")
+    @PostMapping("/envios/insertarEnvio/{codigoOrigen}/{codigoDestino}/{paquetes}/{fechaHora}")
     Envio insertarSimulacionDiaria(@PathVariable String codigoOrigen, @PathVariable String codigoDestino,
-                                  @PathVariable String paquetes){
+                                  @PathVariable String paquetes,@PathVariable String fechaHora){
         Envio envio=new Envio();
         Optional<Aeropuerto> aeropuertoOrigen=aeropuertoService.obtenerAeropuertoPorCodigo(codigoOrigen);
         Optional<Aeropuerto> aeropuertoDestino=aeropuertoService.obtenerAeropuertoPorCodigo(codigoDestino);
         ArrayList<Pais> paises = paisService.obtenerTodosPaises();
         int numPaquetes=Integer.parseInt(paquetes);
+        int anio = Integer.parseInt(fechaHora.substring(0, 4));
+        int mes = Integer.parseInt(fechaHora.substring(4, 6));
+        int dia = Integer.parseInt(fechaHora.substring(6, 8));
+        int hora = Integer.parseInt(fechaHora.substring(9, 11));
+        int minutos = Integer.parseInt(fechaHora.substring(12, 14));
+        String husoHorarioStr = fechaHora.substring(15);
+
+        ZonedDateTime fechaInicio = ZonedDateTime.of(anio, mes, dia, hora, minutos, 0, 0, ZoneId.of(husoHorarioStr));
 
         //Seteo ID
         envio.setAeropuerto_origen(aeropuertoOrigen.get().getId_aeropuerto());
@@ -241,8 +249,9 @@ public class EnvioController {
         ZoneId zonaOrigen = ZoneId.of(husoHorarioOrigen);
 
         // Obtener la fecha y hora actual en la zona horaria del aeropuerto de origen
-        ZonedDateTime fechaEnvioZoned = ZonedDateTime.now(zonaOrigen);
-        LocalDateTime fechaEnvio = fechaEnvioZoned.toLocalDateTime().withNano(0);
+        //ZonedDateTime fechaEnvioZoned = ZonedDateTime.now(zonaOrigen);
+        ZonedDateTime fechaEnvioOrigen = fechaInicio.withZoneSameInstant(ZoneId.of(husoHorarioOrigen)); ;
+        LocalDateTime fechaEnvio = fechaEnvioOrigen.toLocalDateTime().withNano(0);
 
         envio.setFecha_ingreso(fechaEnvio);
 
@@ -254,12 +263,12 @@ public class EnvioController {
 
         envio.setFecha_llegada_max(tiempoMax);
 
-
         System.out.println("Ciudad Origen:  " + ciudadOrigen);
         System.out.println("Ciudad Destino: " + ciudadDestino);
         System.out.println("Paquetes:  "+ numPaquetes);
         System.out.println("Huso Origen:  "+husoHorarioOrigen);
         System.out.println("Huso Destino:  "+husoHorarioDestino);
+        System.out.println("Hora Registro:  "+fechaEnvio);
         System.out.println("Tiempo Max:  "+tiempoMax);
 
         ArrayList<Paquete> paquetesEnvio = new ArrayList<>();
@@ -272,6 +281,5 @@ public class EnvioController {
         envioService.insertarEnvio(envio);
 
         return envio;
-
     }
 }
