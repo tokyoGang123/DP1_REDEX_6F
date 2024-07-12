@@ -9,10 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.time.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @CrossOrigin(origins = "*")
 @RestController
@@ -43,6 +40,7 @@ public class GraspController {
     private ZonedDateTime horaInicioDiaria;
     private ZonedDateTime horaSimulacionDiaria;
     private String husoHorarioDiaria;
+    private ArrayList<Envio> enviosConRutaDiaria;
 
     @GetMapping(value = "/PDF/generar",produces =  MediaType.APPLICATION_PDF_VALUE)
     public ModelAndView generarPDF(){
@@ -221,6 +219,7 @@ public class GraspController {
         husoHorarioDiaria = fechaHora.substring(15);
         horaInicioDiaria = ZonedDateTime.of(anio, mes, dia, hora, minutos, 0, 0, ZoneId.of(husoHorarioDiaria));
         horaSimulacionDiaria = horaInicioDiaria;
+        enviosConRutaDiaria = new ArrayList<>();
         //Busqueda de planes en el rango de 17 horas
         ArrayList<PlanDeVuelo> planesEnRango;
         LocalDateTime fechaInicioLocal = horaInicioDiaria.toLocalDateTime();
@@ -237,25 +236,57 @@ public class GraspController {
         int dia = Integer.parseInt(fechaHora.substring(6, 8));
         int hora = Integer.parseInt(fechaHora.substring(9, 11));
         int minutos = Integer.parseInt(fechaHora.substring(12, 14));
+        int segundos = Integer.parseInt(fechaHora.substring(14, 16));
 
-        ZonedDateTime fechaInicio = ZonedDateTime.of(anio, mes, dia, hora, minutos, 0, 0, ZoneId.of(husoHorarioDiaria));
-        ZonedDateTime fechaFin = fechaInicio.plusSeconds(30);
+        ZonedDateTime fechaFin = ZonedDateTime.of(anio, mes, dia, hora, minutos, segundos, 0, ZoneId.of(husoHorarioDiaria));
+        ZonedDateTime fechaInicio = fechaFin.minusSeconds(60);
         LocalDateTime fechaInicioLocal = fechaInicio.toLocalDateTime();
         LocalDateTime fechaFinLocal = fechaFin.toLocalDateTime();
 
-        //Busqueda de envios en el rango de 30 segundos
+        //Busqueda de envios en el rango de 60 segundos
         ArrayList<Envio> enviosEnRango = envioService.obtenerEnviosPorFecha(fechaInicioLocal, husoHorarioDiaria, fechaFinLocal);
 
         grasp.getPlanes().removeIf(plan -> plan.getZonedHora_origen().isBefore(fechaInicio));
 
-        grasp.getEnvios().addAll(enviosEnRango);
+        HashSet<Long> enviosConRutaIds = new HashSet<>();
+        for (Envio envio : enviosConRutaDiaria) {
+            enviosConRutaIds.add(envio.getId_envio());
+        }
+
+        HashSet<Long> graspEnviosIds = new HashSet<>();
+        for (Envio envio : grasp.getEnvios()) {
+            graspEnviosIds.add(envio.getId_envio());
+        }
+
+        for (Envio envio : enviosEnRango) {
+            if (!enviosConRutaIds.contains(envio.getId_envio()) && !graspEnviosIds.contains(envio.getId_envio())) {
+                grasp.getEnvios().add(envio);
+            }
+        }
+        //grasp.getEnvios().addAll(enviosEnRango);
+
         System.out.println("Cantidad Envios: "+grasp.getEnvios().size());
         System.out.println("Cantidad Planes Antes GRASP:"+grasp.getPlanes().size());
 
         ArrayList<Envio> solucion = grasp.ejecutaGrasp(grasp.getAeropuertos(),grasp.getEnvios(),grasp.getPlanes());
+        ArrayList<Envio> enviosSinRutaSolucion = new ArrayList<>();
 
-        ArrayList<Envio> enviosSinRuta = grasp.buscarSinRuta(solucion);
-        grasp.setEnvios(enviosSinRuta);
+        for (Envio envio : solucion) {
+            boolean tieneRuta = true;
+            for (Paquete paquete : envio.getPaquetes()) {
+                if (paquete.getRuta().getListaRutas().isEmpty()) {
+                    tieneRuta = false;
+                    break;
+                }
+            }
+            if (tieneRuta) {
+                enviosConRutaDiaria.add(envio);
+            } else {
+                enviosSinRutaSolucion.add(envio);
+            }
+        }
+
+        grasp.setEnvios(enviosSinRutaSolucion);
 
         long endTime = System.currentTimeMillis();
         long durationInMillis = endTime - startTime;
