@@ -224,7 +224,7 @@ public class EnvioController {
         int dia = Integer.parseInt(fechaHora.substring(6, 8));
         int hora = Integer.parseInt(fechaHora.substring(9, 11));
         int minutos = Integer.parseInt(fechaHora.substring(12, 14));
-        int segundos = Integer.parseInt(fechaHora.substring(14, 16));
+        int segundos = Integer.parseInt(fechaHora.substring(15, 17));
         String husoHorarioStr = fechaHora.substring(17);
 
         ZonedDateTime fechaInicio = ZonedDateTime.of(anio, mes, dia, hora, minutos, segundos, 0, ZoneId.of(husoHorarioStr));
