@@ -236,7 +236,7 @@ public class GraspController {
         int dia = Integer.parseInt(fechaHora.substring(6, 8));
         int hora = Integer.parseInt(fechaHora.substring(9, 11));
         int minutos = Integer.parseInt(fechaHora.substring(12, 14));
-        int segundos = Integer.parseInt(fechaHora.substring(14, 16));
+        int segundos = Integer.parseInt(fechaHora.substring(15, 17));
 
         ZonedDateTime fechaFin = ZonedDateTime.of(anio, mes, dia, hora, minutos, segundos, 0, ZoneId.of(husoHorarioDiaria));
         ZonedDateTime fechaInicio = fechaFin.minusSeconds(60);
