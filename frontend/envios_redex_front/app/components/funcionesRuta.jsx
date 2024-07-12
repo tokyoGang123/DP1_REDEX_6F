@@ -71,7 +71,8 @@ export default async function hallarPuntosIntermedios(la1, lo1, la2, lo2, planDe
     return coordenadas
 }
 
-async function hallarPuntosIntermediosDiaria(la1, lo1, la2, lo2, planDeVuelo) {
+
+export async function hallarPuntosIntermediosDiaria(la1, lo1, la2, lo2, planDeVuelo) {
     dayjs.extend(utc);
     dayjs.extend(timezone);
 
@@ -83,6 +84,7 @@ async function hallarPuntosIntermediosDiaria(la1, lo1, la2, lo2, planDeVuelo) {
     //console.log(tiempoSimuladoMinutos)
     //const tiempoRealMs = tiempoSimuladoMinutos * 215; // Ajusta según tu rango 200-230 ms
     const steps = Math.ceil(tiempoVuelo); // Ajusta el intervalo de actualización
+    console.log(steps)
     //console.log(steps)
 
     const origen = [la1, lo1];

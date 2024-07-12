@@ -13,8 +13,8 @@ import Header from '../Header/Header'
 import { getPlanesPorIntervalo, getPlanesPorIntervaloLatLon, getPlanesTodos } from "@/app/api/planesDeVuelo.api"
 import { TryOutlined } from "@mui/icons-material"
 import { useTimer } from "../usoTimer"
-import { ejecutaGRASP, iniciaGRASP } from "@/app/api/grasp.api"
-import hallarPuntosIntermedios from "../funcionesRuta"
+import { ejecutaGRASP, ejecutaGRASPDiaria, iniciaGRASP, iniciaGRASPDiaria } from "@/app/api/grasp.api"
+import {hallarPuntosIntermediosDiaria} from "../funcionesRuta"
 import BusquedaPlanes from '../BusquedaPlanes/BusquedaPlanes';
 import BusquedaAeropuertos from '../BusquedaAeropuertos/BusquedaAeropuertos';
 import BusquedaEnvios from '../BusquedaEnvios/BusquedaEnvios';
@@ -248,8 +248,10 @@ export default function OperacionesDiarias() {
             console.log(a)
 
             fechaStartRef.current = fechaSimRef.current; //fecha inicial
-            await iniciaGRASP()
-            await iniciaDatos()
+
+            let fechaI = transformaHora(fechaStartRef.current)
+            await iniciaGRASPDiaria(fechaI)
+            await iniciaDatos() //obtener planes
             await setEstadoSim('PL')
             ejecucionSimulacion()
         }
@@ -356,7 +358,7 @@ export default function OperacionesDiarias() {
         const handlePdvMapping = async () => {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(c.map(async pdv => {
-                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, pdv, intervaloMS, freqMov);
+                let ruta = await hallarPuntosIntermediosDiaria(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, pdv, intervaloMS, 60000);
                 return { ...pdv, listaPaquetes: [], ruta: ruta, paquetesEnDestino: [] };
             }));
             return updatedC;
@@ -476,7 +478,7 @@ export default function OperacionesDiarias() {
 
     const obtenerNuevosEnvios = async (fechaLlam) => {
         let tiempoEnviado = transformaHora(fechaLlam);
-        let p = await ejecutaGRASP(tiempoEnviado);
+        let p = await ejecutaGRASPDiaria(tiempoEnviado);
         p.sort((a, b) => {
             let fechaA = new Date(a.zonedFechaIngreso);
             let fechaB = new Date(b.zonedFechaIngreso);
@@ -500,7 +502,7 @@ export default function OperacionesDiarias() {
         const handlePdvMapping = async () => {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(p.map(async pdv => {
-                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, intervaloMS, freqMov);
+                let ruta = await hallarPuntosIntermediosDiaria(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, intervaloMS, freqMov);
                 return { ...pdv, listaPaquetes: [], ruta: ruta, paquetesEnDestino: [] };
             }));
             return updatedC;
@@ -631,12 +633,12 @@ export default function OperacionesDiarias() {
             //Llamar a GRASP para planificar pedidos ingresados
             if (i == llamarAGrasp) {
                 fechaLlam = fechaLlam.add(ciclo, 's')
-                //obtenerNuevosEnvios(fechaLlam,ciclo)
+                obtenerNuevosEnvios(fechaLlam,ciclo)
                 llamarAGrasp = llamarAGrasp + ciclo
             }
             //Asignar pedidos
             if (i == currentCiclo - 1) {
-                if (enviosRef.current) enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
+                if (enviosRef.current.length > 0) enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
                 //planesDeVueloRef.current = planesDeVueloRef.current.concat([...planesDeVueloFuturoRef.current])
                 //planesEliminarRef.current = planesEliminarRef.current.concat([...planesDeVueloFuturoRef.current])
                 currentCiclo = currentCiclo + ciclo

@@ -23,3 +23,25 @@ export const ejecutaGRASP = async (fechaHoraHuso) => {
         return null;
     }
 }
+
+export const iniciaGRASPDiaria = async (fechaHora) => {
+    try {
+        let data = await baseApi.get('grasp/iniciarDiaria/' + fechaHora).then(({data}) => data)
+        console.log(data)
+        return data;
+    } catch (error) {
+        console.log('Error al buscar data:', error)
+        return null;
+    }
+}
+
+export const ejecutaGRASPDiaria = async () => {
+    try {
+        let data = await baseApi.get('grasp/ejecutarDiaria').then(({data}) => data)
+        console.log("OBTENIDO GRASP DIARIA: ",data)
+        return data;
+    } catch (error) {
+        console.log('Error al buscar data:', error)
+        return null;
+    }
+}
