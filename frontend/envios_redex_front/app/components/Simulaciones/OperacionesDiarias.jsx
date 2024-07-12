@@ -456,7 +456,7 @@ export default function OperacionesDiarias() {
             //console.log(env.id_envio)
 
             await asignarAPlanes(env)
-            await ingresaAeropuertoPorInicio(env)
+            //await ingresaAeropuertoPorInicio(env)
             envios2Ref.current.push(env);
 
             //Quitar envio de la lista
@@ -476,7 +476,7 @@ export default function OperacionesDiarias() {
             //console.log("PLAN " + pc.id_tramo + " CONFIRMADO")
             //console.log(pc)
             newPlanes.push(pc)
-            await saleAeropuertoPorPlan(pc)
+            if (pc.capacidad_ocupada > 0) await saleAeropuertoPorPlan(pc)
             planesEliminarRef.current.splice(i, 1)
         }
         //console.log(newPlanes)
