@@ -224,9 +224,10 @@ public class EnvioController {
         int dia = Integer.parseInt(fechaHora.substring(6, 8));
         int hora = Integer.parseInt(fechaHora.substring(9, 11));
         int minutos = Integer.parseInt(fechaHora.substring(12, 14));
-        String husoHorarioStr = fechaHora.substring(15);
+        int segundos = Integer.parseInt(fechaHora.substring(14, 16));
+        String husoHorarioStr = fechaHora.substring(17);
 
-        ZonedDateTime fechaInicio = ZonedDateTime.of(anio, mes, dia, hora, minutos, 0, 0, ZoneId.of(husoHorarioStr));
+        ZonedDateTime fechaInicio = ZonedDateTime.of(anio, mes, dia, hora, minutos, segundos, 0, ZoneId.of(husoHorarioStr));
 
         //Seteo ID
         envio.setAeropuerto_origen(aeropuertoOrigen.get().getId_aeropuerto());
