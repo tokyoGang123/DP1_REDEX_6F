@@ -30,8 +30,12 @@ import { postEnvioIndividualDiario } from "@/app/api/envios.api"
 import { getEnviosTodos, postEnviosArchivo } from '@/app/api/envios.api';
 import UploadFileIcon from '@mui/icons-material/UploadFile';
 import RegistroEnvio from "../Envios/RegistrarEnvio"
-
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 dayjs.extend(advancedFormat);
+
+
+
 
 //Para manejar intervalos
 function useCustomInterval(callback, delay) {
@@ -232,6 +236,8 @@ export default function OperacionesDiarias() {
     //---------------------------------------------------------
     //                      USE EFFECTS E INTERVALS
 
+    let abus = []
+
     useEffect(() => {
         //Obtener datos iniciales
         //Obtener datos iniciales
@@ -255,7 +261,7 @@ export default function OperacionesDiarias() {
             await setAeropuertos(a);
             await setAeropList(a)
             console.log(a)
-
+            abus = a
             fechaStartRef.current = fechaSimRef.current; //fecha inicial
 
             let fechaI = transformaHora(fechaStartRef.current)
@@ -494,6 +500,7 @@ export default function OperacionesDiarias() {
             return fechaA - fechaB;
         })
         if (p) console.log("NUEVOS LEIDO", p)
+        //notify(p)
         setEnviosFuturo([...p])
         //console.log("CON FECHA " + transformaHora(fechaSimRef.current))
         //console.log(p)
@@ -548,9 +555,9 @@ export default function OperacionesDiarias() {
                     listaPaquetes: aeropuertosActualizados[index].listaPaquetes = [
                         ...aeropuertosActualizados[index].listaPaquetes,
                         ...envio.paquetes
-                    ], 
+                    ],
                     capacidad_ocupada: aeropuertosActualizados[index].capacidad_ocupada + envio.paquetes.length
-                }   
+                }
             }
 
             return aeropuertosActualizados;
@@ -583,9 +590,9 @@ export default function OperacionesDiarias() {
                     listaPaquetes: aeropuertosActualizados[index].listaPaquetes = [
                         ...aeropuertosActualizados[index].listaPaquetes,
                         ...plan
-                    ], 
+                    ],
                     capacidad_ocupada: aeropuertosActualizados[index].capacidad_ocupada + plan.length
-                }   
+                }
             }
 
             return aeropuertosActualizados;
@@ -629,6 +636,35 @@ export default function OperacionesDiarias() {
 
     }
 
+    function generaMensajeObjetos(respuesta) {
+        let texto = `ENVIOS RECIBIDOS <br />`
+        respuesta.forEach(res => {
+            //console.log(abus)
+            //console.log(res)
+            let aor = abus.find(item => item.id_aeropuerto === res.aeropuerto_origen).ciudad
+            let ade = abus.find(item => item.id_aeropuerto === res.aeropuerto_destino).ciudad
+            texto += `ID: ${res.id_envio} || ${aor} -> ${ade} || Paquetes: ${res.numPaquetes}<br />`
+            //texto += " " + res.id_envio + "\n"
+        })
+        return texto
+    }
+    
+    const notify = (respuesta) => {
+        if (respuesta.length == 0) {
+            toast("No se recibieron pedidos",{
+                position: "bottom-right",
+                theme: "dark"
+            })
+        } else {
+            let mensaje = generaMensajeObjetos(respuesta)
+            console.log(mensaje)
+            toast.success(<div dangerouslySetInnerHTML={{ __html: mensaje }} />, {
+                position: "bottom-right",
+                theme:"dark"
+            })
+        }
+    }
+
     //---------------------------------------------------------
     //                      CUERPO SIMULACION
     const ejecucionSimulacion = async () => {
@@ -654,6 +690,8 @@ export default function OperacionesDiarias() {
             //Asignar pedidos
             if (i == currentCiclo - 1) {
                 if (enviosFuturoRef.current.length > 0) enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
+                let mostrar = [...enviosFuturoRef.current]
+                notify(mostrar)
                 //planesDeVueloRef.current = planesDeVueloRef.current.concat([...planesDeVueloFuturoRef.current])
                 //planesEliminarRef.current = planesEliminarRef.current.concat([...planesDeVueloFuturoRef.current])
                 currentCiclo = currentCiclo + ciclo
@@ -809,10 +847,11 @@ export default function OperacionesDiarias() {
                         {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropList} envios2Ref={envios2Ref} />}
                         {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
                         {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropList} />}
-                        {activePanel === 'registrar_envio' && <RegistroEnvio active={activePanel === 'registrar_envio'} fechaSim={fechaSimRef}/>}
+                        {activePanel === 'registrar_envio' && <RegistroEnvio active={activePanel === 'registrar_envio'} fechaSim={fechaSimRef} />}
                     </Grid>
                 )}
             </Grid>
+            <ToastContainer></ToastContainer>
         </>
     );
 }
