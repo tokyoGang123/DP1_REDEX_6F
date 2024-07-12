@@ -60,6 +60,13 @@ const transformaHora = (fecha) => {
 
 }
 
+const transformaHoraS = (fecha) => {
+    const formattedDate = fecha.format('YYYYMMDDTHH:mm:ss:Z');
+    //const customFormattedDate = formattedDate.replace(/([-+]\d{2}):(\d{2})/, '$1:$2');
+    return formattedDate;
+
+}
+
 export default function OperacionesDiarias() {
 
     dayjs.extend(utc);
@@ -477,7 +484,7 @@ export default function OperacionesDiarias() {
     }
 
     const obtenerNuevosEnvios = async (fechaLlam) => {
-        let tiempoEnviado = transformaHora(fechaLlam);
+        let tiempoEnviado = transformaHoraS(fechaLlam);
         let p = await ejecutaGRASPDiaria(tiempoEnviado);
         p.sort((a, b) => {
             let fechaA = new Date(a.zonedFechaIngreso);
@@ -565,18 +572,19 @@ export default function OperacionesDiarias() {
 
             //console.log("ANTES: ", planDeVuelo.listaPaquetes)
             //console.log(planDeVuelo.paquetesEnDestino)
-            planDeVuelo.listaPaquetes = planDeVuelo.listaPaquetes.filter(item => !planDeVuelo.paquetesEnDestino.includes(item))
+            let plan = planDeVuelo.listaPaquetes.filter(item => !planDeVuelo.paquetesEnDestino.includes(item))
             //console.log("DESPUES    : ", planDeVuelo.listaPaquetes)
 
             if (index != -1) {
-                aeropuertosActualizados[index].listaPaquetes = [
-                    ...aeropuertosActualizados[index].listaPaquetes,
-                    ...planDeVuelo.listaPaquetes
-                ]
+                aeropuertosActualizados[index] = {
+                    ...aeropuertosActualizados[index],
+                    listaPaquetes: aeropuertosActualizados[index].listaPaquetes = [
+                        ...aeropuertosActualizados[index].listaPaquetes,
+                        ...plan
+                    ], 
+                    capacidad_ocupada: aeropuertosActualizados[index].capacidad_ocupada + plan.length
+                }   
             }
-            //console.log("Agregados ", planDeVuelo.listaPaquetes.length)
-            //console.log(planDeVuelo.listaPaquetes.length)
-            aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada + planDeVuelo.listaPaquetes.length
 
             return aeropuertosActualizados;
 
@@ -600,15 +608,18 @@ export default function OperacionesDiarias() {
             )
 
             if (index != -1) {
-                aeropuertosActualizados[index].listaPaquetes = aeropuertosActualizados[index].listaPaquetes.filter(
-                    (paquete) => !planDeVuelo.listaPaquetes.includes(paquete)
-                )
+                aeropuertosActualizados[index] = {
+                    ...aeropuertosActualizados[index],
+                    listaPaquetes: aeropuertosActualizados[index].listaPaquetes.filter(
+                        (paquete) => !planDeVuelo.listaPaquetes.includes(paquete)
+                    ),
+                    capacidad_ocupada: aeropuertosActualizados[index].capacidad_ocupada - planDeVuelo.listaPaquetes.length
+                }
+
+                aeropuertosActualizados[index].listaPaquetes = aeropuertosActualizados[index].capacidad_ocupada - planDeVuelo.listaPaquetes.length
             }
 
             //console.log("Quitados ", planDeVuelo.listaPaquetes.length)
-
-            aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada - planDeVuelo.listaPaquetes.length
-
             return aeropuertosActualizados;
 
 
@@ -796,7 +807,7 @@ export default function OperacionesDiarias() {
                         {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} envios2Ref={envios2Ref} />}
                         {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
                         {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} />}
-                        {activePanel === 'registrar_envio' && <RegistroEnvio active={activePanel === 'registrar_envio'} />}
+                        {activePanel === 'registrar_envio' && <RegistroEnvio active={activePanel === 'registrar_envio'} fechaSim={fechaSimRef}/>}
                     </Grid>
                 )}
             </Grid>

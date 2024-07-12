@@ -35,9 +35,10 @@ export const iniciaGRASPDiaria = async (fechaHora) => {
     }
 }
 
-export const ejecutaGRASPDiaria = async () => {
+export const ejecutaGRASPDiaria = async (fechaHora) => {
     try {
-        let data = await baseApi.get('grasp/ejecutarDiaria').then(({data}) => data)
+        console.log(fechaHora)
+        let data = await baseApi.get('grasp/ejecutarDiaria/' + fechaHora).then(({data}) => data)
         console.log("OBTENIDO GRASP DIARIA: ",data)
         return data;
     } catch (error) {

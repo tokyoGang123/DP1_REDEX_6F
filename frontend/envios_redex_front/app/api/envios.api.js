@@ -23,10 +23,10 @@ export const postEnviosArchivo = async (data) =>{
     }
 }
 
-export const postEnvioIndividualDiario = async ({codigoOrigen, codigoDestino, numPaq}) => {
+export const postEnvioIndividualDiario = async ({codigoOrigen, codigoDestino, numPaq,fechaHora}) => {
     try {
         console.log(codigoOrigen, codigoDestino, numPaq)
-        let data = await baseApi.post('envios/insertarEnvio/' + codigoOrigen + "/" + codigoDestino + "/" + numPaq).then(({data}) => data)
+        let data = await baseApi.post('envios/insertarEnvio/' + codigoOrigen + "/" + codigoDestino + "/" + numPaq + "/" + fechaHora).then(({data}) => data)
         console.log(data)
         return data;
     } catch (error) {
