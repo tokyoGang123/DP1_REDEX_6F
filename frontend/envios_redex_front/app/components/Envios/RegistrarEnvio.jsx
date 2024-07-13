@@ -13,7 +13,7 @@ const transformaHora = (fecha) => {
 
 }
 
-export default function RegistroEnvio({fechaSim}) {
+export default function RegistroEnvio({fechaSim,notifyEnvioReg1}) {
     const [datosEnvio, setDatosEnvio] = useState({
         aeropuertoOrigenCodigo: '',
         aeropuertoDestinoCodigo: '',
@@ -75,6 +75,7 @@ export default function RegistroEnvio({fechaSim}) {
                 fechaHora: fechaReg
             });
             console.log('Envío registrado con éxito:', res);
+            notifyEnvioReg1(res)
         } catch (error) {
             console.error('Error al registrar el envío:', error);
         }
