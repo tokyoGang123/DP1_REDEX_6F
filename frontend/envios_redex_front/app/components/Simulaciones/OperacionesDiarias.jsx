@@ -500,7 +500,6 @@ export default function OperacionesDiarias() {
             return fechaA - fechaB;
         })
         if (p) console.log("NUEVOS LEIDO", p)
-        //notify(p)
         setEnviosFuturo([...p])
         //console.log("CON FECHA " + transformaHora(fechaSimRef.current))
         //console.log(p)
@@ -649,7 +648,7 @@ export default function OperacionesDiarias() {
         return texto
     }
     
-    const notify = (respuesta) => {
+    const notifyObtenidos = (respuesta) => {
         if (respuesta.length == 0) {
             toast("No se recibieron pedidos",{
                 position: "bottom-right",
@@ -691,7 +690,7 @@ export default function OperacionesDiarias() {
             if (i == currentCiclo - 1) {
                 if (enviosFuturoRef.current.length > 0) enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
                 let mostrar = [...enviosFuturoRef.current]
-                notify(mostrar)
+                notifyObtenidos(mostrar)
                 //planesDeVueloRef.current = planesDeVueloRef.current.concat([...planesDeVueloFuturoRef.current])
                 //planesEliminarRef.current = planesEliminarRef.current.concat([...planesDeVueloFuturoRef.current])
                 currentCiclo = currentCiclo + ciclo
