@@ -647,10 +647,31 @@ export default function OperacionesDiarias() {
         })
         return texto
     }
-    
+
+    function generaMensajeReg1(respuesta) {
+        let texto = `SE HA REGISTRADO LO SIGUIENTE: <br />`
+        let aor = abus.find(item => item.id_aeropuerto === respuesta.aeropuerto_origen)
+        let ade = abus.find(item => item.id_aeropuerto === respuesta.aeropuerto_destino)
+        texto += `ID: ${respuesta.id_envio} || ${aor} -> ${ade} || Paquetes: ${respuesta.numPaquetes}<br />`
+        return texto
+    }
+
+    function generaMensajeRegArch(respuesta) {
+        let texto = `SE HA REGISTRADO LO SIGUIENTE: <br />`
+        respuesta.forEach(res => {
+            //console.log(abus)
+            //console.log(res)
+            let aor = abus.find(item => item.id_aeropuerto === res.aeropuerto_origen).ciudad
+            let ade = abus.find(item => item.id_aeropuerto === res.aeropuerto_destino).ciudad
+            texto += `ID: ${res.id_envio} || ${aor} -> ${ade} || Paquetes: ${res.numPaquetes}<br />`
+            //texto += " " + res.id_envio + "\n"
+        })
+        return texto
+    }
+
     const notifyObtenidos = (respuesta) => {
         if (respuesta.length == 0) {
-            toast("No se recibieron envios",{
+            toast("No se recibieron envios", {
                 position: "bottom-right",
                 theme: "dark"
             })
@@ -659,10 +680,43 @@ export default function OperacionesDiarias() {
             console.log(mensaje)
             toast.success(<div dangerouslySetInnerHTML={{ __html: mensaje }} />, {
                 position: "bottom-right",
-                theme:"dark"
+                theme: "dark"
             })
         }
     }
+
+    const notifyEnvioReg1 = (respuesta) => {
+        if (respuesta != []) {
+            let mensaje = generaMensajeReg1(respuesta)
+            console.log(mensaje)
+            toast.success(<div dangerouslySetInnerHTML={{ __html: mensaje }} />, {
+                position: "bottom-right",
+                theme: "dark"
+            })
+        } else {
+            toast("Revisar envio", {
+                position: "bottom-right",
+                theme: "dark"
+            })
+        }
+    }
+
+    const notifyEnvioRegArch = (respuesta) => {
+        if (respuesta != []) {
+            let mensaje = generaMensajeRegArch(respuesta)
+            console.log(mensaje)
+            toast.success(<div dangerouslySetInnerHTML={{ __html: mensaje }} />, {
+                position: "bottom-right",
+                theme: "dark"
+            })
+        } else {
+            toast("Revisar envios", {
+                position: "bottom-right",
+                theme: "dark"
+            })
+        }
+    }
+
 
     //---------------------------------------------------------
     //                      CUERPO SIMULACION
@@ -752,6 +806,7 @@ export default function OperacionesDiarias() {
             async function sube() {
                 let res = await postEnviosArchivo(jsonData);
                 console.log(res);
+                //notifyEnvioRegArch(res)
             }
             sube();
         };
@@ -784,7 +839,7 @@ export default function OperacionesDiarias() {
 
     return (
         <>
-            <Header title={"SIMULACION SEMANAL"} togglePanel={togglePanel} />
+            <Header title={"OPERACIONES DIARIAS"} togglePanel={togglePanel} />
             <Grid container sx={{ height: 'calc(100vh - 64px)' }}>
                 <Grid item xs={panelVisible ? 9 : 12}>
                     <Grid sx={{ py: 1, display: 'flex', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
@@ -846,7 +901,7 @@ export default function OperacionesDiarias() {
                         {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropList} envios2Ref={envios2Ref} />}
                         {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
                         {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropList} />}
-                        {activePanel === 'registrar_envio' && <RegistroEnvio active={activePanel === 'registrar_envio'} fechaSim={fechaSimRef} />}
+                        {activePanel === 'registrar_envio' && <RegistroEnvio active={activePanel === 'registrar_envio'} fechaSim={fechaSimRef} notifyEnvioReg1={notifyEnvioReg1}></RegistroEnvio>}
                     </Grid>
                 )}
             </Grid>
