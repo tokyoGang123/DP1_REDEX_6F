@@ -806,7 +806,7 @@ export default function OperacionesDiarias() {
             async function sube() {
                 let res = await postEnviosArchivo(jsonData);
                 console.log(res);
-                notifyEnvioRegArch(res)
+                //notifyEnvioRegArch(res)
             }
             sube();
         };
@@ -839,7 +839,7 @@ export default function OperacionesDiarias() {
 
     return (
         <>
-            <Header title={"SIMULACION SEMANAL"} togglePanel={togglePanel} />
+            <Header title={"OPERACIONES DIARIAS"} togglePanel={togglePanel} />
             <Grid container sx={{ height: 'calc(100vh - 64px)' }}>
                 <Grid item xs={panelVisible ? 9 : 12}>
                     <Grid sx={{ py: 1, display: 'flex', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>

@@ -78,7 +78,7 @@ const ListaEnvios = () => {
       console.log('JSON a enviar:', jsonData);
 
       async function sube() {
-        let res = await postEnviosArchivo(jsonData);
+        let res = await postEnviosArchivo(jsonData)
         console.log(res);
       }
       sube();
