@@ -650,7 +650,7 @@ export default function OperacionesDiarias() {
     
     const notifyObtenidos = (respuesta) => {
         if (respuesta.length == 0) {
-            toast("No se recibieron pedidos",{
+            toast("No se recibieron envios",{
                 position: "bottom-right",
                 theme: "dark"
             })
