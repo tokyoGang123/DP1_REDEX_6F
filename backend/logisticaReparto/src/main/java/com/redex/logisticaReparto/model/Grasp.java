@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Duration;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -153,8 +154,9 @@ public class Grasp {
             //asignando los restantes a la segunda opcion Y asi consecutivamente.
             //De no poder asignar todos los paquetes a estos pedidos, se considerará como COLAPSO
             int numPaquetes = 0;
+            int num = 0;
             while (numPaquetes != envio.getPaquetes().size() && listaRestringida.size() != 0) {
-                int num = rand.nextInt(listaRestringida.size()); //Obtener numero de lista restringida aleatoriamente
+                //int num = rand.nextInt(listaRestringida.size()); //Obtener numero de lista restringida aleatoriamente
                 ElementoListaRestringida elem = listaRestringida.get(num);
                 //Mientras que haya espacio disponible en todos los vuelos
                 while (espacioDisponible(elem.getListaElementos(), planes)) {
@@ -170,6 +172,8 @@ public class Grasp {
 
                 }
                 listaRestringida.remove(num);
+                num++;
+                if (num>= listaRestringida.size()) break;
                 if (numPaquetes == envio.getPaquetes().size()) break;
             }
             //imprimePlanesDeVueloAhora(planesTemp);
@@ -509,6 +513,18 @@ public class Grasp {
         System.out.println(i);
 
         return enviosSinRuta;
+    }
+
+    public long buscarIdColapso(ArrayList<Envio> enviosSinRuta, ZonedDateTime fechaInicio){
+        long idColapso = -1;
+
+        for (Envio envio: enviosSinRuta) {
+            if (fechaInicio.isAfter(envio.getZonedFechaLlegadaMax())) {
+                idColapso = envio.getId_envio();
+                break; //salgo del bucle en la primera coincidencia
+            }
+        }
+        return idColapso;
     }
 }
 

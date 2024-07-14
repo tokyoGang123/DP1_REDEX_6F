@@ -63,7 +63,7 @@ public class PdfService extends AbstractPdfView {
         PdfPTable tablaTitulo = new PdfPTable(1);
         PdfPCell celda = null;
 
-        celda = new PdfPCell(new Phrase("REPORTE DE FIN DE SIMULACIÓN "+ fecha.format(formatter),fuentetitulo));
+        celda = new PdfPCell(new Phrase("REPORTE SIMULACIÓN COLAPSO"+ fecha.format(formatter),fuentetitulo));
         celda.setBorder(0);
         celda.setBackgroundColor(new Color(8,157,227));
         celda.setHorizontalAlignment(Element.ALIGN_CENTER);
@@ -243,7 +243,7 @@ public class PdfService extends AbstractPdfView {
                         //celda.setBackgroundColor(backgroundColor);
                         tablaRutasEntregados.addCell(celda);
 
-                        celda = new PdfPCell(new Phrase("PLANIFICADO", fuenteResaltado));
+                        celda = new PdfPCell(new Phrase("NO PLANIFICADO", fuenteResaltado));
                         celda.setPadding(5);
                         celda.setHorizontalAlignment(Element.ALIGN_CENTER);
                         celda.setVerticalAlignment(Element.ALIGN_CENTER);
