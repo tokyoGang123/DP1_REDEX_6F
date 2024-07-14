@@ -549,13 +549,18 @@ export default function OperacionesDiarias() {
             )
 
             if (index != -1) {
+                const aeropuerto = aeropuertosActualizados[index];
+                console.log(aeropuertosActualizados[index])
+                const listaPaquetesActualizada = [
+                    ...(aeropuerto.listaPaquetes || []), // Inicializar si undefined
+                    ...envio.paquetes
+                ];
+
+
                 aeropuertosActualizados[index] = {
-                    ...aeropuertosActualizados[index],
-                    listaPaquetes: aeropuertosActualizados[index].listaPaquetes = [
-                        ...aeropuertosActualizados[index].listaPaquetes,
-                        ...envio.paquetes
-                    ],
-                    capacidad_ocupada: aeropuertosActualizados[index].capacidad_ocupada + envio.paquetes.length
+                    ...aeropuerto,
+                    listaPaquetes: listaPaquetesActualizada,
+                    capacidad_ocupada: aeropuerto.capacidad_ocupada + envio.paquetes.length
                 }
             }
 
@@ -605,35 +610,28 @@ export default function OperacionesDiarias() {
 
     //Quitar de aeropuertos los planes que llegan de un plan
     const saleAeropuertoPorPlan = (planDeVuelo) => {
-
         setAeropuertos((prevAeropuertos) => {
-            //Copia de seguridad
-            const aeropuertosActualizados = [...prevAeropuertos]
-
-            //Encontrar aeropuerto del que salen todos los paquetes
+            // Copia de seguridad
+            const aeropuertosActualizados = [...prevAeropuertos];
+    
+            // Encontrar aeropuerto del que salen todos los paquetes
             const index = aeropuertosActualizados.findIndex(
                 (aeropuerto) => aeropuerto.id_aeropuerto === planDeVuelo.ciudad_origen
-            )
-
-            if (index != -1) {
+            );
+    
+            if (index !== -1) {
                 aeropuertosActualizados[index] = {
                     ...aeropuertosActualizados[index],
                     listaPaquetes: aeropuertosActualizados[index].listaPaquetes.filter(
                         (paquete) => !planDeVuelo.listaPaquetes.includes(paquete)
                     ),
                     capacidad_ocupada: aeropuertosActualizados[index].capacidad_ocupada - planDeVuelo.listaPaquetes.length
-                }
-
-                aeropuertosActualizados[index].listaPaquetes = aeropuertosActualizados[index].capacidad_ocupada - planDeVuelo.listaPaquetes.length
+                };
             }
-
-            //console.log("Quitados ", planDeVuelo.listaPaquetes.length)
+            console.log("act luego de salida: ",aeropuertosActualizados)
             return aeropuertosActualizados;
-
-
-        })
-
-    }
+        });
+    };
 
     function generaMensajeObjetos(respuesta) {
         let texto = `ENVIOS RECIBIDOS <br />`
@@ -648,16 +646,18 @@ export default function OperacionesDiarias() {
         return texto
     }
 
-    function generaMensajeReg1(respuesta) {
+    function generaMensajeReg1(respuesta, aerpo) {
         let texto = `SE HA REGISTRADO LO SIGUIENTE: <br />`
-        let aor = abus.find(item => item.id_aeropuerto === respuesta.aeropuerto_origen)
-        let ade = abus.find(item => item.id_aeropuerto === respuesta.aeropuerto_destino)
+        console.log(aerpo)
+        let aor = aerpo.find(item => item.id_aeropuerto === respuesta.aeropuerto_origen).ciudad
+        let ade = aerpo.find(item => item.id_aeropuerto === respuesta.aeropuerto_destino).ciudad
         texto += `ID: ${respuesta.id_envio} || ${aor} -> ${ade} || Paquetes: ${respuesta.numPaquetes}<br />`
         return texto
     }
 
     function generaMensajeRegArch(respuesta) {
         let texto = `SE HA REGISTRADO LO SIGUIENTE: <br />`
+
         respuesta.forEach(res => {
             //console.log(abus)
             //console.log(res)
@@ -685,9 +685,9 @@ export default function OperacionesDiarias() {
         }
     }
 
-    const notifyEnvioReg1 = (respuesta) => {
+    const notifyEnvioReg1 = (respuesta, aerpo) => {
         if (respuesta != []) {
-            let mensaje = generaMensajeReg1(respuesta)
+            let mensaje = generaMensajeReg1(respuesta, aerpo)
             console.log(mensaje)
             toast.success(<div dangerouslySetInnerHTML={{ __html: mensaje }} />, {
                 position: "bottom-right",
