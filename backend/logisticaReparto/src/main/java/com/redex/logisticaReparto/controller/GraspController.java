@@ -42,6 +42,8 @@ public class GraspController {
     private String husoHorarioDiaria;
     private ArrayList<Envio> enviosConRutaDiaria;
 
+    private long idColapso = -1;
+
     @GetMapping(value = "/PDF/generar",produces =  MediaType.APPLICATION_PDF_VALUE)
     public ModelAndView generarPDF(){
         Map<String, Object> model = new HashMap<>();
@@ -140,7 +142,10 @@ public class GraspController {
             return envios;
     }
 
-
+    @GetMapping("grasp/consultarColapso")
+    public long consultarColapso(){
+        return idColapso;
+    }
 
     @GetMapping("grasp/ejecutar/{fechaHora}")
     public ArrayList<Envio> ejecutarGrasp(@PathVariable String fechaHora){
@@ -187,6 +192,7 @@ public class GraspController {
 
 
         ArrayList<Envio> enviosSinRuta = grasp.buscarSinRuta(solucion);
+        idColapso = grasp.buscarIdColapso(enviosSinRuta, fechaInicio);
         grasp.setEnvios(enviosSinRuta);
 
         long endTime = System.currentTimeMillis();
