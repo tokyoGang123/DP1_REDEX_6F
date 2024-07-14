@@ -13,8 +13,8 @@ import Header from '../Header/Header'
 import { getPlanesPorIntervalo, getPlanesPorIntervaloLatLon, getPlanesTodos } from "@/app/api/planesDeVuelo.api"
 import { TryOutlined } from "@mui/icons-material"
 import { useTimer } from "../usoTimer"
-import { ejecutaGRASP, ejecutaGRASPDiaria, iniciaGRASP, iniciaGRASPDiaria } from "@/app/api/grasp.api"
-import { hallarPuntosIntermediosDiaria } from "../funcionesRuta"
+import { ejecutaGRASP, iniciaGRASP } from "@/app/api/grasp.api"
+import hallarPuntosIntermedios from "../funcionesRuta"
 import BusquedaPlanes from '../BusquedaPlanes/BusquedaPlanes';
 import BusquedaAeropuertos from '../BusquedaAeropuertos/BusquedaAeropuertos';
 import BusquedaEnvios from '../BusquedaEnvios/BusquedaEnvios';
@@ -26,16 +26,8 @@ import SaturacionPlanes from "../Elementos/SaturacionPlanes"
 import CapacidadesAeropuertos from "../Elementos/CapacidadesAeropuerto"
 import CapacidadesPlanes from "../Elementos/CapacidadesPlanes"
 import AirplanemodeActiveIcon from '@mui/icons-material/AirplanemodeActive';
-import { postEnvioIndividualDiario } from "@/app/api/envios.api"
-import { getEnviosTodos, postEnviosArchivo } from '@/app/api/envios.api';
-import UploadFileIcon from '@mui/icons-material/UploadFile';
-import RegistroEnvio from "../Envios/RegistrarEnvio"
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+
 dayjs.extend(advancedFormat);
-
-
-
 
 //Para manejar intervalos
 function useCustomInterval(callback, delay) {
@@ -64,14 +56,7 @@ const transformaHora = (fecha) => {
 
 }
 
-const transformaHoraS = (fecha) => {
-    const formattedDate = fecha.format('YYYYMMDDTHH:mm:ss:Z');
-    //const customFormattedDate = formattedDate.replace(/([-+]\d{2}):(\d{2})/, '$1:$2');
-    return formattedDate;
-
-}
-
-export default function OperacionesDiarias() {
+export default function SimColapso() {
 
     dayjs.extend(utc);
     dayjs.extend(timezone);
@@ -84,7 +69,7 @@ export default function OperacionesDiarias() {
     const zonaHorariaUsuario = dayjs.tz.guess();
 
     //TIEMPO SELECCIONADO PARA EJECUTAR LA SIMULACION
-    const [fechaSim, setFechaSim] = useState(dayjs('2024-07-22T05:45:00').tz(zonaHorariaUsuario));
+    const [fechaSim, setFechaSim] = useState(dayjs().tz(zonaHorariaUsuario));
     //const [fechaSim, setFechaSim] = useState(dayjs("2024-05-30T00:00:00Z").tz(zonaHorariaUsuario));
 
     //useRef de fechaSim
@@ -118,7 +103,6 @@ export default function OperacionesDiarias() {
 
     //Aeropuertos
     const [aeropuertos, setAeropuertos] = useState([]);
-    const [aeropList, setAeropList] = useState([])
 
     //Planes de Vuelo
     const [planesDeVuelo, setPlanesDeVuelo] = useState([])
@@ -154,7 +138,7 @@ export default function OperacionesDiarias() {
     }, [])*/
 
     //Envios
-    const [envios, setEnvios] = useState([])
+    const [envios, setEnvios] = useState({})
     const enviosRef = useRef(envios)
     useEffect(() => {
         enviosRef.current = envios;
@@ -178,10 +162,10 @@ export default function OperacionesDiarias() {
     const isInitialMount = useRef(TryOutlined)
 
     //Tiempo hasta llamada de datos nueva
-    const tiempoLlamaGRASP = 30;
+    const tiempoLlamaGRASP = 120;
 
     //Frecuencia de movimiento de aviones
-    const freqMov = 60000; //1 segundo
+    const freqMov = 1000; //1 segundo
 
     //Mapa
     const [muestraLineas, setMuestraLineas] = useState(false)
@@ -192,6 +176,11 @@ export default function OperacionesDiarias() {
     //MEDIDOR DE SATURACION - AEROPUERTOS
     const [contadorAeropuerto, setContadorAeropuerto] = useState({ rojo: 0, amarillo: 0, verde: 0 })
 
+    const [colapsado, setColapsado] = useState(-1)
+    const colapsadoRef = useRef(colapsado)
+    useEffect(() => {
+        colapsadoRef.current = colapsado;
+    }, [colapsado])
 
 
     useEffect(() => {
@@ -236,10 +225,7 @@ export default function OperacionesDiarias() {
     //---------------------------------------------------------
     //                      USE EFFECTS E INTERVALS
 
-    let abus = []
-
     useEffect(() => {
-        //Obtener datos iniciales
         //Obtener datos iniciales
         async function obtenerDatos() {
             isInitialMount.current = false;
@@ -258,21 +244,16 @@ export default function OperacionesDiarias() {
                 a = updatedA;
             });
 
-            await setAeropuertos(a);
-            await setAeropList(a)
-            console.log(a)
-            abus = a
-            fechaStartRef.current = fechaSimRef.current; //fecha inicial
 
-            let fechaI = transformaHora(fechaStartRef.current)
-            await iniciaGRASPDiaria(fechaI)
-            await iniciaDatos() //obtener planes
-            await setEstadoSim('PL')
-            ejecucionSimulacion()
+            await setAeropuertos(a);
+            //let b = await cargarPlanesFecha(fechaSimRef)
+            //let c = await getPlanesTodos()
+            //await setPlanesDeVuelo(c);
+            console.log(a)
         }
         if (isInitialMount.current) obtenerDatos()
+        fechaSimRef.current = fechaSim;
     }, [])
-
 
     //Cambio del cronómetro real (mediante variable segundosReales)
     /*
@@ -373,7 +354,7 @@ export default function OperacionesDiarias() {
         const handlePdvMapping = async () => {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(c.map(async pdv => {
-                let ruta = await hallarPuntosIntermediosDiaria(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, pdv, intervaloMS, 60000);
+                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, pdv, intervaloMS, freqMov);
                 return { ...pdv, listaPaquetes: [], ruta: ruta, paquetesEnDestino: [] };
             }));
             return updatedC;
@@ -392,7 +373,6 @@ export default function OperacionesDiarias() {
         await setPlanesEliminar([...c])
         console.log("PLANES FINALES", c)
 
-        /*
         //Comando para inicializar la simulación
         let res = await iniciaGRASP();
         //console.log(res)
@@ -408,7 +388,7 @@ export default function OperacionesDiarias() {
         })
         await setEnvios(p)
         enviosRef.current = p
-    */
+
         //console.log("PEDIDOS")
         //console.log(p)
 
@@ -484,7 +464,7 @@ export default function OperacionesDiarias() {
             //console.log("PLAN " + pc.id_tramo + " CONFIRMADO")
             //console.log(pc)
             newPlanes.push(pc)
-            if (pc.capacidad_ocupada > 0) await saleAeropuertoPorPlan(pc)
+            await saleAeropuertoPorPlan(pc)
             planesEliminarRef.current.splice(i, 1)
         }
         //console.log(newPlanes)
@@ -492,14 +472,14 @@ export default function OperacionesDiarias() {
     }
 
     const obtenerNuevosEnvios = async (fechaLlam) => {
-        let tiempoEnviado = transformaHoraS(fechaLlam);
-        let p = await ejecutaGRASPDiaria(tiempoEnviado);
+        let tiempoEnviado = transformaHora(fechaLlam);
+        let p = await ejecutaGRASP(tiempoEnviado);
         p.sort((a, b) => {
             let fechaA = new Date(a.zonedFechaIngreso);
             let fechaB = new Date(b.zonedFechaIngreso);
             return fechaA - fechaB;
         })
-        if (p) console.log("NUEVOS LEIDO", p)
+        if (p) console.log("NUEVOS LEIDO",p)
         setEnviosFuturo([...p])
         //console.log("CON FECHA " + transformaHora(fechaSimRef.current))
         //console.log(p)
@@ -517,7 +497,7 @@ export default function OperacionesDiarias() {
         const handlePdvMapping = async () => {
             // Supongo que `c` es tu array original de puntos de venta
             const updatedC = await Promise.all(p.map(async pdv => {
-                let ruta = await hallarPuntosIntermediosDiaria(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, intervaloMS, freqMov);
+                let ruta = await hallarPuntosIntermedios(pdv.latitud_origen, pdv.longitud_origen, pdv.latitud_destino, pdv.longitud_destino, intervaloMS, freqMov);
                 return { ...pdv, listaPaquetes: [], ruta: ruta, paquetesEnDestino: [] };
             }));
             return updatedC;
@@ -549,20 +529,13 @@ export default function OperacionesDiarias() {
             )
 
             if (index != -1) {
-                const aeropuerto = aeropuertosActualizados[index];
-                console.log(aeropuertosActualizados[index])
-                const listaPaquetesActualizada = [
-                    ...(aeropuerto.listaPaquetes || []), // Inicializar si undefined
+                aeropuertosActualizados[index].listaPaquetes = [
+                    ...aeropuertosActualizados[index].listaPaquetes,
                     ...envio.paquetes
-                ];
-
-
-                aeropuertosActualizados[index] = {
-                    ...aeropuerto,
-                    listaPaquetes: listaPaquetesActualizada,
-                    capacidad_ocupada: aeropuerto.capacidad_ocupada + envio.paquetes.length
-                }
+                ]
             }
+
+            aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada + envio.paquetes.length
 
             return aeropuertosActualizados;
 
@@ -585,19 +558,18 @@ export default function OperacionesDiarias() {
 
             //console.log("ANTES: ", planDeVuelo.listaPaquetes)
             //console.log(planDeVuelo.paquetesEnDestino)
-            let plan = planDeVuelo.listaPaquetes.filter(item => !planDeVuelo.paquetesEnDestino.includes(item))
+            planDeVuelo.listaPaquetes = planDeVuelo.listaPaquetes.filter(item => !planDeVuelo.paquetesEnDestino.includes(item))
             //console.log("DESPUES    : ", planDeVuelo.listaPaquetes)
 
             if (index != -1) {
-                aeropuertosActualizados[index] = {
-                    ...aeropuertosActualizados[index],
-                    listaPaquetes: aeropuertosActualizados[index].listaPaquetes = [
-                        ...aeropuertosActualizados[index].listaPaquetes,
-                        ...plan
-                    ],
-                    capacidad_ocupada: aeropuertosActualizados[index].capacidad_ocupada + plan.length
-                }
+                aeropuertosActualizados[index].listaPaquetes = [
+                    ...aeropuertosActualizados[index].listaPaquetes,
+                    ...planDeVuelo.listaPaquetes
+                ]
             }
+            //console.log("Agregados ", planDeVuelo.listaPaquetes.length)
+            //console.log(planDeVuelo.listaPaquetes.length)
+            aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada + planDeVuelo.listaPaquetes.length
 
             return aeropuertosActualizados;
 
@@ -610,145 +582,81 @@ export default function OperacionesDiarias() {
 
     //Quitar de aeropuertos los planes que llegan de un plan
     const saleAeropuertoPorPlan = (planDeVuelo) => {
+
         setAeropuertos((prevAeropuertos) => {
-            // Copia de seguridad
-            const aeropuertosActualizados = [...prevAeropuertos];
-    
-            // Encontrar aeropuerto del que salen todos los paquetes
+            //Copia de seguridad
+            const aeropuertosActualizados = [...prevAeropuertos]
+
+            //Encontrar aeropuerto del que salen todos los paquetes
             const index = aeropuertosActualizados.findIndex(
                 (aeropuerto) => aeropuerto.id_aeropuerto === planDeVuelo.ciudad_origen
-            );
-    
-            if (index !== -1) {
-                aeropuertosActualizados[index] = {
-                    ...aeropuertosActualizados[index],
-                    listaPaquetes: aeropuertosActualizados[index].listaPaquetes.filter(
-                        (paquete) => !planDeVuelo.listaPaquetes.includes(paquete)
-                    ),
-                    capacidad_ocupada: aeropuertosActualizados[index].capacidad_ocupada - planDeVuelo.listaPaquetes.length
-                };
+            )
+
+            if (index != -1) {
+                aeropuertosActualizados[index].listaPaquetes = aeropuertosActualizados[index].listaPaquetes.filter(
+                    (paquete) => !planDeVuelo.listaPaquetes.includes(paquete)
+                )
             }
-            console.log("act luego de salida: ",aeropuertosActualizados)
+
+            //console.log("Quitados ", planDeVuelo.listaPaquetes.length)
+
+            aeropuertosActualizados[index].capacidad_ocupada = aeropuertosActualizados[index].capacidad_ocupada - planDeVuelo.listaPaquetes.length
+
             return aeropuertosActualizados;
-        });
-    };
 
-    function generaMensajeObjetos(respuesta) {
-        let texto = `ENVIOS RECIBIDOS <br />`
-        respuesta.forEach(res => {
-            //console.log(abus)
-            //console.log(res)
-            let aor = abus.find(item => item.id_aeropuerto === res.aeropuerto_origen).ciudad
-            let ade = abus.find(item => item.id_aeropuerto === res.aeropuerto_destino).ciudad
-            texto += `ID: ${res.id_envio} || ${aor} -> ${ade} || Paquetes: ${res.numPaquetes}<br />`
-            //texto += " " + res.id_envio + "\n"
+
         })
-        return texto
+
     }
-
-    function generaMensajeReg1(respuesta, aerpo) {
-        let texto = `SE HA REGISTRADO LO SIGUIENTE: <br />`
-        console.log(aerpo)
-        let aor = aerpo.find(item => item.id_aeropuerto === respuesta.aeropuerto_origen).ciudad
-        let ade = aerpo.find(item => item.id_aeropuerto === respuesta.aeropuerto_destino).ciudad
-        texto += `ID: ${respuesta.id_envio} || ${aor} -> ${ade} || Paquetes: ${respuesta.numPaquetes}<br />`
-        return texto
-    }
-
-    function generaMensajeRegArch(respuesta) {
-        let texto = `SE HA REGISTRADO LO SIGUIENTE: <br />`
-
-        respuesta.forEach(res => {
-            //console.log(abus)
-            //console.log(res)
-            let aor = abus.find(item => item.id_aeropuerto === res.aeropuerto_origen).ciudad
-            let ade = abus.find(item => item.id_aeropuerto === res.aeropuerto_destino).ciudad
-            texto += `ID: ${res.id_envio} || ${aor} -> ${ade} || Paquetes: ${res.numPaquetes}<br />`
-            //texto += " " + res.id_envio + "\n"
-        })
-        return texto
-    }
-
-    const notifyObtenidos = (respuesta) => {
-        if (respuesta.length == 0) {
-            toast("No se recibieron envios", {
-                position: "bottom-right",
-                theme: "dark"
-            })
-        } else {
-            let mensaje = generaMensajeObjetos(respuesta)
-            console.log(mensaje)
-            toast.success(<div dangerouslySetInnerHTML={{ __html: mensaje }} />, {
-                position: "bottom-right",
-                theme: "dark"
-            })
-        }
-    }
-
-    const notifyEnvioReg1 = (respuesta, aerpo) => {
-        if (respuesta != []) {
-            let mensaje = generaMensajeReg1(respuesta, aerpo)
-            console.log(mensaje)
-            toast.success(<div dangerouslySetInnerHTML={{ __html: mensaje }} />, {
-                position: "bottom-right",
-                theme: "dark"
-            })
-        } else {
-            toast("Revisar envio", {
-                position: "bottom-right",
-                theme: "dark"
-            })
-        }
-    }
-
-    const notifyEnvioRegArch = (respuesta) => {
-        if (respuesta != []) {
-            let mensaje = generaMensajeRegArch(respuesta)
-            console.log(mensaje)
-            toast.success(<div dangerouslySetInnerHTML={{ __html: mensaje }} />, {
-                position: "bottom-right",
-                theme: "dark"
-            })
-        } else {
-            toast("Revisar envios", {
-                position: "bottom-right",
-                theme: "dark"
-            })
-        }
-    }
-
 
     //---------------------------------------------------------
     //                      CUERPO SIMULACION
     const ejecucionSimulacion = async () => {
         let i = 0;
-        let ciclo = 30;
-        let currentCiclo = 30
+        let llamadas_totales = 10080;
+        let ciclo = 120
+        let currentCiclo = 120
         let llamarAGrasp = 1;
+        let tiempoMax = 1;
         let nF = fechaSimRef.current;
         let fechaLlam = fechaStartRef.current //Fecha para llamar grasp
         let fechaLlamPlan = fechaStartRef.current.add(2, 'd').add(2, 'h') // 2 días + 2 horas ya se tienen leidos, se procedera a llamar bloques posteriores de 2 horas
         //console.log("LLAMADA INICIO: " + fechaLlam)
+        await setEstadoSim('PL')
 
-
-        setInterval(async () => {
+        const interval = setInterval(async () => {
             const inicio = performance.now();
 
-            //Llamar a GRASP para planificar pedidos ingresados
-            if (i == llamarAGrasp) {
-                fechaLlam = fechaLlam.add(ciclo, 's')
-                obtenerNuevosEnvios(fechaLlam, ciclo)
-                llamarAGrasp = llamarAGrasp + ciclo
+            if (colapsadoRef.current != -1) { //Colapso
+                setEstadoSim('FI')
+                console.log("COLAPSO EN EL PEDIDO: ", colapsadoRef.current)
+                stopTimer()
+                clearInterval(interval)
             }
-            //Asignar pedidos
+            //Si estamos antes que acabe el ciclo, colocar nuevos envios
             if (i == currentCiclo - 1) {
-                if (enviosFuturoRef.current.length > 0) enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
-                let mostrar = [...enviosFuturoRef.current]
-                notifyObtenidos(mostrar)
+                colapsadoRef.current = await getColapso()
+                if (enviosRef.current) console.log("NUEVOS AGREGADO",enviosRef.current)
+                enviosRef.current = enviosRef.current.concat(enviosFuturoRef.current)
                 //planesDeVueloRef.current = planesDeVueloRef.current.concat([...planesDeVueloFuturoRef.current])
                 //planesEliminarRef.current = planesEliminarRef.current.concat([...planesDeVueloFuturoRef.current])
                 currentCiclo = currentCiclo + ciclo
             }
+
+            //Si se han llegado al momento de llamar a GRASP, realizar la llamada a nuevos pedidos
+            if (i == llamarAGrasp) {
+                console.log("llamada A GRASP")
+                fechaLlam = fechaLlam.add(ciclo, 'm')
+                obtenerNuevosPlanes(fechaLlamPlan, ciclo)
+                //fechaLlamPlan = fechaLlamPlan.add(ciclo, 'm')
+                obtenerNuevosEnvios(fechaLlam)
+                //console.log(enviosNew)
+                llamarAGrasp = llamarAGrasp + ciclo
+            }
+
+
+            //MANTENER TIEMPO
+            //-----------------------------------
 
             //-----------------------------------
             //OPERACIONES
@@ -758,23 +666,22 @@ export default function OperacionesDiarias() {
             //console.log(enviosRef.current)
             await revisaEnvios()
             await revisaPlanes() //Ver si inicia algun plan para colocarlo en el arreglo y mostrarlo en mapa
-            console.log(fechaSimRef.current)
+
+
             const fin = performance.now();
             const tiempoEjecucion = fin - inicio;
-            const tiempoEspera = Math.max(0, 1000 - tiempoEjecucion);
+            const tiempoEspera = Math.max(0, 200 - tiempoEjecucion);
 
             setTimeout(() => {
-                setFechaSim(nF.add(1, 's'));
+                setFechaSim(nF.add(1, 'm'));
                 fechaSimRef.current = nF;
             }, tiempoEspera);
 
-            nF = nF.add(1, 's');
+            nF = nF.add(1, 'm');
             fechaSimRef.current = nF;
-
+            console.log(nF)
             i++;
-        }, 1000);
-
-
+        }, 200)
     }
 
     //---------------------------------------------------------
@@ -782,76 +689,36 @@ export default function OperacionesDiarias() {
     //console.log("envios2Ref en SimSemanal:",envios2Ref);
 
     const [activePanel, setActivePanel] = useState('');
-    const [file, setFile] = useState(null);
-
-    const handleFileChange = (event) => {
-        setFile(event.target.files[0]);
-        handleFileUpload(event.target.files[0]);
-    };
-
-    const handleFileUpload = async (file) => {
-        if (!file) {
-            alert('Por favor, seleccione un archivo primero.');
-            return;
-        }
-
-        const reader = new FileReader();
-        reader.onload = async (event) => {
-            const text = event.target.result;
-            const cleanText = await changeText(text);
-            const jsonData = await formatJSON(cleanText);
-
-            console.log('JSON a enviar:', jsonData);
-
-            async function sube() {
-                let res = await postEnviosArchivo(jsonData);
-                console.log(res);
-                //notifyEnvioRegArch(res)
-            }
-            sube();
-        };
-
-        reader.readAsText(file);
-    };
-
-    async function changeText(texto) {
-        const textoApropiado = texto.replace(/\r/g, '');
-        return textoApropiado;
-    }
-
-    async function formatJSON(text) {
-        const json = {
-            data: text
-        };
-        return json;
-    }
 
 
     const [panelVisible, setPanelVisible] = useState(true);
 
     const togglePanel = () => {
-        setPanelVisible(!panelVisible);
-        setTimeout(() => {
-            window.dispatchEvent(new Event('resize'));  // Forza el redimensionamiento del mapa
-        }, 300);  // Alineado con la duración de cualquier animación de CSS
+      setPanelVisible(!panelVisible);
+      setTimeout(() => {
+        window.dispatchEvent(new Event('resize'));  // Forza el redimensionamiento del mapa
+      }, 300);  // Alineado con la duración de cualquier animación de CSS
     };
 
 
     return (
         <>
-            <Header title={"OPERACIONES DIARIAS"} togglePanel={togglePanel} />
+            <Header title={"SIMULACION AL COLAPSO"} togglePanel={togglePanel} />
             <Grid container sx={{ height: 'calc(100vh - 64px)' }}>
                 <Grid item xs={panelVisible ? 9 : 12}>
                     <Grid sx={{ py: 1, display: 'flex', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
                         <Grid>
                             <Box sx={{ px: 2, display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2 }}>
-                                <Typography>
-                                    {fechaSimRef.current.format('DD/MM/YYYY HH:mm:ss')}
-                                </Typography>
+                                <HoraActual></HoraActual>
                                 <Typography> ZONA HORARIA: {dayjs().tz(zonaHorariaUsuario).format('Z')}</Typography>
                             </Box>
-                            <Box sx={{ px: 1, display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                <IconButton onClick={changeGrises}><AirplanemodeActiveIcon /></IconButton>
+                            <Box sx={{ px: 2, py: 1 ,display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                <CuadroTiempo horas={horaCron} minutos={minutoCron} segundos={segundoCron} tiempo={time} ></CuadroTiempo>
+                            </Box>
+                            <Box sx={{ px:1,display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
+                                <SelectorFecha fechaSim={fechaSimRef.current} setFechaSim={setFechaSim} estadoSim={estadoSim} zonaHoraria={zonaHorariaUsuario}></SelectorFecha>
+                                <BotonIniciar onClick={clickBotonIniciar} disabled={estadoSim == 'PL'}></BotonIniciar>
+                                <IconButton onClick={changeGrises}><AirplanemodeActiveIcon/></IconButton>
                                 <IconButton onClick={toggleLineas}><RouteIcon /></IconButton>
                                 {estadoSim == 'FI' ? <Button onClick={obtenerpdf}>Reporte Final</Button> : <></>}
 
@@ -872,40 +739,18 @@ export default function OperacionesDiarias() {
                     <MapaSimulador aeropuertosBD={aeropuertos} planesDeVueloBD={pdvMapa} fechaSim={fechaSimRef.current} estadoSim={estadoSim} freqMov={freqMov} ingresarAeropuertos={ingresaAeropuertoPorPlan} muestraLineas={muestraLineas} setSaturacion={setPdvSaturacion} showGris={showGris} />
                 </Grid>
                 {panelVisible && (
-                    <Grid item xs={3} sx={{ overflowY: 'auto', height: 'calc(100vh - 64px)', p: 2, borderLeft: '1px solid #ccc' }}>
+                    <Grid item xs={3} sx={{ overflowY: 'auto', height: 'calc(100vh - 64px)',p: 2, borderLeft: '1px solid #ccc' }}>
                         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                             <Button variant="contained" onClick={() => setActivePanel('planes')}>Planes de Vuelo</Button>
                             <Button variant="contained" onClick={() => setActivePanel('aeropuertos')}>Aeropuertos</Button>
                             <Button variant="contained" onClick={() => setActivePanel('envios')}>Envíos</Button>
-                            <Button variant="contained" onClick={() => setActivePanel('registrar_envio')}>Registrar envío</Button>
-                            <input
-                                type="file"
-                                accept=".txt"
-                                id="upload-file"
-                                style={{ display: 'none' }}
-                                onChange={handleFileChange}
-                            />
-                            <label htmlFor="upload-file">
-                                <Button
-                                    variant="contained"
-                                    component="span"
-                                    color="primary"
-                                    startIcon={<UploadFileIcon />}
-                                    className="button-right"
-                                    fullWidth
-                                >
-                                    + Cargar envíos
-                                </Button>
-                            </label>
                         </Box>
-                        {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropList} envios2Ref={envios2Ref} />}
+                        {activePanel === 'planes' && <BusquedaPlanes active={activePanel === 'planes'} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos} envios2Ref={envios2Ref}/>}
                         {activePanel === 'aeropuertos' && <BusquedaAeropuertos active={activePanel === 'aeropuertos'} aeropuertos={aeropuertos} />}
-                        {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropList} />}
-                        {activePanel === 'registrar_envio' && <RegistroEnvio active={activePanel === 'registrar_envio'} fechaSim={fechaSimRef} notifyEnvioReg1={notifyEnvioReg1}></RegistroEnvio>}
+                        {activePanel === 'envios' && <BusquedaEnvios active={activePanel === 'envios'} envios2Ref={envios2Ref} planesDeVueloRef={planesDeVueloRef} aeropuertos={aeropuertos}/>}
                     </Grid>
                 )}
             </Grid>
-            <ToastContainer></ToastContainer>
         </>
     );
 }

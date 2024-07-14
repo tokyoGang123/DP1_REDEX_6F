@@ -23,6 +23,9 @@ export default function Menu() {
                         <Link href='/operacionesDiarias'>
                             <Button className="seleccion" variant="contained">OPERACIONES DIARIAS</Button>
                         </Link>
+                        <Link href='/simColapso'>
+                            <Button className="seleccion" variant="contained">SIMULACION AL COLAPSO</Button>
+                        </Link>
                     </div>
                     <div className="options">
                         <Link href="/envios">
