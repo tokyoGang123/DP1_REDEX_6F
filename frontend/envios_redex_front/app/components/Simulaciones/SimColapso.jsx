@@ -629,7 +629,7 @@ export default function SimColapso() {
 
             if (colapsadoRef.current != -1) { //Colapso
                 setEstadoSim('FI')
-                console.log("FIN")
+                console.log("COLAPSO EN EL PEDIDO: ", colapsadoRef.current)
                 stopTimer()
                 clearInterval(interval)
             }

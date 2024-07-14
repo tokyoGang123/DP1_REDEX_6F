@@ -49,7 +49,7 @@ export const ejecutaGRASPDiaria = async (fechaHora) => {
 
 export const getColapso = async () => {
     try {
-        let data = await baseApi.get('grasp/').then(({data}) => data)
+        let data = await baseApi.get('grasp/consultarColapso').then(({data}) => data)
         console.log("Colapso? ", data)
         return data;
     } catch (error) {
