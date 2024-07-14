@@ -627,7 +627,7 @@ export default function SimColapso() {
         const interval = setInterval(async () => {
             const inicio = performance.now();
 
-            if (i >= llamadas_totales) {
+            if (colapsadoRef.current != -1) { //Colapso
                 setEstadoSim('FI')
                 console.log("FIN")
                 stopTimer()
